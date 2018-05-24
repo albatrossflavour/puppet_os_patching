@@ -1,10 +1,10 @@
 {
-  "name": "greeno-os_patching",
+  "name": "albatrossflavour-os_patching",
   "version": "0.1.0",
   "author": "Tony Green",
-  "summary": "",
+  "summary": "Perform OS level patching through tasks and report on patch levels through facts",
   "license": "Apache-2.0",
-  "source": "",
+  "source": "https://github.com/albatrossflavour/puppet_os_patching",
   "dependencies": [
 
   ],
