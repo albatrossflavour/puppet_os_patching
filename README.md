@@ -1,6 +1,6 @@
 # os_patching
 
-This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat derivitives.
+This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat derivatives.
 
 ## Table of contents
 
