@@ -1,0 +1,7 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Carry out OS patching on the server, optionally including a reboot",
+  "parameters": {
+  }
+}
