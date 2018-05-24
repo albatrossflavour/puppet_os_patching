@@ -11,29 +11,17 @@ If you're looking for a simple way to report on your OS patch levels, this modul
 
 ## Setup
 
-### What rhel_patching affects **OPTIONAL**
+### What rhel_patching affects
 
-If it's obvious what your module touches, you can skip this section. For example, folks can probably figure out that your mysql_instance module affects their MySQL instances.
-
-If there's more that they should know about, though, this is the place to mention:
-
-* Files, packages, services, or operations that the module will alter, impact, or execute.
-* Dependencies that your module automatically installs.
-* Warnings or other important notices.
-
-### Setup Requirements **OPTIONAL**
-
-If your module requires anything extra before setting up (pluginsync enabled, another module, etc.), mention it here.
-
-If your most recent release breaks compatibility or requires particular steps for upgrading, you might want to include an additional "Upgrading" section here.
+The module will not impact the nodes and does not have to be included in any profiles.  It simply provides facts and tasks to assist in the patching and maintenance of the server.
 
 ### Beginning with rhel_patching
 
-The very basic steps needed for a user to get the module up and running. This can include setup steps, if necessary, or it can be an example of the most basic use of the module.
+Once the module has been installed, using either the Puppetfile or manually, it will start to collect facts and provide access to the tasks needed to patch servers.
 
 ## Usage
 
-This section is where you describe how to customize, configure, and do the fancy stuff with your module here. It's especially helpful if you include usage examples and code samples for doing things with your module.
+**TODO**
 
 ## Reference
 
@@ -50,12 +38,12 @@ Users need a complete list of your module's classes, types, defined types provid
 
 ## Limitations
 
-This is where you list OS compatibility, version compatibility, etc. If there are Known Issues, you might want to include them under their own heading here.
+This module is for PE2018+ with agents capable of running tasks.  It is currently limited to the Red Hat operating system.
 
 ## Development
 
-Since your module is awesome, other users will want to play with it. Let them know what the ground rules for contributing are.
+Fork, develop, submit a pull request
 
-## Release Notes/Contributors/Etc. **Optional**
+## Contributors
 
-If you aren't using changelog, put your release notes here (though you should consider using changelog). You can also add any additional sections you feel are necessary or important to include here. Please use the `## ` header.
+* Tony Green <tgreen@albatrossflavour.com>
