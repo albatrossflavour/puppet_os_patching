@@ -5,7 +5,6 @@ class os_patching (
   $patch_data_cache_dir  = '/var/patching-data',
   $patch_data_owner      = 'root',
   $patch_data_group      = 'root',
-  $patch_required_pkgs   = [ 'yum', 'rpm' ],
   $patch_cron_hour       = '*',
   $patch_cron_min        = fqdn_rand(59),
   $patch_cron_user       = $patch_data_owner,
@@ -16,10 +15,6 @@ class os_patching (
     owner   => $patch_data_owner,
     group   => $patch_data_group,
     mode    => '0700',
-  }
-
-  packge { $patch_required_pkgs:
-    ensure => present,
   }
 
   file { $patch_data_cache_dir:
