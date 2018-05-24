@@ -2,6 +2,10 @@
 
 ## Release 0.1.7
 
+- Change cache location in fact
+
+## Release 0.1.7
+
 - Keys bug in facter fixed
 
 ## Release 0.1.6
