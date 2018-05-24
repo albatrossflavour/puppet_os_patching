@@ -1,6 +1,6 @@
 # Changelog
 
-## Release 0.1.7
+## Release 0.1.8
 
 - Change cache location in fact
 
