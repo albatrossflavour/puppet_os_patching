@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.1.7
+
+- Keys bug in facter fixed
+
 ## Release 0.1.6
 
 - Update patching task
