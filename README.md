@@ -26,7 +26,7 @@ If you're looking for a simple way to report on your OS patch levels, this modul
 
 ### What os_patching affects
 
-The module will not impact the nodes and does not have to be included in any profiles.  It simply provides facts and tasks to assist in the patching and maintenance of the server.
+The module, when added to a node, creates a directory to cache patch data, installs a script to generate the cache and a cron job to run the script.  It also installs a dynamic custom fact which reports on the patching state of the server.
 
 ### Beginning with os_patching
 
@@ -34,7 +34,9 @@ Once the module has been installed, using either the Puppetfile or manually, it 
 
 ## Usage
 
-Not yet documented **TODO**
+```
+include os_patching
+```
 
 ## Reference
 
