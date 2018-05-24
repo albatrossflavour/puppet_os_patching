@@ -34,7 +34,7 @@ Once the module has been installed, using either the Puppetfile or manually, it 
 
 ## Usage
 
-```
+```puppet
 include os_patching
 ```
 
