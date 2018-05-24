@@ -2,6 +2,8 @@
 
 This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat derivatives.
 
+The module **currently** only does reporting, but it is under active development and I expect the patch functionality will be enabled before the end May 2018.
+
 ## Table of contents
 
 - [os_patching](#ospatching)
