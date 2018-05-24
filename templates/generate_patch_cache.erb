@@ -1,0 +1,16 @@
+#!/bin/sh
+
+CACHEDIR=<%= @patch_data_cache_dir %>
+
+if [ ! -d $CACHEDIR ]
+then
+  echo "Cannot find directory $CACHEDIR, exiting" >&2
+  exit 1
+fi
+
+YUM='/bin/yum'
+RPM='/bin/rpm'
+
+$RPM -qa > $CACHEDIR/cache.rpm-qaf
+$YUM check-update > $CACHEDIR/cache.yum-cu
+$YUM --security check-update > $CACHEDIR/cache.yum-scu
