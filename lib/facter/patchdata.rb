@@ -326,8 +326,6 @@ Facter.add(:patchdata, :type => :aggregate) do
       end
       data['days_until_patch_non_compliant'] = secondsuntilexpiry / oneday
 
-      # write out to compliance file  - do it in Puppet
-
       # Logic to determine compliance level, in order of importance.
       if (data['days_until_patch_non_compliant'] < 0)
         data['compliance'] = 'Non-Compliant'
