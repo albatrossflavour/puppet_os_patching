@@ -8,14 +8,18 @@
 PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin
 export PATH
 DATE=`date +"%Y%m%d"`
+REBOOT=0
+
+case $PT_reboot in
+  true|True)   REBOOT=1 ;;
+  false|False) REBOOT=0 ;;
+  *)           REBOOT=0 ;;
+fi
 
 # What is this event we are working on?
 EVENT="PATCHING_${DATE}"
 
 # Constants - not to be modified
-
-# To be used below
-TMPDATA=/tmp/.patch_run.${DATE}.$$
 LOCKFILE=/tmp/.patch_run_${DATE}.lockfile
 LOGFILE=/var/log/os_patching.${DATE}
 FAILMSG=
@@ -36,7 +40,6 @@ HOSTMAJOR=`echo ${HOSTRELEASE} | awk -F. '{print $1}'`
 # Patch states 0-2 are used in the pre and post scripts
 PATCHSTATE0="0-patchscriptstart"
 PATCHSTATE1="1-precheckscomplete"
-PATCHSTATE2="2-backgroundpatching"
 PATCHSTATE3="3-yumdryrun"
 PATCHSTATE4="4-yumrun"
 PATCHSTATE5="5-yumdryrun"
@@ -62,8 +65,6 @@ send_message()
     esac
   fi
   if [ ${TYPE} -ne 0 ]; then
-    /bin/rm -f ${TMPDATA} ${LOCKFILE}
-
     # Force a puppet run to get facts into DB
     # For successful patching, puppet runs after reboot
     if [ -x /opt/puppetlabs/puppet/bin/puppet ]; then
@@ -244,8 +245,12 @@ send_message 0 "NOTICE: Verify of required packages succeeded - rebooting"
 
 clean_up ${PATCHSTATE9}
 
-/bin/rm -f ${TMPDATA} ${LOCKFILE}
+/bin/rm -f ${LOCKFILE}
 
-/sbin/shutdown -r now
+if [ "$REBOOT" -gt 0 ]
+then
+  # Reboot option set to true, reboot the system
+  /sbin/shutdown -r now
+fi
 
 exit 0

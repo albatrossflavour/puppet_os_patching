@@ -1,7 +1,12 @@
 {
+  "input_method": "environment",
+  "parameters": {
+    "reboot": {
+      "description": "Should the server reboot after patching has been applied?",
+      "type": "Boolean"
+    },
+  },
   "puppet_task_version": 1,
   "supports_noop": false,
   "description": "Carry out OS patching on the server, optionally including a reboot",
-  "parameters": {
-  }
 }
