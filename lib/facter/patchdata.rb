@@ -279,7 +279,8 @@ Facter.add(:patchdata, :type => :aggregate) do
       data['patching_current_time'] = currentdate
   
       # Do we have a dispensation
-      if (Facter.value(:dispensations).keys.any?)
+      tmpfactdata = Facter.value(:mgldispensations)
+      if (tmpfactdata and tmpfactdata.empty?)
         dispensation = false
         data['patchingblockedby'] = {:dispensation => false}
       else
