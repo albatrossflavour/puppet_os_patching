@@ -20,8 +20,8 @@ Facter.add(:patchdata, :type => :aggregate) do
   yumcvecode = "/opt/patching/cache/cache.yum.listsec.code"
   compliancefile = "/opt/patching/compliance.txt"
 
-  # Only run on Linux
-  confine :kernel => "Linux"
+  # Only run on Redhat/yum based servers
+  confine :osfamily => "Redhat"
 
   chunk(:versioning) do
     data = {}
