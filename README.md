@@ -1,15 +1,15 @@
-# rhel_patching
+# os_patching
 
 This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat derivitives.
 
 ## Table of contents
 
-- [rhel_patching](#rhelpatching)
+- [os_patching](#ospatching)
   - [Table of contents](#table-of-contents)
   - [Description](#description)
   - [Setup](#setup)
-    - [What rhel_patching affects](#what-rhelpatching-affects)
-    - [Beginning with rhel_patching](#beginning-with-rhelpatching)
+    - [What os_patching affects](#what-ospatching-affects)
+    - [Beginning with os_patching](#beginning-with-ospatching)
   - [Usage](#usage)
   - [Reference](#reference)
   - [Limitations](#limitations)
@@ -24,11 +24,11 @@ If you're looking for a simple way to report on your OS patch levels, this modul
 
 ## Setup
 
-### What rhel_patching affects
+### What os_patching affects
 
 The module will not impact the nodes and does not have to be included in any profiles.  It simply provides facts and tasks to assist in the patching and maintenance of the server.
 
-### Beginning with rhel_patching
+### Beginning with os_patching
 
 Once the module has been installed, using either the Puppetfile or manually, it will start to collect facts and provide access to the tasks needed to patch servers.
 
