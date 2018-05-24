@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.1.5
+
+- Typo in the require
+
 ## Release 0.1.4
 
 - Change template location
