@@ -4,6 +4,10 @@
     "reboot": {
       "description": "Should the server reboot after patching has been applied?",
       "type": "Boolean"
+    },
+    "security_only": {
+      "description": "Limit patches to those tagged as security related?",
+      "type": "Boolean"
     }
   },
   "puppet_task_version": 1,

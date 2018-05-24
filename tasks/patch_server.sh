@@ -9,11 +9,18 @@ PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin
 export PATH
 DATE=`date +"%Y%m%d"`
 REBOOT=0
+SECONLY=""
 
 case $PT_reboot in
   true|True)   REBOOT=1 ;;
   false|False) REBOOT=0 ;;
   *)           REBOOT=0 ;;
+esac
+
+case $PT_security_only in
+  true|True)   SECONLY="--security" ;;
+  false|False) SECONLY="" ;;
+  *)           SECONLY="" ;;
 esac
 
 # What is this event we are working on?
@@ -152,7 +159,7 @@ send_message 0 "NOTICE: Patch initial dry run starting"
 
 # Start the dry run
 yum clean all
-yum check-update
+yum $SECONLY check-update
 case $? in
   0)
     FAILMSG="No patches to apply"
@@ -175,7 +182,7 @@ esac
 
 # Set fact - yum has finished with an exit code
 send_message 0 "NOTICE: Patch package installation starting"
-yum upgrade -y >> ${LOGFILE} 2>&1
+yum $SECONLY upgrade -y >> ${LOGFILE} 2>&1
 YUMEXIT=$?
 
 # Yum said yes, but we simply do not trust it in low space situations ...
@@ -215,7 +222,7 @@ esac
 
 # Set fact - yum second check as dry run
 send_message 0 "NOTICE: Patch second dry run starting"
-yum check-update
+yum $SECONLY check-update
 case $? in
   0)
     write_patch_fact "${PATCHSTATE5}-success"
