@@ -26,3 +26,22 @@
 #   }
 # Learn more at: https://puppet.com/docs/bolt/latest/task_metadata.html
 #
+YUM=/bin/yum
+
+if [ ! -f $YUM -a ! -f '/etc/redhat-release' ]
+then
+  RETURN="Not a Redhat system, exiting"
+  exit 0
+else
+  $YUM --security check-update 2>/dev/null 1>/dev/null
+
+  case $? in
+    0)   RETURN="No updates available" ;;
+    100) RETURN="Updates available"    ;;
+    *)   RETURN="Unknown state"        ;;
+  esac
+fi
+
+JSON="{ \"message\": \"$RETURN\" }"
+echo $JSON
+exit 0
