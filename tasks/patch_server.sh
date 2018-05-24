@@ -14,7 +14,7 @@ case $PT_reboot in
   true|True)   REBOOT=1 ;;
   false|False) REBOOT=0 ;;
   *)           REBOOT=0 ;;
-fi
+esac
 
 # What is this event we are working on?
 EVENT="PATCHING_${DATE}"

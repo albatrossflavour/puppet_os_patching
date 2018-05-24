@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.1.6
+
+- Update patching task
+
 ## Release 0.1.5
 
 - Typo in the require
