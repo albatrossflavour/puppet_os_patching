@@ -33,6 +33,6 @@ class os_patching (
     user    => $patch_cron_user,
     hour    => $patch_cron_hour,
     minute  => $patch_cron_min,
-    require => File($cache_cmd),
+    require => File[$cache_cmd],
   }
 }
