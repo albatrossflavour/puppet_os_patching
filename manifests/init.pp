@@ -24,7 +24,7 @@ class os_patching (
 
   file { $cache_cmd:
     ensure  => present,
-    content => template('modules/os_patching/generate_patch_cache.erb'),
+    content => template("${module_name}/generate_patch_cache.erb"),
   }
 
   cron { 'Cache patching data':

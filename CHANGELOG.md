@@ -1,5 +1,13 @@
 # Changelog
 
+## Release 0.1.4
+
+- Change template location
+
+## Release 0.1.3
+
+- Typo in the template
+
 ## Release 0.1.2
 
 - Added the patching task scripts
