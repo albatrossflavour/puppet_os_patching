@@ -277,9 +277,9 @@ Facter.add(:patchdata, :type => :aggregate) do
       expirydays = (time_to_patch * oneday) # How long until we must patch in seconds
       data['patching_grace_days_from_last_compliance'] = time_to_patch
       data['patching_current_time'] = currentdate
-  
+
       # Do we have a dispensation
-      tmpfactdata = Facter.value(:mgldispensations)
+      tmpfactdata = Facter.value(:dispensations)
       if (tmpfactdata and tmpfactdata.empty?)
         dispensation = false
         data['patchingblockedby'] = {:dispensation => false}
