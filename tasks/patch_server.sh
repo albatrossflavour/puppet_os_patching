@@ -86,9 +86,18 @@ send_message()
     if [ ! -z "${PUPPET}" ]; then
       ( cd /tmp ; nohup ${PUPPET} agent -t >/dev/null ) &
     fi
-    exit ${TYPE}
-  fi
+    JSON=`cat << EOF
+{
+  "_error": {
+    "kind": "yum_error",
+    "msg": ${MESSAGE},
+    "details": {},
+  }
 }
+EOF
+`
+    echo ${JSON}
+    exit ${TYPE}
 
 
 #
@@ -226,7 +235,7 @@ esac
 
 # Set fact - yum second check as dry run
 send_message 0 "NOTICE: Patch second dry run starting"
-yum $SECONLY check-update
+yum $SECONLY check-update 2>/dev/null 1>/dev/null
 case $? in
   0)
     write_patch_fact "${PATCHSTATE5}-success"
