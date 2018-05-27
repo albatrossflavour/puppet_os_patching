@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.1.11
+
+- Fixed output format for the patching task
+
 ## Release 0.1.10
 
 - Added 'security_only' option to the patching task

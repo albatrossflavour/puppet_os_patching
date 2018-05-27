@@ -2,7 +2,7 @@
 
 This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat derivatives.
 
-The module **currently** only does reporting, but it is under active development and I expect the patch functionality will be enabled before the end May 2018.
+The module is under active development and tasks to carry out RPM based OS patching have now been included.
 
 ## Table of contents
 
