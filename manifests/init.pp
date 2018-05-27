@@ -8,8 +8,13 @@ class os_patching (
   $patch_cron_hour       = '*',
   $patch_cron_min        = fqdn_rand(59),
   $patch_cron_user       = $patch_data_owner,
+  $install_delta_rpm     = false,
 ){
   $cache_cmd =  "${patch_data_bin_dir}/generate_patch_cache"
+
+  package { 'deltarpm':
+    ensure => $install_delta_rpm,
+  }
 
   File {
     owner   => $patch_data_owner,

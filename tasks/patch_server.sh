@@ -17,6 +17,8 @@ case $PT_reboot in
   *)           REBOOT=0 ;;
 esac
 
+# The security only tagging works with RHEL with an official
+# feed from Redhat.  CentOS doesn't seem to have the same metadata
 case $PT_security_only in
   true|True)   SECONLY="--security" ;;
   false|False) SECONLY="" ;;
@@ -158,8 +160,8 @@ write_patch_fact "${PATCHSTATE3}"
 send_message 0 "NOTICE: Patch initial dry run starting"
 
 # Start the dry run
-yum clean all
-yum $SECONLY check-update
+yum clean all 2>/dev/null 1>/dev/null
+yum $SECONLY check-update 2>/dev/null 1>/dev/null
 case $? in
   0)
     FAILMSG="No patches to apply"
@@ -182,6 +184,8 @@ esac
 
 # Set fact - yum has finished with an exit code
 send_message 0 "NOTICE: Patch package installation starting"
+
+# Actually do the patching!
 yum $SECONLY upgrade -y >> ${LOGFILE} 2>&1
 YUMEXIT=$?
 
@@ -240,19 +244,37 @@ case $? in
     ;;
 esac
 
-yum clean all
+yum clean all 2>/dev/null 1>/dev/null
 write_patch_fact "${PATCHSTATE6}-success"
 
 # Verification checks - external - check that we got the packages we expected.
 # This is highly customised for each patch run and must cover the list
 # of supported OS versions from the pre-check script.
 # We expect the verification script to return 0 on success and 1 on failed to verify.
+
+FQDN=`${FACTER} fqdn`
+REBOOT=$PT_reboot
+JSONDATE=`date`
+JOB=`yum history | egrep "^[[:space:]]" | awk '{print $1}' | head -1`
+RETURN=`yum history info $JOB | awk '$1 == "Return-Code" {print $3}'`
+PACKAGES=`yum history info $JOB | egrep "Updated" | awk '{print t "\"" $2 "\""} { t=", "}'`
+
+JSON=`cat <<EOF
+{
+  "fqdn": "$FQDN",
+  "return-code": "$RETURN",
+  "date": "$JSONDATE",
+  "packages": [
+    $PACKAGES
+  ]
+}
+EOF`
+
+echo $JSON
+
 write_patch_fact "${PATCHSTATE8}"
 send_message 0 "NOTICE: Verify of required packages succeeded - rebooting"
-
 clean_up ${PATCHSTATE9}
-
-/bin/rm -f ${LOCKFILE}
 
 if [ "$REBOOT" -gt 0 ]
 then
