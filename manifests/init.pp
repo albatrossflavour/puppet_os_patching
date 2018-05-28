@@ -18,9 +18,9 @@ class os_patching (
 
   file { $fact_cmd:
     ensure => present,
-    owner   => $patch_data_owner,
-    group   => $patch_data_group,
-    mode    => '0700',
+    owner  => $patch_data_owner,
+    group  => $patch_data_group,
+    mode   => '0700',
     source => "puppet:///modules/${module_name}/os_patching_fact_generation.sh",
   }
 
