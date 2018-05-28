@@ -33,7 +33,7 @@ Facter.add(:patchdata, :type => :aggregate) do
   if File.file?(yumcvefile)
     cvedata = File.open(yumcvefile, "r").read # .strip
   end
-    if File.file?(yumupdatefile)
+  if File.file?(yumupdatefile)
     updates = File.open(yumupdatefile, "r").read # .strip
   end
   if File.file?(yumupdatecode)
@@ -42,8 +42,6 @@ Facter.add(:patchdata, :type => :aggregate) do
 
 
   # Display CVE data
-  # This includes all RHSA as well as bugfixes, so not completely CVE. But, this is
-  # what we are most interested in. Arrange as a hash of priority with array of ids.
   chunk(:cvedata) do
     data = {}
     arraydata = {}
