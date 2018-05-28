@@ -291,7 +291,7 @@ JSON=`cat <<EOF
   "date": "$JSONDATE",
   "packagesupdated": [
     $PACKAGES
-  ]
+  ],
   "logfile": "$LOGFILE",
   "reboot": "$PT_reboot",
   "securityonly": "$PT_security_only",
