@@ -3,6 +3,8 @@ Facter.add(:patchdata, :type => :aggregate) do
   yumupdatefile = "/var/patching-data/cache.yum.cu"
   yumsecupdatefile = "/var/patching-data/cache.yum.scu"
   yumsecupdatecode = "/var/patching-data/cache.yum.scu.code"
+  yumupdatefile = "/var/patching-data/cache.yum.cu"
+  yumupdatecode = "/var/patching-data/cache.yum.cu.code"
   yumcvefile = "/var/patching-data/cache.yum.listsec"
 
   # Only run on Redhat/yum based servers
