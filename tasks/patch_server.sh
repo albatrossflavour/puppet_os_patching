@@ -53,7 +53,7 @@ EOF
 esac
 
 # Actually do the patching!
-yum ${SECONLY} upgrade -y 2>/dev/null 1>dev/null 
+yum ${SECONLY} upgrade -y 2>/dev/null 1>dev/null
 if [ "$?" -lt 1 ]
 then
   MESSAGE="Patching complete"
