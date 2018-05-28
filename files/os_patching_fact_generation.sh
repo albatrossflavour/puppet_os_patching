@@ -23,10 +23,10 @@ then
 fi
 
 echo "os_patching:" >> ${FACTFILE} || exit 1
-echo "  package_updates:" >> ${FACTFILE} exit 1
+echo "  package_updates:" >> ${FACTFILE} || exit 1
 for UPDATE in $(yum -q check-update | awk '{print $1}')
 do
-  echo "   - '$UPDATE'" >> ${FACTFILE} exit 1
+  echo "   - '$UPDATE'" >> ${FACTFILE} || exit 1
   COUNT=$((COUNT + 1))
 done
 
@@ -34,7 +34,7 @@ SECCOUNT=0
 echo "  security_package_updates:" >> ${FACTFILE} || exit 1
 for UPDATE in $(yum -q --security check-update | awk '{print $1}')
 do
-  echo "   - '$UPDATE'" >> ${FACTFILE} exit 1
+  echo "   - '$UPDATE'" >> ${FACTFILE} || exit 1
   SECCOUNT=$((SECCOUNT + 1))
 done
 
