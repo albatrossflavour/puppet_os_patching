@@ -98,6 +98,7 @@ EOF
 `
     echo ${JSON}
     exit ${TYPE}
+  fi
 }
 
 #
