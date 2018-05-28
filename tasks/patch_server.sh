@@ -57,6 +57,7 @@ PATCHSTATE7="7-rebootaborted"
 PATCHSTATE8="8-rebootstarted"
 PATCHSTATE9="9-rebootcompleted"
 PATCHSTATE10="10-noactionrequired"
+PATCHSTATE11="11-rebootnotperformed"
 
 # Log a message
 # If our type arg is non-zero, clean up and exit with this code
@@ -303,13 +304,16 @@ EOF
 echo $JSON
 
 write_patch_fact "${PATCHSTATE8}"
-send_message 0 "NOTICE: Verify of required packages succeeded - rebooting"
-clean_up ${PATCHSTATE9}
 
 if [ "$REBOOT" -gt 0 ]
 then
+  send_message 0 "NOTICE: Verify of required packages succeeded - rebooting"
+  clean_up ${PATCHSTATE9}
   # Reboot option set to true, reboot the system
-  nohup "/sbin/shutdown -r 1" &
+  /sbin/shutdown -r 1
+else
+  send_message 0 "NOTICE: Verify of required packages succeeded - not rebooting"
+  clean_up ${PATCHSTATE11}
 fi
 
 exit 0
