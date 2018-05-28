@@ -274,7 +274,7 @@ JSON=`cat <<EOF
   "fqdn": "$FQDN",
   "return-code": "$RETURN",
   "date": "$JSONDATE",
-  "packages": [
+  "packagesupdated": [
     $PACKAGES
   ]
 }
