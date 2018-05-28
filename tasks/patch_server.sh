@@ -91,7 +91,7 @@ send_message()
   "_error": {
     "kind": "yum_error",
     "msg": ${MESSAGE},
-    "details": {},
+    "details": {}
   }
 }
 EOF
