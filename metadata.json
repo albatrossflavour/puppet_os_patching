@@ -1,10 +1,12 @@
 {
   "name": "albatrossflavour-os_patching",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "author": "Tony Green",
   "summary": "Perform OS level patching through tasks and report on patch levels through facts",
   "license": "Apache-2.0",
   "source": "https://github.com/albatrossflavour/puppet_os_patching",
+  "project_page": "https://github.com/albatrossflavour/puppet_os_patching",
+  "issues_url": "https://github.com/albatrossflavour/puppet_os_patching/issues",
   "dependencies": [
 
   ],

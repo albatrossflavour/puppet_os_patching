@@ -18,11 +18,8 @@ fi
 
 case ${OS} in
   'Linux')
-    # Kern list
     /bin/rpm -q --qf="%{BUILDTIME} %{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel | /bin/sort -n > ${CACHEDIR}/cache.kernel
-    # Complete pkg list
     /bin/rpm -qa --qf="%{NAME},%{VERSION},%{RELEASE},%{ARCH}\n" > ${CACHEDIR}/cache.rpm-qaf
-    # Various YUM data
     /usr/bin/yum repolist 2>/dev/null > ${CACHEDIR}/cache.yum.repolist
     echo $? > ${CACHEDIR}/cache.yum.repolist.code
     /usr/bin/yum -q check-update 2>/dev/null > ${CACHEDIR}/cache.yum.cu
@@ -32,8 +29,6 @@ case ${OS} in
     /usr/bin/yum -q list-sec 2>/dev/null > ${CACHEDIR}/cache.yum.listsec
     echo $? > ${CACHEDIR}/cache.yum.listsec.code
     ;;
-  'Solaris') ;;
-  'AIX') ;;
   *) ;;
 esac
 
