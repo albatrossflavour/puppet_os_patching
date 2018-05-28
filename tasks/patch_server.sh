@@ -98,7 +98,7 @@ EOF
 `
     echo ${JSON}
     exit ${TYPE}
-
+}
 
 #
 # Clean up after ourselves
@@ -277,7 +277,8 @@ JSON=`cat <<EOF
     $PACKAGES
   ]
 }
-EOF`
+EOF
+`
 
 echo $JSON
 
