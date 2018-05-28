@@ -187,7 +187,7 @@ case $? in
   "message": "yum dry run shows no patching work to do",
   "logfile": "$LOGFILE",
   "reboot": "$PT_reboot",
-  "securityonly": "$PT_security_only",
+  "securityonly": "$PT_security_only"
 }
 EOF
 `
@@ -295,7 +295,7 @@ JSON=`cat <<EOF
   "logfile": "$LOGFILE",
   "reboot": "$PT_reboot",
   "securityonly": "$PT_security_only",
-  "message": "Patching complete",
+  "message": "Patching complete"
 }
 EOF
 `
