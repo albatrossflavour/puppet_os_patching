@@ -32,7 +32,7 @@ The module, when added to a node, creates a directory to cache patch data, insta
 
 ### Beginning with os_patching
 
-Once the module has been installed, using either the Puppetfile or manually, it will start to collect facts and provide access to the tasks needed to patch servers.
+Install the module using the Puppetfile, include it on your nodes and then use the provided tasks to carry out patching.
 
 ## Usage
 
@@ -99,7 +99,7 @@ If there is nothing to be done, the task will report:
 }
 ```
 
-If patching is required, the task will report:
+If patching was executed, the task will report:
 
 ```puppet
 {

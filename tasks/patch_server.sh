@@ -183,7 +183,7 @@ case $? in
     JSON=`cat <<EOF
 {
   "fqdn": "$FQDN",
-  "return-code": "success",
+  "return-code": "Success",
   "date": "$JSONDATE",
   "message": "yum dry run shows no patching work to do",
   "logfile": "$LOGFILE",
