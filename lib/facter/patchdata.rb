@@ -33,6 +33,12 @@ Facter.add(:patchdata, :type => :aggregate) do
   if File.file?(yumcvefile)
     cvedata = File.open(yumcvefile, "r").read # .strip
   end
+    if File.file?(yumupdatefile)
+    updates = File.open(yumupdatefile, "r").read # .strip
+  end
+  if File.file?(yumupdatecode)
+    updatesexit = File.open(yumupdatecode, "r").read.strip.to_i
+  end
 
 
   # Display CVE data
