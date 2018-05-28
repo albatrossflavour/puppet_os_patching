@@ -18,7 +18,7 @@ do
 done
 
 SECCOUNT=0
-echo "  security_package_updates:
+echo "  security_package_updates:" >> ${FACTFILE}
 for UPDATE in `yum -q --security check-update | awk '{print $1}'`
 do
   echo "   - '$UPDATE'" >> ${FACTFILE}
