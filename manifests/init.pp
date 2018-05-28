@@ -21,6 +21,14 @@ class os_patching (
     group  => $patch_data_group,
     mode   => '0700',
     source => "puppet:///modules/${module_name}/os_patching_fact_generation.sh",
+    notify => Exec[$fact_cmd],
+  }
+
+  exec { $fact_cmd:
+    user        => $patch_data_owner,
+    group       => $patch_data_group,
+    refreshonly => true,
+    require     => File[$fact_cmd],
   }
 
   cron { 'Cache patching data':
