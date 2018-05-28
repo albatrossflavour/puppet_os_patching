@@ -3,7 +3,7 @@
 PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin
 FQDN=$(facter fqdn)
 JSONDATE=$(date)
-LOGGER='/usr/bin/logger -i -p debug -t os_patching'
+LOGGER='/usr/bin/logger -i -p info -t os_patching'
 
 ${LOGGER} "Starting patch run task"
 
