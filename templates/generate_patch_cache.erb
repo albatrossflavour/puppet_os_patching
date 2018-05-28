@@ -1,8 +1,6 @@
 #!/bin/sh
 #
 # Generate cache of patch data for consumption by Puppet custom facts.
-# Data must be cached, otherwise performance and deadlock issues can
-# result from calling yum from within custom facts.
 #
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
@@ -15,20 +13,15 @@ if [ ! -d ${CACHEDIR} ]; then
   mkdir -p ${CACHEDIR}
 fi
 
-
 case ${OS} in
   'Linux')
-    /bin/rpm -q --qf="%{BUILDTIME} %{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel | /bin/sort -n > ${CACHEDIR}/cache.kernel
-    /bin/rpm -qa --qf="%{NAME},%{VERSION},%{RELEASE},%{ARCH}\n" > ${CACHEDIR}/cache.rpm-qaf
-    /usr/bin/yum repolist 2>/dev/null > ${CACHEDIR}/cache.yum.repolist
-    echo $? > ${CACHEDIR}/cache.yum.repolist.code
     /usr/bin/yum -q check-update 2>/dev/null > ${CACHEDIR}/cache.yum.cu
     echo $? > ${CACHEDIR}/cache.yum.cu.code
     /usr/bin/yum --security -q check-update 2>/dev/null > ${CACHEDIR}/cache.yum.scu
     echo $? > ${CACHEDIR}/cache.yum.scu.code
     /usr/bin/yum -q list-sec 2>/dev/null > ${CACHEDIR}/cache.yum.listsec
     echo $? > ${CACHEDIR}/cache.yum.listsec.code
-    ;;
+  ;;
   *) ;;
 esac
 
