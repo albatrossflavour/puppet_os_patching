@@ -17,5 +17,14 @@ do
   COUNT=`expr $COUNT + 1`
 done
 
+SECCOUNT=0
+echo "  security_package_updates:
+for UPDATE in `yum -q --security check-update | awk '{print $1}'`
+do
+  echo "   - '$UPDATE'" >> ${FACTFILE}
+  SECCOUNT=`expr $SECCOUNT + 1`
+done
+
 echo "  package_update_count: $COUNT" >> ${FACTFILE}
+echo "  security_package_update_count: $SECCOUNT" >> ${FACTFILE}
 exit 0

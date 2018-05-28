@@ -2,8 +2,8 @@
 
 PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin
 FQDN=$(facter fqdn)
-JSONDATE=$(date)
-LOGGER='/usr/bin/logger -i -p info -t os_patching'
+STARTDATE=$(date)
+LOGGER='/usr/bin/logger -p info -t os_patching'
 
 ${LOGGER} "Starting patch run task"
 
@@ -37,11 +37,13 @@ yum ${SECONLY} check-update 2>/dev/null 1>/dev/null
 case ${?} in
   0)
     ${LOGGER} "No updates found, exiting cleanly"
+    ENDDATE=$(date)
     JSON=$(cat <<EOF
 {
   "fqdn": "${FQDN}",
   "return-code": "Success",
-  "date": "${JSONDATE}",
+  "startdate": "${STARTDATE}",
+  "enddate": "${ENDDATE}",
   "message": "yum shows no patching work to do",
   "reboot": "${PT_reboot}",
   "securityonly": "${PT_security_only}"
@@ -76,12 +78,14 @@ else
 fi
 
 ${LOGGER} $MESSAGE
+ENDDATE=$(date)
 
 JSON=$(cat <<EOF
 {
   "fqdn": "${FQDN}",
   "return-code": "${RETURN}",
-  "date": "${JSONDATE}",
+  "startdate": "${STARTDATE}",
+  "enddate": "${ENDDATE}",
   "packagesupdated": [
     ${PACKAGES}
   ],
@@ -103,6 +107,8 @@ then
   # Reboot option set to true, reboot the system
   ${LOGGER} "triggering reboot in 1 minute"
   /sbin/shutdown -r 1
+else
+  ${LOGGER} "not rebooting based on task parameter"
 fi
 
 ${LOGGER} "patch run complete"
