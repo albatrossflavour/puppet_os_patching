@@ -7,6 +7,9 @@ class os_patching (
   String $patch_cron_user       = $patch_data_owner,
   Boolean $install_delta_rpm    = false,
   $patch_cron_hour              = absent,
+  $patch_cron_month             = absent,
+  $patch_cron_monthday          = absent,
+  $patch_cron_weekday           = absent,
   $patch_cron_min               = fqdn_rand(59),
 ){
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
@@ -32,11 +35,14 @@ class os_patching (
   }
 
   cron { 'Cache patching data':
-    ensure  => present,
-    command => $fact_cmd,
-    user    => $patch_cron_user,
-    hour    => $patch_cron_hour,
-    minute  => $patch_cron_min,
-    require => File[$fact_cmd],
+    ensure   => present,
+    command  => $fact_cmd,
+    user     => $patch_cron_user,
+    hour     => $patch_cron_hour,
+    minute   => $patch_cron_min,
+    month    => $patch_cron_month,
+    monthday => $patch_cron_monthday,
+    weekday  => $patch_cron_weekday,
+    require  => File[$fact_cmd],
   }
 }
