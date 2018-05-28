@@ -1,5 +1,11 @@
 # Changelog
 
+## Release 0.1.13
+
+- Additional controls around the rebooting of the nodes
+- Examples added to the documentation
+- Formatted responses for puppet tasks
+
 ## Release 0.1.12
 
 - Updated documentation
