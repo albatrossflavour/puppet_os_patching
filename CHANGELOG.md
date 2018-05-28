@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.1.12
+
+- Updated documentation
+
 ## Release 0.1.11
 
 - Fixed output format for the patching task

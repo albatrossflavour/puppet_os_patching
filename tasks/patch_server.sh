@@ -177,6 +177,22 @@ case $? in
     FAILMSG="No patches to apply"
     write_patch_fact "${PATCHSTATE3}-noop"
     send_message 0 "NOTICE: Yum dry run shows no patching work to do - exiting"
+    FQDN=`${FACTER} fqdn`
+    JSONDATE=`date`
+    JSON=`cat <<EOF
+{
+  "fqdn": "$FQDN",
+  "return-code": "success",
+  "date": "$JSONDATE",
+  "message": "yum dry run shows no patching work to do",
+  "logfile": "$LOGFILE",
+  "reboot": "$PT_reboot",
+  "securityonly": "$PT_security_only",
+}
+EOF
+`
+
+    echo $JSON
     clean_up ${PATCHSTATE10} now
     exit 0
     ;;
@@ -263,7 +279,6 @@ write_patch_fact "${PATCHSTATE6}-success"
 # We expect the verification script to return 0 on success and 1 on failed to verify.
 
 FQDN=`${FACTER} fqdn`
-REBOOT=$PT_reboot
 JSONDATE=`date`
 JOB=`yum history | egrep "^[[:space:]]" | awk '{print $1}' | head -1`
 RETURN=`yum history info $JOB | awk '$1 == "Return-Code" {print $3}'`
@@ -277,6 +292,10 @@ JSON=`cat <<EOF
   "packagesupdated": [
     $PACKAGES
   ]
+  "logfile": "$LOGFILE",
+  "reboot": "$PT_reboot",
+  "securityonly": "$PT_security_only",
+  "message": "Patching complete",
 }
 EOF
 `
