@@ -309,7 +309,7 @@ clean_up ${PATCHSTATE9}
 if [ "$REBOOT" -gt 0 ]
 then
   # Reboot option set to true, reboot the system
-  /sbin/shutdown -r now
+  nohup "sleep 5; /sbin/shutdown -r now" &
 fi
 
 exit 0
