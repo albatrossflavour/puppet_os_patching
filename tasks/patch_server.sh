@@ -19,12 +19,12 @@ ${LOGGER} "patch task set post run reboot to $PT_reboot"
 # feed from Redhat.  CentOS doesn't seem to have the same metadata
 # Default to applying everything.  PT_security_only comes in from puppet tasks
 case $PT_security_only in
-  true)  
+  true)
     SECONLY="--security"
     ${LOGGER} "patch task will only apply updates marked as security related"
   ;;
   *)
-    SECONLY="" ;;
+    SECONLY=""
     ${LOGGER} "patch task will apply all updates"
   ;;
 esac
