@@ -5,9 +5,22 @@
 
 PATH=/usr/bin:/usr/sbin:/bin:/usr/local/bin
 
+case $(/usr/local/bin/facter osfamily) in
+  RedHat)
+    PKGS=$(yum -q check-update | awk '{print $1}')
+    SECPKGS=$(yum -q --security check-update | awk '{print $1}')
+  ;;
+  Debian)
+    PKGS=$(apt-get upgrade -s | awk '$1 == "Inst" {print $2}')
+    SECPKGS=$(apt-get upgrade -s | awk '$1 == "Inst && /security/" {print $2}')
+  ;;
+  *)
+    exit 1
+  ;;
+esac
+
 FACTDIR='/opt/puppetlabs/facter/facts.d'
 FACTFILE="${FACTDIR}//os_patching.yaml"
-COUNT=0
 
 if [ ! -d "${FACTDIR}" ]
 then
@@ -22,23 +35,11 @@ then
   exit 1
 fi
 
-case $(/usr/local/bin/facter osfamily) in
-  RedHat)
-    PKGCMD="yum -q check-update | awk '{print $1}'"
-    SECPKGCMD="yum -q --security check-update | awk '{print $1}'"
-  ;;
-  Debian)
-    PKGCMD="apt-get upgrade -s | awk '$1 == "Inst" {print $2}"
-    SECPKGCMD="apt-get upgrade -s | awk '$1 == "Inst && /security/" {print $2}"
-  ;;
-  Windows)
-  ;;
-  *)
-  ;;
-esac
 echo "os_patching:" >> ${FACTFILE} || exit 1
+
+COUNT=0
 echo "  package_updates:" >> ${FACTFILE} || exit 1
-for UPDATE in $(PKGCMD)
+for UPDATE in $PKGS
 do
   echo "   - '$UPDATE'" >> ${FACTFILE} || exit 1
   COUNT=$((COUNT + 1))
@@ -46,7 +47,7 @@ done
 
 SECCOUNT=0
 echo "  security_package_updates:" >> ${FACTFILE} || exit 1
-for UPDATE in $(SECPKGCMD)
+for UPDATE in $SECPKGS
 do
   echo "   - '$UPDATE'" >> ${FACTFILE} || exit 1
   SECCOUNT=$((SECCOUNT + 1))
