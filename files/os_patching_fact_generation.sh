@@ -12,7 +12,7 @@ case $(/usr/local/bin/facter osfamily) in
   ;;
   Debian)
     PKGS=$(apt-get upgrade -s | awk '$1 == "Inst" {print $2}')
-    SECPKGS=$(apt-get upgrade -s | awk '$1 == "Inst && /security/" {print $2}')
+    SECPKGS=$(apt-get upgrade -s | awk '$1 == "Inst" && /security/ {print $2}')
   ;;
   *)
     exit 1

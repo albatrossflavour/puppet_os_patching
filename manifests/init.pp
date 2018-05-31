@@ -14,8 +14,12 @@ class os_patching (
 ){
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
 
-  package { 'deltarpm':
-    ensure => $install_delta_rpm,
+  if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
+
+  if ( $::osfamily == 'RedHat' ) {
+    package { 'deltarpm':
+      ensure => $install_delta_rpm,
+    }
   }
 
   file { $fact_cmd:
