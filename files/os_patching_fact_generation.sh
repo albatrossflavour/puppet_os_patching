@@ -22,9 +22,23 @@ then
   exit 1
 fi
 
+case $(/usr/local/bin/facter osfamily) in
+  RedHat)
+    PKGCMD="yum -q check-update | awk '{print $1}'"
+    SECPKGCMD="yum -q --security check-update | awk '{print $1}'"
+  ;;
+  Debian)
+    PKGCMD="apt-get upgrade -s | awk '$1 == "Inst" {print $2}"
+    SECPKGCMD="apt-get upgrade -s | awk '$1 == "Inst && /security/" {print $2}"
+  ;;
+  Windows)
+  ;;
+  *)
+  ;;
+esac
 echo "os_patching:" >> ${FACTFILE} || exit 1
 echo "  package_updates:" >> ${FACTFILE} || exit 1
-for UPDATE in $(yum -q check-update | awk '{print $1}')
+for UPDATE in $(PKGCMD)
 do
   echo "   - '$UPDATE'" >> ${FACTFILE} || exit 1
   COUNT=$((COUNT + 1))
@@ -32,7 +46,7 @@ done
 
 SECCOUNT=0
 echo "  security_package_updates:" >> ${FACTFILE} || exit 1
-for UPDATE in $(yum -q --security check-update | awk '{print $1}')
+for UPDATE in $(SECPKGCMD)
 do
   echo "   - '$UPDATE'" >> ${FACTFILE} || exit 1
   SECCOUNT=$((SECCOUNT + 1))
