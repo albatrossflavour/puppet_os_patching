@@ -64,29 +64,28 @@ EOF
         exit 1
       ;;
     esac
-  
+
     # Actually do the patching!
     ${LOGGER} "applying updates"
     yum ${SECONLY} upgrade -y 2>/dev/null 1>dev/null
     if [ "$?" -lt 1 ]
     then
       MESSAGE="Patching complete"
-      JOB=`yum history | grep -E "^[[:space:]]" | awk '{print $1}' | head -1`
-      RETURN=`yum history info "${JOB}" | awk '$1 == "Return-Code" {print $3}'`
-      PACKAGES=`yum history info "${JOB}" | grep -E "Updated" | awk '{print t "\"" $2 "\""} { t=", "}'`
+      JOB=$(yum history | grep -E "^[[:space:]]" | awk '{print $1}' | head -1)
+      RETURN=$(yum history info "${JOB}" | awk '$1 == "Return-Code" {print $3}')
+      PACKAGES=$(yum history info "${JOB}" | grep -E "Updated" | awk '{print t "\"" $2 "\""} { t=", "}')
     else
       MESSAGE="Yum completed with errors"
       RETURN="Error"
     fi
   ;;
   Debian)
-    # The security only tagging works with RHEL with an official
-    # feed from Redhat.  CentOS doesn't seem to have the same metadata
+    # Match packages from security repos to see if there are any security updates to apply.
     # Default to applying everything.  PT_security_only comes in from puppet tasks
     case $PT_security_only in
       true)
         ${LOGGER} "patch task will only apply updates marked as security related"
-        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" && /security/ {print $2}')
+        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" && /security/ {print t "\"" $2 "\""} { t=", "}')
         if [ "$SECKPGS" -gt 0 ]
         then
           ${LOGGER} "applying security updates"
@@ -98,7 +97,7 @@ EOF
       ;;
       *)
         ${LOGGER} "applying all updates"
-        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" {print $2}')
+        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" {print t "\"" $2 "\""} { t=", "}')
 	      if [ -n "$PACKAGES" ]
       	then
           apt-get -qy upgrade 2>/dev/null 1>/dev/null
@@ -124,7 +123,7 @@ EOF
   ;;
 esac
 
-${LOGGER} $MESSAGE
+${LOGGER} "$MESSAGE"
 ENDDATE=$(date)
 
 JSON=$(cat <<EOF

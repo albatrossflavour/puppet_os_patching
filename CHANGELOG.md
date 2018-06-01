@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.1.17
+
+- Added initial support for Debian/Ubuntu systems
+
 ## Release 0.1.16
 
 - Additional logging, through `logger`, on both fact generation and patching
