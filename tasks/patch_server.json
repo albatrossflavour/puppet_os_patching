@@ -6,8 +6,8 @@
       "type": "Boolean"
     },
     "security_only": {
-      "description": "Limit patches to those tagged as security related?",
-      "type": "Boolean"
+      "description": "Limit patches to those tagged as security related? (Defaults to false)",
+      "type": "Optional[Boolean]"
     }
   },
   "puppet_task_version": 1,
