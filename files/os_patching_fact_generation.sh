@@ -7,8 +7,8 @@ PATH=/usr/bin:/usr/sbin:/bin:/usr/local/bin
 
 case $(/usr/local/bin/facter osfamily) in
   RedHat)
-    PKGS=$(yum -q check-update | awk '{print $1}')
-    SECPKGS=$(yum -q --security check-update | awk '{print $1}')
+    PKGS=$(yum -q check-update | awk '/^[a-z]/ {print $1}')
+    SECPKGS=$(yum -q --security check-update | awk '/^[a-z]/ {print $1}')
   ;;
   Debian)
     PKGS=$(apt-get upgrade -s | awk '$1 == "Inst" {print $2}')
