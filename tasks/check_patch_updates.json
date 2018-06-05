@@ -1,7 +1,0 @@
-{
-  "puppet_task_version": 1,
-  "supports_noop": false,
-  "description": "Check if there are any updates available through yum",
-  "parameters": {
-  }
-}
