@@ -15,6 +15,6 @@ class os_patching::block (
 
   file { '/etc/os_patching/block.conf':
     ensure  => file,
-    content => template("puppet:///modules/${module_name}/block.conf.erb"),
+    content => template("${module_name}/block.conf.erb"),
   }
 }
