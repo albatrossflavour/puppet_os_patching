@@ -41,10 +41,10 @@ EOF
 }
 
 # Check if patching is blocked
-if [  $(facter os_patching.patching_blocked) == true ]
+if [ "$(facter os_patching.patching_blocked)" = true ]
 then
   REASON=$(facter os_patching.patching_blocked_reason)
-  output("Blocked" "Patching is blocked : $REASON")
+  output "Blocked" "Patching is blocked : $REASON"
   ${LOGGER} "patching is blocked, exiting"
   exit 1
 fi
@@ -72,7 +72,7 @@ case $FAMILY in
     case ${?} in
       0)
         ${LOGGER} "No updates found, exiting cleanly"
-        output("Success" "yum shows no patching work to do")
+        output "Success" "yum shows no patching work to do"
         exit 0
       ;;
       100)
@@ -81,7 +81,7 @@ case $FAMILY in
       ;;
       *)
         ${LOGGER} "failure checking updates"
-        output("Error","Could not check updates though yum")
+        output "Error" "Could not check updates though yum"
         exit 1
       ;;
     esac
@@ -148,7 +148,7 @@ esac
 
 ${LOGGER} "$MESSAGE"
 
-output("${RETURN}" "${MESSAGE}" "${PACKAGES}")
+output "${RETURN}" "${MESSAGE}" "${PACKAGES}"
 
 ${LOGGER} "refreshing facts and running puppet"
 /usr/local/bin/os_patching_fact_generation.sh
