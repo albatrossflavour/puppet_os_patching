@@ -16,6 +16,39 @@ esac
 
 ${LOGGER} "patch task set post run reboot to $PT_reboot"
 
+function output()
+{
+  RETURN=$1
+  MESSAGE=$2
+  PACKAGES=$3
+  ENDDATE=$(date)
+  JSON=$(cat <<EOF
+{
+  "fqdn": "${FQDN}",
+  "return-code": "${RETURN}",
+  "startdate": "${STARTDATE}",
+  "enddate": "${ENDDATE}",
+  "reboot": "${PT_reboot}",
+  "securityonly": "${PT_security_only}",
+  "message": "${MESSAGE}",
+  "packagesupdated": [
+    ${PACKAGES}
+  ]
+}
+EOF
+)
+  echo "${JSON}"
+}
+
+# Check if patching is blocked
+if [ "$(facter os_patching.patching_blocked)" = true ]
+then
+  REASON=$(facter os_patching.patching_blocked_reason)
+  output "Blocked" "Patching is blocked : $REASON"
+  ${LOGGER} "patching is blocked, exiting"
+  exit 1
+fi
+
 case $FAMILY in
   RedHat)
     # The security only tagging works with RHEL with an official
@@ -39,20 +72,7 @@ case $FAMILY in
     case ${?} in
       0)
         ${LOGGER} "No updates found, exiting cleanly"
-        ENDDATE=$(date)
-        JSON=$(cat <<EOF
-{
-  "fqdn": "${FQDN}",
-  "return-code": "Success",
-  "startdate": "${STARTDATE}",
-  "enddate": "${ENDDATE}",
-  "message": "yum shows no patching work to do",
-  "reboot": "${PT_reboot}",
-  "securityonly": "${PT_security_only}"
-}
-EOF
-)
-        echo "${JSON}"
+        output "Success" "yum shows no patching work to do"
         exit 0
       ;;
       100)
@@ -61,6 +81,7 @@ EOF
       ;;
       *)
         ${LOGGER} "failure checking updates"
+        output "Error" "Could not check updates though yum"
         exit 1
       ;;
     esac
@@ -89,7 +110,9 @@ EOF
         if [ "$SECKPGS" -gt 0 ]
         then
           ${LOGGER} "applying security updates"
-          apt-get upgrade -s | awk '$1 == "Inst" && /security/ {print $2}' | xargs apt -qy install 2>/dev/null 1>/dev/null
+          apt-get upgrade -s 2>/dev/null | \
+            awk '$1 == "Inst" && /security/ {print $2}' | \
+            xargs apt -qy install 2>/dev/null 1>/dev/null
           RET=$?
 	      else
 	        RET=-1
@@ -124,25 +147,8 @@ EOF
 esac
 
 ${LOGGER} "$MESSAGE"
-ENDDATE=$(date)
 
-JSON=$(cat <<EOF
-{
-  "fqdn": "${FQDN}",
-  "return-code": "${RETURN}",
-  "startdate": "${STARTDATE}",
-  "enddate": "${ENDDATE}",
-  "packagesupdated": [
-    ${PACKAGES}
-  ],
-  "reboot": "${PT_reboot}",
-  "securityonly": "${PT_security_only}",
-  "message": "${MESSAGE}"
-}
-EOF
-)
-
-echo "${JSON}"
+output "${RETURN}" "${MESSAGE}" "${PACKAGES}"
 
 ${LOGGER} "refreshing facts and running puppet"
 /usr/local/bin/os_patching_fact_generation.sh
