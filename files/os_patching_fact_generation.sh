@@ -9,6 +9,7 @@ case $(/usr/local/bin/facter osfamily) in
   RedHat)
     PKGS=$(yum -q check-update | awk '/^[a-z]/ {print $1}')
     SECPKGS=$(yum -q --security check-update | awk '/^[a-z]/ {print $1}')
+    PINNEDPKGS=$(awk -F: '/^[0-9]*:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list 2>/dev/null )
   ;;
   Debian)
     PKGS=$(apt-get upgrade -s | awk '$1 == "Inst" {print $2}')
@@ -56,6 +57,16 @@ done
 echo "  package_update_count: $COUNT" >> ${FACTFILE} || exit 1
 echo "  security_package_update_count: $SECCOUNT" >> ${FACTFILE} || exit 1
 
+
+# Do we have pinned packages?
+if [ -n "$PINNEDPKGS" ]
+then
+  echo "  pinned_packages:" >> ${FACTFILE} || exit 1
+  for PKG in $PINNEDPKGS
+  do
+    echo "   - '$PKG'" >> ${FACTFILE} || exit 1
+  done
+fi
 
 # Are we blocked? (os_patching::block)
 BLOCKCONF=/etc/os_patching/block.conf

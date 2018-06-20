@@ -5,7 +5,7 @@ FQDN=$(facter fqdn)
 FAMILY=$(facter osfamily)
 STARTDATE=$(date)
 LOGGER='/usr/bin/logger -p info -t os_patching'
-
+PINNEDPKGS=$(facter os_patching.pinned_packages 2>/dev/null)
 ${LOGGER} "Starting patch run task"
 
 # Default to not rebooting.  PT_reboot comes in from puppet tasks
@@ -34,6 +34,7 @@ function output()
   "packagesupdated": [
     ${PACKAGES}
   ]
+  "pinned_packages" : ${PINNEDPKGS}
 }
 EOF
 )
