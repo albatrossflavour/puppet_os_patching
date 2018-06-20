@@ -1,0 +1,9 @@
+# This file is managed by Puppet - do not manually edit
+#
+# The purpose of the file is to allow automated patching tasks triggered from
+# puppet to be blocked.
+#
+# Configured using the puppet class 'os_patching::block'
+
+BLOCK="<%= @block_patching %>"
+REASON="<%= @block_reason %>"
