@@ -33,7 +33,7 @@ function output()
   "message": "${MESSAGE}",
   "packagesupdated": [
     ${PACKAGES}
-  ]
+  ],
   "pinned_packages" : ${PINNEDPKGS}
 }
 EOF
