@@ -40,6 +40,15 @@ EOF
   echo "${JSON}"
 }
 
+# Check if patching is blocked
+if [  $(facter os_patching.patching_blocked) == true ]
+then
+  REASON=$(facter os_patching.patching_blocked_reason)
+  output("Blocked" "Patching is blocked : $REASON")
+  ${LOGGER} "patching is blocked, exiting"
+  exit 1
+fi
+
 case $FAMILY in
   RedHat)
     # The security only tagging works with RHEL with an official
