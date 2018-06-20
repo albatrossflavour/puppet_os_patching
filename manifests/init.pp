@@ -22,6 +22,19 @@ class os_patching (
     }
   }
 
+  file { '/etc/os_patching':
+    ensure => directory,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
+  }
+
+  unless defined(Class['os_patching::block']) {
+    file { '/etc/os_patching/block.conf':
+      ensure => absent,
+    }
+  }
+
   file { $fact_cmd:
     ensure => present,
     owner  => $patch_data_owner,
