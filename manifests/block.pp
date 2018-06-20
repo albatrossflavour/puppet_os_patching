@@ -16,5 +16,6 @@ class os_patching::block (
   file { '/etc/os_patching/block.conf':
     ensure  => file,
     content => template("${module_name}/block.conf.erb"),
+    notify  => Exec['/usr/local/bin/os_patching_fact_generation.sh']
   }
 }

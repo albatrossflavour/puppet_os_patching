@@ -56,6 +56,18 @@ done
 echo "  package_update_count: $COUNT" >> ${FACTFILE} || exit 1
 echo "  security_package_update_count: $SECCOUNT" >> ${FACTFILE} || exit 1
 
+
+# Are we blocked? (os_patching::block)
+BLOCKCONF=/etc/os_patching/block.conf
+
+if [ -f "$BLOCKCONF" ]
+then
+  . /etc/os_patching/block.conf
+
+  echo "  patching_blocked: $BLOCK" >> ${FACTFILE} || exit 1
+  echo "  patching_blocked_reason: $REASON" >> ${FACTFILE} || exit 1
+fi
+
 /usr/bin/logger -p info -t os_patching_fact_generation.sh "patch data fact refreshed"
 
 exit 0
