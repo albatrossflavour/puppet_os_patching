@@ -1,7 +1,6 @@
 # @summary Block os_patching tasks from being run on a node
 class os_patching::block (
-  Boolean $block_patching = false,
-  String $block_reason = undef,
+  String $block_reason = 'Blocker class (os_patching::block) has been applied, no reason supplied',
 ){
 
   file { '/etc/os_patching/block.conf':
