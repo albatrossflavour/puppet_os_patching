@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin
 FQDN=$(facter fqdn)
