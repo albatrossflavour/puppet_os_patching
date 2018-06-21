@@ -14,7 +14,7 @@ case $(/usr/local/bin/facter osfamily) in
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
     SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /security/ {print $2}')
-    PINNEDPKGS=$(awk '$1 == "Package:" {print $2}' /etc/apt/preferences.d/hold*pref)
+    PINNEDPKGS=$(awk '$1 == "Package:" {print $2}' /etc/apt/preferences.d/hold*pref 2>/dev/null)
   ;;
   *)
     exit 1

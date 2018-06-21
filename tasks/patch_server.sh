@@ -129,7 +129,7 @@ case $FAMILY in
         PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" {{print t "\"" $2 "\""} { t=", "}}')
 	      if [ -n "$PACKAGES" ]
       	then
-          apt-get -qy upgrade 2>/dev/null 1>/dev/null
+          apt -qy upgrade 2>/dev/null 1>/dev/null
           RET=$?
 	      else
 		      RET=-1
