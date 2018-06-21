@@ -12,8 +12,9 @@ case $(/usr/local/bin/facter osfamily) in
     PINNEDPKGS=$(awk -F: '/^[0-9]*:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list 2>/dev/null )
   ;;
   Debian)
-    PKGS=$(apt-get upgrade -s | awk '$1 == "Inst" {print $2}')
-    SECPKGS=$(apt-get upgrade -s | awk '$1 == "Inst" && /security/ {print $2}')
+    PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
+    SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /security/ {print $2}')
+    PINNEDPKGS=$(awk '$1 == "Package:" {print $2}' /etc/apt/preferences.d/hold*pref)
   ;;
   *)
     exit 1

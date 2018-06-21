@@ -103,6 +103,7 @@ case $FAMILY in
     else
       MESSAGE="Yum completed with errors"
       RETURN="Error"
+      REBOOT=0
     fi
   ;;
   Debian)
@@ -111,11 +112,11 @@ case $FAMILY in
     case $PT_security_only in
       true)
         ${LOGGER} "patch task will only apply updates marked as security related"
-        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" && /security/ {{print t "\"" $2 "\""} { t=", "}}')
-        if [ "$SECKPGS" -gt 0 ]
+        PACKAGES=$(apt upgrade -s 2>/dev/null| awk '$1 == "Inst" && /security/ {{print t "\"" $2 "\""} { t=", "}}')
+        if [ -n "${PACKAGES}" ]
         then
           ${LOGGER} "applying security updates"
-          apt-get upgrade -s 2>/dev/null | \
+          apt upgrade -s 2>/dev/null | \
             awk '$1 == "Inst" && /security/ {print $2}' | \
             xargs apt -qy install 2>/dev/null 1>/dev/null
           RET=$?
@@ -144,9 +145,11 @@ case $FAMILY in
     then
       MESSAGE="No updates required"
       RETURN='Success'
+      REBOOT=0
     else
       MESSAGE="apt completed with errors"
       RETURN="Error"
+      REBOOT=0
     fi
   ;;
 esac
