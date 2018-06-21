@@ -107,7 +107,7 @@ case $FAMILY in
     case $PT_security_only in
       true)
         ${LOGGER} "patch task will only apply updates marked as security related"
-        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" && /security/ {print t "\"" $2 "\""} { t=", "}')
+        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" && /security/ {{print t "\"" $2 "\""} { t=", "}}')
         if [ "$SECKPGS" -gt 0 ]
         then
           ${LOGGER} "applying security updates"
@@ -121,7 +121,7 @@ case $FAMILY in
       ;;
       *)
         ${LOGGER} "applying all updates"
-        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" {print t "\"" $2 "\""} { t=", "}')
+        PACKAGES=$(apt-get upgrade -s | awk '$1 == "Inst" {{print t "\"" $2 "\""} { t=", "}}')
 	      if [ -n "$PACKAGES" ]
       	then
           apt-get -qy upgrade 2>/dev/null 1>/dev/null
