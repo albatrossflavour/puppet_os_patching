@@ -1,5 +1,12 @@
 # Changelog
 
+## Release 0.1.18
+
+- Many improvements in the debian workflow
+- Pull out information for pinned/version locked/held packages
+- Removed redundant task
+- Cleaner patch fact generation
+
 ## Release 0.1.17
 
 - Added initial support for Debian/Ubuntu systems
