@@ -6,6 +6,10 @@ FAMILY=$(facter osfamily)
 STARTDATE=$(date)
 LOGGER='/usr/bin/logger -p info -t os_patching'
 PINNEDPKGS=$(facter os_patching.pinned_packages 2>/dev/null)
+if [ -z "${PINNEDPKGS}" ]
+then
+  PINNEDPKGS='""'
+fi
 ${LOGGER} "Starting patch run task"
 
 # Default to not rebooting.  PT_reboot comes in from puppet tasks
