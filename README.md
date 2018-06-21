@@ -2,8 +2,6 @@
 
 This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat and Debian derivatives.
 
-The module is under active development and tasks to carry out RPM based OS patching have now been included.
-
 ## Table of contents
 
 - [os_patching](#ospatching)
@@ -20,7 +18,7 @@ The module is under active development and tasks to carry out RPM based OS patch
 
 ## Description
 
-Puppet tasks and bolt have opened up methods to integrate operating system level patching into the pupept workflow.  Providing automation of patch execution through tasks and the robust reporting of state through custom facts and PuppetDB.
+Puppet tasks and bolt have opened up methods to integrate operating system level patching into the puppet workflow.  Providing automation of patch execution through tasks and the robust reporting of state through custom facts and PuppetDB.
 
 If you're looking for a simple way to report on your OS patch levels, this module will show all updates which are outstanding, including which are related to security updates.  Do you want to enable self-service patching?  This module will use Puppet's RBAC and orchestration and task execution facilities to give you that power.
 
