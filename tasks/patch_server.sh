@@ -18,6 +18,12 @@ case ${PT_reboot} in
   *)     REBOOT=0 ;;
 esac
 
+# Default to patching everything.  PT_security_only comes in from puppet tasks
+case ${PT_security_only} in
+  true)  PT_security_only=true ;;
+  *)     PT_security_only=false ;;
+esac
+
 ${LOGGER} "patch task set post run reboot to $PT_reboot"
 
 function output()
