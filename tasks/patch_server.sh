@@ -137,7 +137,7 @@ case $FAMILY in
       ;;
     esac
 
-    if [ "$RET" -eq 1 ]
+    if [ "$RET" -eq 0 ]
     then
       MESSAGE="Patching complete"
       RETURN='Success'
