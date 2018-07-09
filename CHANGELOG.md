@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.1.19
+
+- Bugfix on the debian task which caused incorrect reporting of patching status
+
 ## Release 0.1.18
 
 - Many improvements in the debian workflow
