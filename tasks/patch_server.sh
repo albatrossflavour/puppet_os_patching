@@ -165,7 +165,11 @@ ${LOGGER} "$MESSAGE"
 output "${RETURN}" "${MESSAGE}" "${PACKAGES}"
 
 ${LOGGER} "refreshing facts and running puppet"
-/usr/local/bin/os_patching_fact_generation.sh
+
+if [ -f '/usr/local/bin/os_patching_fact_generation.sh' ]
+then
+  /usr/local/bin/os_patching_fact_generation.sh
+fi
 puppet agent -t 2>/dev/null 1>/dev/null
 
 if [ "${REBOOT}" -gt 0 ]

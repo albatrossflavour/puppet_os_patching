@@ -1,0 +1,23 @@
+Allow server to be exempted from patching +Exemptions
+Facts to view patch day +PatchDay +Reporting
+Facts to view exemption +Exemptions +Reporting
+Ability to use redis to set patch dates +PatchDay
+Use redis to set change freeze windows +ChangeFreeze
+Change freeze windows must have an end date +ChangeFreeze
+Change freeze windows must have a unique ID +ChangeFreeze
+Change freeze windows must have a free text field +ChangeFreeze
+Ability to query all change freezes set +ChangeFreeze +Reporting
+Ability to remove a change freeze +ChangeFreeze
+Ability to set the desired patch day for a server +PatchDay
+Patching task must check that it's not within a change freeze +ChangeFreeze
+Patching task must check that the server is not excempted +Exemptions
+Patching task must only run if it's the patch day for that server (??) +PatchDay
+Manually trigger a patching task (contridicts above?) +Orchestration @Questions
+Manage any automation jobs (cron etc) required for processes to work +Orchestration
+Why should it only be patchable on a specific day?  What about overrides? +Exemptions +PatchDay +Orchestration @Questions
+Will servers be managed in batches?  Do we need to be able to assign to them if so? @Questions
+How will the patch run output be consumed? +Reporting @Questions
+Are patch run dates important? +Reporting @Questions
+How do you want to see the patch dates? +PatchDay +Reporting @Questions
+How do you want to see the change freeze dates? +ChangeFreeze +Reporting @Questions
+How do you want to see the patch exemptions? +Exemptions +Reporting @Questions
