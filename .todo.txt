@@ -21,3 +21,5 @@ Are patch run dates important? +Reporting @Questions
 How do you want to see the patch dates? +PatchDay +Reporting @Questions
 How do you want to see the change freeze dates? +ChangeFreeze +Reporting @Questions
 How do you want to see the patch exemptions? +Exemptions +Reporting @Questions
+Split fact generation into a template with specifics for each OS covered +Improvements +Facter
+Allow a parameter for where to put the facter generation script +Improvements +Facter
