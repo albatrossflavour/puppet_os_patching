@@ -29,11 +29,13 @@ then
   exit 1
 fi
 
+cat /dev/null > ${UPDATEFILE}
 for UPDATE in $PKGS
 do
   echo "$UPDATE" >> ${UPDATEFILE} || exit 1
 done
 
+cat /dev/null > ${SECUPDATEFILE}
 for UPDATE in $SECPKGS
 do
   echo "$UPDATE" >> ${SECUPDATEFILE} || exit 1
