@@ -145,5 +145,6 @@ Facter.add('os_patching', :type => :aggregate) do
         data['patchwindow'] = matchdata[0]
 			end
     end
+    data
   end
 end
