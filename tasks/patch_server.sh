@@ -50,7 +50,7 @@ EOF
 )
   echo "${JSON}"
   PATCHDATE=$(date -Isec)
-  echo -e "${PATCHDATE}\t${MESSAGE}" >> /etc/os_patching/run_history
+  echo -e "${PATCHDATE}\t${MESSAGE}\t${RETURN}\t${PT_reboot}\t${PT_security_only}" >> /etc/os_patching/run_history
 }
 
 # Check if patching is blocked
