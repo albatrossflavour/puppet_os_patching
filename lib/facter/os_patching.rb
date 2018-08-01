@@ -120,11 +120,11 @@ Facter.add('os_patching', :type => :aggregate) do
       #matchdata = line.match(/^([\d:T\-\\+]*)[[:blank:]]*(\S.*)[[:blank:]]*(\S.*)[[:blank:]]*(\S.*)[[:blank:]]*(\S.*)$/)
       matchdata = line.split("|")
 			if (matchdata[1])
-      	data['last_run']['date'] = matchdata[1]
-      	data['last_run']['message'] = matchdata[2]
-      	data['last_run']['return_code'] = matchdata[3]
-      	data['last_run']['post_reboot'] = matchdata[4]
-      	data['last_run']['security_only'] = matchdata[5]
+      	data['last_run']['date'] = matchdata[0]
+      	data['last_run']['message'] = matchdata[1]
+      	data['last_run']['return_code'] = matchdata[2]
+      	data['last_run']['post_reboot'] = matchdata[3]
+        data['last_run']['security_only'] = matchdata[4].chomp
 			end
     end
     data
