@@ -140,7 +140,7 @@ Facter.add('os_patching', :type => :aggregate) do
     window = {}
     if (patchwindow)
       line = patchwindow.last
-      matchdata = line.match(/^\d*$/)
+      matchdata = line.match(/^(.*)$/)
 			if (matchdata[0])
         data['patch_window'] = matchdata[0]
 			end
