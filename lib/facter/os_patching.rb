@@ -104,4 +104,25 @@ Facter.add('os_patching', :type => :aggregate) do
     data['pinned_packages'] = pinnedpkgs
     data
   end
+
+  # History info
+  patchhistoryfile = '/etc/os_patching/run_history'
+  if File.file?(patchhistoryfile)
+    historyfile = File.open(patchhistoryfile, "r").to_a
+  end
+
+  chunk(:history) do
+    data = {}
+    history = {}
+    if (historyfile)
+      data['last_run'] = {}
+      line = historyfile.last
+      matchdata = line.match(/^([\d:T\-\\+]*)[[:blank:]]*(\S.*)$/)
+			if (matchdata[1])
+      	data['last_run']['date'] = matchdata[1]
+      	data['last_run']['message'] = matchdata[2]
+			end
+    end
+    data
+  end
 end
