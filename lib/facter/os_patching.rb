@@ -15,10 +15,9 @@ Facter.add('os_patching', :type => :aggregate) do
     updatelist = Array.new
     if (updates)
       updates.each_line do |line|
-        line.chomp
         next if line.empty?
         next if line.include? "^#"
-        updatelist.push line
+        updatelist.push line.chomp
       end
     end
     data['package_updates'] = updatelist
@@ -37,10 +36,9 @@ Facter.add('os_patching', :type => :aggregate) do
     secupdatelist = Array.new
     if (secupdates)
       secupdates.each_line do |line|
-        line.chomp
         next if line.empty?
         next if line.include? "^#"
-        secupdatelist.push line
+        secupdatelist.push line.chomp
       end
     end
     data['security_package_updates'] = secupdatelist
