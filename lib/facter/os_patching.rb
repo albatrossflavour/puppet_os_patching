@@ -128,4 +128,22 @@ Facter.add('os_patching', :type => :aggregate) do
     end
     data
   end
+
+  # Patch window
+  patchwindowfile = '/etc/os_patching/patch_window'
+  if File.file?(patchwindowfile)
+    patchwindow = File.open(patchwindowfile, "r").to_a
+  end
+
+  chunk(:history) do
+    data = {}
+    window = {}
+    if (patchwindow)
+      line = patchwindow.last
+      matchdata = line.match(/^\d*$/)
+			if (matchdata[0])
+        data['patchwindow'] = matchdata[0]
+			end
+    end
+  end
 end
