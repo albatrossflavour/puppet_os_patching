@@ -53,6 +53,9 @@ Facter.add('os_patching', :type => :aggregate) do
   chunk(:blackouts) do
     data = {}
     arraydata = {}
+    data['blocked'] = false
+    data['blocked_reasons'] = {}
+    data['blocked_reasons'] = Array.new
     if (blackouts)
       blackouts.each_line do |line|
         matchdata = line.match(/^([\w ]*),([\d:T\-\\+]*),([\d:T\-\\+]*)$/)
@@ -69,11 +72,10 @@ Facter.add('os_patching', :type => :aggregate) do
           end
 
           if (matchdata[2] .. matchdata[3]).cover?(now)
-            if (!data['blocked'])
-              data['blocked'] = Array.new
-            end
-            data['blocked'].push matchdata[1]
+            data['blocked'] = true
+            data['blocked_reasons'].push matchdata[1]
           end
+
         end
       end
     end
