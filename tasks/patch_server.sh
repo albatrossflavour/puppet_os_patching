@@ -5,7 +5,7 @@ FQDN=$(facter fqdn)
 FAMILY=$(facter osfamily)
 STARTDATE=$(date)
 LOGGER='/usr/bin/logger -p info -t os_patching'
-PINNEDPKGS=$(facter os_patching.pinned_packages 2>/dev/null)
+PINNEDPKGS=$(facter -p os_patching.pinned_packages 2>/dev/null)
 if [ -z "${PINNEDPKGS}" ]
 then
   PINNEDPKGS='""'
@@ -52,10 +52,11 @@ EOF
 }
 
 # Check if patching is blocked
-if [ "$(facter os_patching.patching_blocked)" = true ]
+BLOCKED=$(facter -p os_patching.blocked)
+
+if [ -n "$BLOCKED" ]
 then
-  REASON=$(facter os_patching.patching_blocked_reason)
-  output "Blocked" "Patching is blocked : $REASON"
+  output "Blocked" "Patching is blocked : $BLOCKED"
   ${LOGGER} "patching is blocked, exiting"
   exit 1
 fi
