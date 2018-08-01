@@ -52,11 +52,10 @@ EOF
 }
 
 # Check if patching is blocked
-BLOCKED=$(facter -p os_patching.blocked)
-
-if [ -n "$BLOCKED" ]
+if [ $(facter -p os_patching.blocked) == true ]
 then
-  output "Blocked" "Patching is blocked : $BLOCKED"
+  REASONS=$(facter -p os_patching.blocked_reasons | awk '/"/ {printf $0}' | sed "s/\"/'/g")
+  output "Blocked" "Patching is blocked : $REASONS"
   ${LOGGER} "patching is blocked, exiting"
   exit 1
 fi
