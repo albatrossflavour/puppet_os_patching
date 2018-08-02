@@ -8,8 +8,8 @@ facter = '/opt/puppetlabs/puppet/bin/facter'
 
 log = Syslog::Logger.new 'os_patching'
 
-def output(returncode,reboot,security,message,packages_updated,debug,yum_id)
-  json = { :return => returncode, :reboot => reboot, :security => security, :message => message, :packages_updated => packages_updated, :debug => debug, :yum_id => yum_id }
+def output(returncode,reboot,security,message,packages_updated,debug,yum_id,pinned_packages)
+  json = { :return => returncode, :reboot => reboot, :security => security, :message => message, :packages_updated => packages_updated, :debug => debug, :yum_id => yum_id, :pinned_packages => pinned_packages }
   puts JSON.pretty_generate(json)
 end
 
@@ -67,6 +67,8 @@ if (blocker.to_s.chomp == "true")
   err(100,"os_patching/blocked","Patching blocked #{block_reason}")
 end
 
+# Should we look at security or all patches to determine if we need to patch?
+# (requires RedHat subscription or Debian based distro... for now)
 if (security_only == true)
   updatecount = facts['os_patching']['security_package_update_count']
   securityflag = '--security'
@@ -76,7 +78,7 @@ else
 end
 
 if (updatecount == 0)
-  output('Success',reboot,security_only,'No patches to apply','','','')
+  output('Success',reboot,security_only,'No patches to apply','','','',pinned_pkgs)
   log.info "No patches to apply, exiting"
   exit(0)
 end
@@ -98,7 +100,7 @@ updated_packages,stderr,status = Open3.capture3("yum history info #{yum_id.chomp
 err(status,"os_patching/yum",stderr) if status != 0
 pkg_array = updated_packages.split
 
-output(yum_status.chomp,reboot,security_only,"Patching complete",pkg_array,yum_std_out,yum_id.chomp)
+output(yum_status.chomp,reboot,security_only,"Patching complete",pkg_array,yum_std_out,yum_id.chomp,pinned_pkgs)
 log.debug "Patching complete"
 
 log.debug 'Running os_patching fact refresh'
