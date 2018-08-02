@@ -8,8 +8,17 @@ facter = '/opt/puppetlabs/puppet/bin/facter'
 
 log = Syslog::Logger.new 'os_patching'
 
-def output(returncode,reboot,security,message,packages_updated,debug,yum_id,pinned_packages)
-  json = { :return => returncode, :reboot => reboot, :security => security, :message => message, :packages_updated => packages_updated, :debug => debug, :yum_id => yum_id, :pinned_packages => pinned_packages }
+def output(returncode,reboot,security,message,packages_updated,debug,job_id,pinned_packages)
+  json = {
+    :return => returncode,
+    :reboot => reboot,
+    :security => security,
+    :message => message,
+    :packages_updated => packages_updated,
+    :debug => debug,
+    :job_id => job_id,
+    :pinned_packages => pinned_packages
+  }
   puts JSON.pretty_generate(json)
 end
 
@@ -19,7 +28,7 @@ def err(code,kind,message)
 	   :msg => "Task exited : #{exitcode}\n#{message}",
 	   :kind => kind,
 	   :details => { :exitcode => exitcode }
-         }}
+  }}
 
   puts JSON.pretty_generate(json)
   log = Syslog::Logger.new 'os_patching'
@@ -27,13 +36,12 @@ def err(code,kind,message)
   exit(exitcode.to_i)
 end
 
+# Cache fact data to speed things up
 log.debug 'Gathering facts'
 full_facts,stderr,status = Open3.capture3("#{facter} -p -j")
 err(status,"os_patching/facter",stderr) if status != 0
 facts = {}
 facts = JSON.parse(full_facts)
-
-fqdn = facts['networking']['fqdn']
 pinned_pkgs = facts['os_patching']['pinned_packages']
 
 # Should we do a reboot?
@@ -77,31 +85,55 @@ else
   securityflag = ''
 end
 
+# There are no updates available, exit cleanly
 if (updatecount == 0)
   output('Success',reboot,security_only,'No patches to apply','','','',pinned_pkgs)
   log.info "No patches to apply, exiting"
   exit(0)
 end
 
-log.debug 'Running yum upgrade'
-yum_std_out,stderr,status = Open3.capture3("/bin/yum #{securityflag} upgrade -y")
-err(status,"os_patching/yum",stderr) if status != 0
+# Run the patching
+if (facts['os']['family'] == "RedHat")
+  log.debug 'Running yum upgrade'
+  yum_std_out,stderr,status = Open3.capture3("/bin/yum #{securityflag} upgrade -y")
+  err(status,"os_patching/yum",stderr) if status != 0
 
-log.debug 'Getting yum job ID'
-yum_id,stderr,status = Open3.capture3("yum history | grep -E \"^[[:space:]]\" | awk '{print $1}' | head -1")
-err(status,"os_patching/yum",stderr) if status != 0
+  log.debug 'Getting yum job ID'
+  yum_id,stderr,status = Open3.capture3("yum history | grep -E \"^[[:space:]]\" | awk '{print $1}' | head -1")
+  err(status,"os_patching/yum",stderr) if status != 0
 
-log.debug "Getting yum return code for job #{yum_id.chomp}"
-yum_status,stderr,status = Open3.capture3("yum history info #{yum_id.chomp} | awk '/^Return-Code/ {print $3}'")
-err(status,"os_patching/yum",stderr) if status != 0
+  log.debug "Getting yum return code for job #{yum_id.chomp}"
+  yum_status,stderr,status = Open3.capture3("yum history info #{yum_id.chomp} | awk '/^Return-Code/ {print $3}'")
+  err(status,"os_patching/yum",stderr) if status != 0
 
-log.debug "Getting updated package list	for job #{yum_id.chomp}"
-updated_packages,stderr,status = Open3.capture3("yum history info #{yum_id.chomp} | awk '/Updated/ {print $2}'")
-err(status,"os_patching/yum",stderr) if status != 0
-pkg_array = updated_packages.split
+  log.debug "Getting updated package list	for job #{yum_id.chomp}"
+  updated_packages,stderr,status = Open3.capture3("yum history info #{yum_id.chomp} | awk '/Updated/ {print $2}'")
+  err(status,"os_patching/yum",stderr) if status != 0
+  pkg_array = updated_packages.split
 
-output(yum_status.chomp,reboot,security_only,"Patching complete",pkg_array,yum_std_out,yum_id.chomp,pinned_pkgs)
-log.debug "Patching complete"
+  output(yum_status.chomp,reboot,security_only,"Patching complete",pkg_array,yum_std_out,yum_id.chomp,pinned_pkgs)
+  log.debug "Patching complete"
+elsif (facts['os']['family'] == "Debian")
+  if (security_only == true)
+    log.debug 'Debian upgrades, security only not currently supported'
+    err(101,"os_patching/security_only","Security only not supported on Debian at this point")
+  end
+
+  log.debug 'Getting package update list'
+  update_packages,stderr,status = Open3.capture3("apt-get upgrade -s | awk '/^Inst/ {print $2}'")
+  err(status,"os_patching/apt",stderr) if status != 0
+  pkg_array = updated_packages.split
+
+  log.debug 'Running apt update'
+  apt_std_out,stderr,status = Open3.capture3("apt -y upgrade")
+  err(status,"os_patching/apt",stderr) if status != 0
+
+  output('Success',reboot,security_only,"Patching complete",pkg_array,apt_std_out,'',pinned_pkgs)
+  log.debug "Patching complete"
+else
+  log.error "Unsupported OS - exiting"
+  err(200,"os_patching/unsupported_os","Unsupported OS")
+end
 
 log.debug 'Running os_patching fact refresh'
 fact_out,stdout,stderr = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
