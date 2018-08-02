@@ -120,12 +120,12 @@ elsif (facts['os']['family'] == "Debian")
   end
 
   log.debug 'Getting package update list'
-  updated_packages,stderr,status = Open3.capture3("apt-get upgrade -s | awk '/^Inst/ {print $2}'")
+  updated_packages,stderr,status = Open3.capture3("apt-get dist-upgrade -s | awk '/^Inst/ {print $2}'")
   err(status,"os_patching/apt",stderr) if status != 0
   pkg_array = updated_packages.split
 
   log.debug 'Running apt update'
-  apt_std_out,stderr,status = Open3.capture3("DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade")
+  apt_std_out,stderr,status = Open3.capture3("DEBIAN_FRONTEND=noninteractive apt-get -y -o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends dist-upgrade")
   err(status,"os_patching/apt",stderr) if status != 0
 
   output('Success',reboot,security_only,"Patching complete",pkg_array,apt_std_out,'',pinned_pkgs)
