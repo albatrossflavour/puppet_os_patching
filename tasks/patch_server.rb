@@ -120,9 +120,8 @@ elsif (facts['os']['family'] == "Debian")
   end
 
   log.debug 'Getting package update list'
-  update_packages,stderr,status = Open3.capture3("apt-get upgrade -s | awk '/^Inst/ {print $2}'")
+  updated_packages,stderr,status = Open3.capture3("apt-get upgrade -s | awk '/^Inst/ {print $2}'")
   err(status,"os_patching/apt",stderr) if status != 0
-  pkg_array = []
   pkg_array = updated_packages.split
 
   log.debug 'Running apt update'
