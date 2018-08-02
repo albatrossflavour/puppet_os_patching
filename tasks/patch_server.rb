@@ -125,7 +125,7 @@ elsif (facts['os']['family'] == "Debian")
   pkg_array = updated_packages.split
 
   log.debug 'Running apt update'
-  apt_std_out,stderr,status = Open3.capture3("apt -y upgrade")
+  apt_std_out,stderr,status = Open3.capture3("DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade")
   err(status,"os_patching/apt",stderr) if status != 0
 
   output('Success',reboot,security_only,"Patching complete",pkg_array,apt_std_out,'',pinned_pkgs)
