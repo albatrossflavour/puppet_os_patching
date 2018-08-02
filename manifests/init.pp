@@ -22,6 +22,10 @@ class os_patching (
     }
   }
 
+  file { '/opt/puppetlabs/facter/facts.d/os_patching.yaml':
+    ensure => absent,
+  }
+
   file { '/etc/os_patching':
     ensure => directory,
     owner  => 'root',
