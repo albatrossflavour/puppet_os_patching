@@ -168,9 +168,9 @@ end
 log.debug 'Running os_patching fact refresh'
 fact_out,stdout,stderr = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 log.debug 'Running puppet agent'
-puppet_out,stdout,stderr = Open3.capture3('/opt/puppetlabs/bin/puppet -t')
+puppet_out,stdout,stderr = Open3.capture3('/opt/puppetlabs/bin/puppet agent -t')
 
 if (reboot == true)
   log.info 'Rebooting'
-  reboot_out,stdout,stderr = Open3.capture3('reboot -r 1')
+  reboot_out,stdout,stderr = Open3.capture3('shutdown -r +1')
 end
