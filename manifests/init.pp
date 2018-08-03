@@ -121,7 +121,7 @@ class os_patching (
   $blackout_window_file = '/etc/os_patching/blackout_windows'
   if ( $blackout_windows ) {
     # Validate the information in the blackout_windows hash
-    blackout_windows.each | String $key, Hash $value | {
+    $blackout_windows.each | String $key, Hash $value | {
       if ( $key !~ /^[A-Za-z0-9\-_]+$/ ){
         fail ("Blackout description can only contain alphanumerics, dash and underscore")
       }
