@@ -2,15 +2,17 @@
 #   custom structured facts that contain patching data.
 # @example include os_patching
 class os_patching (
-  String $patch_data_owner      = 'root',
-  String $patch_data_group      = 'root',
-  String $patch_cron_user       = $patch_data_owner,
-  Boolean $install_delta_rpm    = false,
-  $patch_cron_hour              = absent,
-  $patch_cron_month             = absent,
-  $patch_cron_monthday          = absent,
-  $patch_cron_weekday           = absent,
-  $patch_cron_min               = fqdn_rand(59),
+  String $patch_data_owner           = 'root',
+  String $patch_data_group           = 'root',
+  String $patch_cron_user            = $patch_data_owner,
+  Boolean $install_delta_rpm         = false,
+  Optional[Boolean] $reboot_override,
+  $patch_window,
+  $patch_cron_hour                   = absent,
+  $patch_cron_month                  = absent,
+  $patch_cron_monthday               = absent,
+  $patch_cron_weekday                = absent,
+  $patch_cron_min                    = fqdn_rand(59),
 ){
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
 
@@ -66,4 +68,44 @@ class os_patching (
     weekday  => $patch_cron_weekday,
     require  => File[$fact_cmd],
   }
+
+
+  if ( $patch_window )
+		if ($patch_window !~ /[A-Za-z0-9-_]+/ ){
+    	fail ('The patch window can only contain alphanumerics, underscore and dash')
+  	}
+
+		$patch_window_file = '/etc/os_patching/patch_window'
+
+  	file { $patch_window_file:
+    	ensure   => file,
+    	owner    => 'root',
+    	group    => 'root',
+    	mode     => '0644',
+    	contents => $patch_window,
+    	require  => File['/etc/os_patching'],
+  	}
+	} else {
+		file { $patch_window_file:
+			ensure => absent,
+		}
+	}
+
+  if ( $reboot_override )
+
+		$reboot_override_file = '/etc/os_patching/reboot_override'
+
+  	file { $reboot_window_file:
+    	ensure   => file,
+    	owner    => 'root',
+    	group    => 'root',
+    	mode     => '0644',
+    	contents => $reboot_override,
+    	require  => File['/etc/os_patching'],
+  	}
+	} else {
+		file { $reboot_window_file:
+			ensure => absent,
+		}
+	}
 }
