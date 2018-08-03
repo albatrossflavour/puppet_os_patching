@@ -148,4 +148,23 @@ Facter.add('os_patching', :type => :aggregate) do
     end
     data
   end
+
+  # Reboot override
+  rebootfile = '/etc/os_patching/reboot_override'
+  if File.file?(rebootfile)
+    rebootoverride = File.open(rebootfile, "r").to_a
+  end
+
+  chunk(:reboot_override) do
+    data = {}
+    window = {}
+    if (rebootoverride)
+      line = rebootoverride.last
+      matchdata = line.match(/[Tt]rue|[Ff]alse/)
+      data['reboot_override'] = matchdata[0]
+    else
+      data['reboot_override'] = ''
+    end
+    data
+  end
 end
