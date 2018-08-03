@@ -3,6 +3,7 @@
 require 'open3'
 require 'json'
 require 'syslog/logger'
+require 'time'
 
 facter = '/opt/puppetlabs/puppet/bin/facter'
 
