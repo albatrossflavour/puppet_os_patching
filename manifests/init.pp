@@ -7,6 +7,7 @@ class os_patching (
   String $patch_cron_user            = $patch_data_owner,
   Boolean $install_delta_rpm         = false,
   Optional[Boolean] $reboot_override,
+  Optional[Hash] $blackout_windows,
   $patch_window,
   $patch_cron_hour                   = absent,
   $patch_cron_month                  = absent,
@@ -115,6 +116,26 @@ class os_patching (
   	}
 	} else {
 		file { $reboot_override_file:
+			ensure => absent,
+      notify => Exec[$fact_upload],
+		}
+  }
+
+  if ( $blackout_windows ) {
+
+		$blackout_window_file = '/etc/os_patching/blackout_windows'
+
+  	file { $blackout_window_file:
+    	ensure  => file,
+    	owner   => 'root',
+    	group   => 'root',
+    	mode    => '0644',
+    	content => template('os_patching/blackout_windows.erb'),
+    	require => File['/etc/os_patching'],
+      notify  => Exec[$fact_upload],
+  	}
+	} else {
+		file { $blackout_window_file:
 			ensure => absent,
       notify => Exec[$fact_upload],
 		}
