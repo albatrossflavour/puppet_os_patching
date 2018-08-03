@@ -91,11 +91,11 @@ class os_patching (
 		}
 	}
 
-  if ( $reboot_override ) {
+  if ( $reboot_override != undef ) {
 
 		$reboot_override_file = '/etc/os_patching/reboot_override'
 
-  	file { $reboot_window_file:
+  	file { $reboot_override_file:
     	ensure   => file,
     	owner    => 'root',
     	group    => 'root',
@@ -104,7 +104,7 @@ class os_patching (
     	require  => File['/etc/os_patching'],
   	}
 	} else {
-		file { $reboot_window_file:
+		file { $reboot_override_file:
 			ensure => absent,
 		}
 	}
