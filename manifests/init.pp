@@ -15,6 +15,7 @@ class os_patching (
   $patch_cron_min                    = fqdn_rand(59),
 ){
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
+  $fact_upload ='/opt/puppetlabs/bin/puppet facts upload'
 
   if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
 
@@ -84,10 +85,12 @@ class os_patching (
     	mode    => '0644',
     	content => $patch_window,
     	require => File['/etc/os_patching'],
+      notify  => Exec[$fact_upload],
   	}
 	} else {
 		file { $patch_window_file:
 			ensure => absent,
+      notify => Exec[$fact_upload],
 		}
 	}
 
@@ -108,10 +111,16 @@ class os_patching (
     	mode    => '0644',
     	content => $reboot_boolean,
     	require => File['/etc/os_patching'],
+      notify  => Exec[$fact_upload],
   	}
 	} else {
 		file { $reboot_override_file:
 			ensure => absent,
+      notify => Exec[$fact_upload],
 		}
 	}
+
+  exec { $fact_upload:
+    refreshonly => true,
+  }
 }

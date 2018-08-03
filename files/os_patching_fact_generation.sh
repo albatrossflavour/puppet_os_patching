@@ -41,6 +41,7 @@ do
   echo "$UPDATE" >> ${SECUPDATEFILE} || exit 1
 done
 
+/opt/puppetlabs/bin/puppet facts upload 2>/dev/null 1>/dev/null
 /usr/bin/logger -p info -t os_patching_fact_generation.sh "patch data fact refreshed"
 
 exit 0
