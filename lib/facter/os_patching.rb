@@ -161,7 +161,11 @@ Facter.add('os_patching', :type => :aggregate) do
     if (rebootoverride)
       line = rebootoverride.last
       matchdata = line.match(/[Tt]rue|[Ff]alse/)
-      data['reboot_override'] = matchdata[0]
+      if (matchdata)
+        data['reboot_override'] = matchdata[0]
+      else
+        data['reboot_override'] = ''
+      end
     else
       data['reboot_override'] = ''
     end
