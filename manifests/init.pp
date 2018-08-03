@@ -125,7 +125,7 @@ class os_patching (
     	owner   => 'root',
     	group   => 'root',
     	mode    => '0644',
-    	content => template('os_patching/blackout_windows.erb'),
+      content => template("${module_name}/blackout_windows.erb"),
     	require => File['/etc/os_patching'],
       notify  => Exec[$fact_upload],
   	}
