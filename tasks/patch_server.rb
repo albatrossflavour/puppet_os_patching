@@ -70,10 +70,9 @@ else
 end
 
 reboot_override = facts['os_patching']['reboot_override']
-reboot_override.chomp!
 if ( reboot_override == 'Invalid Entry' )
   err(105,"os_patching/reboot_override","Fact reboot_override invalid",starttime)
-elsif ( reboot_override =~ /true|false/ )
+else
   if ( reboot_override == true and reboot == false )
     log.error "Reboot override set to true but task said no.  Will reboot"
     reboot = true
