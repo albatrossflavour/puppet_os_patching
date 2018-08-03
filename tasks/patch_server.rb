@@ -54,6 +54,9 @@ def err(code,kind,message,starttime)
 end
 
 # Cache fact data to speed things up
+log.debug 'Running os_patching fact refresh'
+fact_out,stdout,stderr = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+err(status,"os_patching/fact_refresh",stderr,starttime) if status != 0
 log.debug 'Gathering facts'
 full_facts,stderr,status = Open3.capture3("#{facter} -p -j")
 err(status,"os_patching/facter",stderr,starttime) if status != 0
@@ -69,6 +72,7 @@ else
   reboot = false
 end
 
+# Is the reboot_override fact set?
 reboot_override = facts['os_patching']['reboot_override']
 if ( reboot_override == 'Invalid Entry' )
   err(105,"os_patching/reboot_override","Fact reboot_override invalid",starttime)
