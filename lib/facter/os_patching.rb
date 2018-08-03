@@ -119,11 +119,12 @@ Facter.add('os_patching', :type => :aggregate) do
       line = historyfile.last
       matchdata = line.split("|")
 			if (matchdata[1])
-      	data['last_run']['date'] = matchdata[0]
-      	data['last_run']['message'] = matchdata[1]
-      	data['last_run']['return_code'] = matchdata[2]
-      	data['last_run']['post_reboot'] = matchdata[3]
+        data['last_run']['date'] = matchdata[0].chomp
+        data['last_run']['message'] = matchdata[1].chomp
+        data['last_run']['return_code'] = matchdata[2].chomp
+        data['last_run']['post_reboot'] = matchdata[3].chomp
         data['last_run']['security_only'] = matchdata[4].chomp
+        data['last_run']['job_id'] = matchdata[5].chomp
 			end
       data
     end
