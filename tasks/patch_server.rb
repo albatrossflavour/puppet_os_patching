@@ -70,6 +70,7 @@ else
 end
 
 reboot_override = facts['os_patching']['reboot_override']
+reboot_override.chomp!
 if ( reboot_override == 'Invalid Entry' )
   err(105,"os_patching/reboot_override","Fact reboot_override invalid",starttime)
 elsif ( reboot_override =~ /true|false/ )
