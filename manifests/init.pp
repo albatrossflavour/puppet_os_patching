@@ -95,12 +95,18 @@ class os_patching (
 
 		$reboot_override_file = '/etc/os_patching/reboot_override'
 
+    case $reboot_override {
+      true:  { $reboot_boolean = 'true' }
+      false: { $reboot_boolean = 'false' }
+      default: { fail ('reboot_override must be a boolean')}
+    }
+
   	file { $reboot_override_file:
     	ensure  => file,
     	owner   => 'root',
     	group   => 'root',
     	mode    => '0644',
-    	content => $reboot_override,
+    	content => $reboot_boolean,
     	require => File['/etc/os_patching'],
   	}
 	} else {
