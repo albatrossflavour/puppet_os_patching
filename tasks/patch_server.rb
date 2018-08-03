@@ -69,6 +69,19 @@ else
   reboot = false
 end
 
+reboot_override = facts['os_patching']['reboot_override']
+if ( reboot_override == 'Invalid Entry' )
+  err(105,"os_patching/reboot_override","Fact reboot_override invalid",starttime)
+elsif ( reboot_override =~ /true|false/ )
+  if ( reboot_override == true and reboot == false )
+    log.error "Reboot override set to true but task said no.  Will reboot"
+    reboot = true
+  elsif ( reboot_override == false and reboot == true )
+    log.error "Reboot override set to false but task said yes.  Will not reboot"
+    reboot = false
+  end
+end
+
 log.debug "Reboot after patching set to #{reboot}"
 
 # Should we only apply security patches?
