@@ -40,7 +40,7 @@ def err(code,kind,message,starttime)
   json = { :_error => {
 	   :msg => "Task exited : #{exitcode}\n#{message}",
 	   :kind => kind,
-	   :details => { :exitcode => exitcode }
+	   :details => { :exitcode => exitcode },
      :start_time => starttime,
      :end_time => endtime
   }}
