@@ -78,12 +78,12 @@ class os_patching (
 		$patch_window_file = '/etc/os_patching/patch_window'
 
   	file { $patch_window_file:
-    	ensure   => file,
-    	owner    => 'root',
-    	group    => 'root',
-    	mode     => '0644',
-    	contents => $patch_window,
-    	require  => File['/etc/os_patching'],
+    	ensure  => file,
+    	owner   => 'root',
+    	group   => 'root',
+    	mode    => '0644',
+    	content => $patch_window,
+    	require => File['/etc/os_patching'],
   	}
 	} else {
 		file { $patch_window_file:
@@ -96,12 +96,12 @@ class os_patching (
 		$reboot_override_file = '/etc/os_patching/reboot_override'
 
   	file { $reboot_override_file:
-    	ensure   => file,
-    	owner    => 'root',
-    	group    => 'root',
-    	mode     => '0644',
-    	contents => $reboot_override,
-    	require  => File['/etc/os_patching'],
+    	ensure  => file,
+    	owner   => 'root',
+    	group   => 'root',
+    	mode    => '0644',
+    	content => $reboot_override,
+    	require => File['/etc/os_patching'],
   	}
 	} else {
 		file { $reboot_override_file:
