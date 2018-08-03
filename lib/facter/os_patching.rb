@@ -161,7 +161,7 @@ Facter.add('os_patching', :type => :aggregate) do
     if (rebootoverride)
       line = rebootoverride.last
       case line
-      when /^[Tr]rue$/
+      when /^[Tt]rue$/
         data['reboot_override'] = true
       when /^[Ff]alse$/
         data['reboot_override'] = false
