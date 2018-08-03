@@ -70,8 +70,8 @@ class os_patching (
   }
 
 
-  if ( $patch_window )
-		if ($patch_window !~ /[A-Za-z0-9-_]+/ ){
+  if ( $patch_window ) {
+		if ($patch_window !~ /[A-Za-z0-9\-_]+/ ){
     	fail ('The patch window can only contain alphanumerics, underscore and dash')
   	}
 
@@ -91,7 +91,7 @@ class os_patching (
 		}
 	}
 
-  if ( $reboot_override )
+  if ( $reboot_override ) {
 
 		$reboot_override_file = '/etc/os_patching/reboot_override'
 
