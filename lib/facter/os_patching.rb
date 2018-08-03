@@ -12,7 +12,7 @@ Facter.add('os_patching', :type => :aggregate) do
   chunk(:updates) do
     data = {}
     updatelist = {}
-    updatelist = Array.new
+    updatelist = []
     if (updates)
       updates.each_line do |line|
         next if line.empty?
@@ -33,7 +33,7 @@ Facter.add('os_patching', :type => :aggregate) do
   chunk(:secupdates) do
     data = {}
     secupdatelist = {}
-    secupdatelist = Array.new
+    secupdatelist = []
     if (secupdates)
       secupdates.each_line do |line|
         next if line.empty?
@@ -55,7 +55,7 @@ Facter.add('os_patching', :type => :aggregate) do
     arraydata = {}
     data['blocked'] = false
     data['blocked_reasons'] = {}
-    data['blocked_reasons'] = Array.new
+    data['blocked_reasons'] = []
     if (blackouts)
       blackouts.each_line do |line|
         matchdata = line.match(/^([\w ]*),([\d:T\-\\+]*),([\d:T\-\\+]*)$/)
@@ -92,7 +92,7 @@ Facter.add('os_patching', :type => :aggregate) do
   chunk(:pinned) do
     data = {}
     pinnedpkgs = {}
-    pinnedpkgs = Array.new
+    pinnedpkgs = []
     if (pinnedfile)
       pinnedfile.each_line do |line|
         matchdata = line.match(/^[0-9]:(.*)/)
@@ -119,14 +119,15 @@ Facter.add('os_patching', :type => :aggregate) do
       line = historyfile.last
       matchdata = line.split("|")
 			if (matchdata[1])
-      	data['last_run']['date'] = matchdata[0]
-      	data['last_run']['message'] = matchdata[1]
-      	data['last_run']['return_code'] = matchdata[2]
-      	data['last_run']['post_reboot'] = matchdata[3]
+        data['last_run']['date'] = matchdata[0].chomp
+        data['last_run']['message'] = matchdata[1].chomp
+        data['last_run']['return_code'] = matchdata[2].chomp
+        data['last_run']['post_reboot'] = matchdata[3].chomp
         data['last_run']['security_only'] = matchdata[4].chomp
+        data['last_run']['job_id'] = matchdata[5].chomp
 			end
+      data
     end
-    data
   end
 
   # Patch window
@@ -135,7 +136,7 @@ Facter.add('os_patching', :type => :aggregate) do
     patchwindow = File.open(patchwindowfile, "r").to_a
   end
 
-  chunk(:history) do
+  chunk(:patch_window) do
     data = {}
     window = {}
     if (patchwindow)
