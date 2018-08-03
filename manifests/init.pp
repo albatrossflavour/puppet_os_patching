@@ -72,12 +72,11 @@ class os_patching (
   }
 
 
+  $patch_window_file = '/etc/os_patching/patch_window'
   if ( $patch_window ) {
 		if ($patch_window !~ /[A-Za-z0-9\-_]+/ ){
     	fail ('The patch window can only contain alphanumerics, underscore and dash')
   	}
-
-		$patch_window_file = '/etc/os_patching/patch_window'
 
   	file { $patch_window_file:
     	ensure  => file,
@@ -95,10 +94,8 @@ class os_patching (
 		}
 	}
 
+	$reboot_override_file = '/etc/os_patching/reboot_override'
   if ( $reboot_override != undef ) {
-
-		$reboot_override_file = '/etc/os_patching/reboot_override'
-
     case $reboot_override {
       true:  { $reboot_boolean = 'true' }
       false: { $reboot_boolean = 'false' }
@@ -121,10 +118,8 @@ class os_patching (
 		}
   }
 
+  $blackout_window_file = '/etc/os_patching/blackout_windows'
   if ( $blackout_windows ) {
-
-		$blackout_window_file = '/etc/os_patching/blackout_windows'
-
   	file { $blackout_window_file:
     	ensure  => file,
     	owner   => 'root',
