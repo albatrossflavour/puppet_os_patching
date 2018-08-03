@@ -74,8 +74,8 @@ class os_patching (
 
   $patch_window_file = '/etc/os_patching/patch_window'
   if ( $patch_window ) {
-		if ($patch_window !~ /[A-Za-z0-9\-_]+/ ){
-    	fail ('The patch window can only contain alphanumerics, underscore and dash')
+		if ($patch_window !~ /[A-Za-z0-9\-_ ]+/ ){
+    	fail ('The patch window can only contain alphanumerics, space, underscore and dash')
   	}
 
   	file { $patch_window_file:
@@ -122,8 +122,8 @@ class os_patching (
   if ( $blackout_windows ) {
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
-      if ( $key !~ /^[A-Za-z0-9\-_]+$/ ){
-        fail ("Blackout description can only contain alphanumerics, dash and underscore")
+      if ( $key !~ /^[A-Za-z0-9\-_ ]+$/ ){
+        fail ("Blackout description can only contain alphanumerics, space, dash and underscore")
       }
       if ( $key['start'] !~ /^[\d:T\-\\+]*$/ ){
         fail ("Blackout start time must be in ISO 8601 format")
