@@ -55,7 +55,7 @@ end
 
 # Cache fact data to speed things up
 log.debug 'Running os_patching fact refresh'
-fact_out,stdout,stderr = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+fact_out,stderr,status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status,'os_patching/fact_refresh',stderr,starttime) if status != 0
 log.debug 'Gathering facts'
 full_facts,stderr,status = Open3.capture3(facter,'-p -j')
