@@ -129,7 +129,7 @@ end
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
-  yum_std_out,stderr,status = Open3.capture3("/bin/yum #{securityflag} upgrade -y")
+  yum_std_out,stderr,status = Open3.capture3('/bin/yum',securityflag,'upgrade','-y')
   err(status,'os_patching/yum',stderr,starttime) if status != 0
 
   log.debug 'Getting yum job ID'
@@ -174,5 +174,5 @@ fact_out,stdout,stderr = Open3.capture3('/usr/local/bin/os_patching_fact_generat
 
 if (reboot == true)
   log.info 'Rebooting'
-  reboot_out,stdout,stderr = Open3.capture3('shutdown -r +1')
+  reboot_out,stdout,stderr = Open3.capture3('/sbin/shutdown','-r','+1')
 end
