@@ -13,7 +13,7 @@ starttime = Time.now.iso8601
 def history(dts,message,code,reboot,security,job)
   historyfile = '/etc/os_patching/run_history'
   open(historyfile, 'a') { |f|
-      f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
+    f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
   }
 end
 
