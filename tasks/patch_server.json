@@ -1,6 +1,14 @@
 {
-  "input_method": "environment",
+  "input_method": "stdin",
   "parameters": {
+    "yum_params": {
+      "description": "Any additional parameters to include in the yum upgrade command (such as including/excluding repos)",
+      "type": "Optional[String]"
+    },
+    "dpkg_params": {
+      "description": "Any additional parameters to include in the dpkg command",
+      "type": "Optional[String]"
+    },
     "reboot": {
       "description": "Should the server reboot after patching has been applied?",
       "type": "Boolean"

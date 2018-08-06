@@ -53,7 +53,12 @@ def err(code,kind,message,starttime)
   exit(exitcode.to_i)
 end
 
+# Parse input
+
+params = JSON.parse(STDIN.read)
+
 # Cache fact data to speed things up
+log.info 'os_patching run started'
 log.debug 'Running os_patching fact refresh'
 fact_out,stderr,status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status,'os_patching/fact_refresh',stderr,starttime) if status != 0
@@ -65,11 +70,12 @@ facts = JSON.parse(full_facts)
 pinned_pkgs = facts['os_patching']['pinned_packages']
 
 # Should we do a reboot?
-# PT_reboot is set by puppet as part of the task
-if ( ENV['PT_reboot'] == 'true' )
+if ( params['reboot'] == 'true' )
   reboot = true
-else
+elsif
   reboot = false
+else
+  err('108','os_patching/params',"Invalid boolean to reboot parameter",starttime)
 end
 
 # Is the reboot_override fact set?
@@ -89,14 +95,28 @@ end
 log.debug "Reboot after patching set to #{reboot}"
 
 # Should we only apply security patches?
-# PT_security_only is set by puppet as part of the task
-if ( ENV['PT_security_only'] == 'true' )
+if ( params['security_only'] == 'true' )
   security_only = true
-else
+elsif
   security_only = false
+else
+  err('109','os_patching/params',"Invalid boolean to security_only parameter",starttime)
 end
 log.debug "Apply only security patches set to #{security_only}"
 
+# Have we had any yum parameter specified?
+if params['yum_params']
+  yum_params = params['yum_params']
+else
+  yum_params = ''
+end
+
+# Have we had any dpkg parameter specified?
+if params['dpkg_params']
+  dpkg_params = params['dpkg_params']
+else
+  dpkg_params = ''
+end
 
 # Is the patching blocker flag set?
 blocker = facts['os_patching']['blocked']
@@ -129,7 +149,7 @@ end
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
-  yum_std_out,stderr,status = Open3.capture3('/bin/yum',securityflag,'upgrade','-y')
+  yum_std_out,stderr,status = Open3.capture3('/bin/yum',securityflag,'upgrade','-y',yum_params)
   err(status,'os_patching/yum',stderr,starttime) if status != 0
 
   log.debug 'Getting yum job ID'
@@ -176,3 +196,4 @@ if (reboot == true)
   log.info 'Rebooting'
   reboot_out,stdout,stderr = Open3.capture3('/sbin/shutdown','-r','+1')
 end
+log.info 'os_patching run complete'
