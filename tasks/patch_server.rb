@@ -173,13 +173,13 @@ end
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
   log.error "starting timeout code : #{timeout}"
-  Open3.capture3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | o,e,s,w |
+  Open3.capture3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
     begin
       Timeout.timeout(timeout) do
         until o.eof? do
           log.error o
           log.error e
-          sleep(1)
+          sleep(.1)
         end
         log.error 'end 1'
       end
@@ -204,7 +204,7 @@ if (facts['os']['family'] == 'RedHat')
   err(status,'os_patching/yum',stderr,starttime) if status != 0
   pkg_array = updated_packages.split
 
-  output(yum_status.chomp,reboot,security_only,'Patching complete',pkg_array,yum_std_out,yum_id.chomp,pinned_pkgs,starttime)
+  output(yum_status.chomp,reboot,security_only,'Patching complete',pkg_array,o,yum_id.chomp,pinned_pkgs,starttime)
   log.debug 'Patching complete'
 elsif (facts['os']['family'] == 'Debian')
   if (security_only == true)
