@@ -180,7 +180,7 @@ if facts['os']['family'] == 'RedHat'
     begin
       pid = w.pid
       Timeout.timeout(timeout) do
-        until e.eof? do
+        until e.eof?
           sleep(1)
           log.debug "yum process #{pid} still running but within timeout threshold, sleeping"
         end
