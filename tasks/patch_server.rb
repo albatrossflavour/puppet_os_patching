@@ -167,13 +167,17 @@ end
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
+  log.error 'starting timeout code : #{timeout}'
   Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
     begin
       Timeout.timeout(timeout) do
         until o.eof? do
+          log.error 'sleeping'
           sleep(1)
         end
+        log.error 'end 1'
       end
+      log.error 'end 2'
     rescue Timeout::Error
       Process.kill("KILL",w.pid)
       err('999','os_patching/timeout',"yum timeout after #{timeout} seconds : #{e}",starttime)
