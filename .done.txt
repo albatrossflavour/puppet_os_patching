@@ -33,3 +33,5 @@ x 2018-08-07 Manage any automation jobs (cron etc) required for processes to wor
 x 2018-08-07 Is it just that a server must be rebooted every 3(?) months (so use uptime) or that it must be rebooted during patching for it to count? @Questions
 x 2018-08-07 What are the normal issues you encounter during patching? @Questions
 x 2018-08-07 Change freeze windows must have an end date +ChangeFreeze
+x 2018-08-07 2018-08-07 Allow task to take a parameter for command arguments
+x 2018-08-07 Job that kills the patch run on a client if it's approaching a specific time.

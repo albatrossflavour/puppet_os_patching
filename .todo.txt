@@ -18,5 +18,3 @@ Can I feed a path variable into the task without hacking it? +Tasks @Research
 Do you allow packages to be pinned/locked to specific versions? @Questions
 Should we check that the kernel version installed is the same as the one running? @Questions
 How many kernels should be installed? @Questions
-Job that kills the patch run on a client if it's approaching a specific time.
-2018-08-07 Allow task to take a parameter for command arguments
