@@ -223,8 +223,8 @@ elsif facts['os']['family'] == 'Debian'
   pkg_array = updated_packages.split
 
   log.debug 'Running apt update'
-  deb_front='DEBIAN_FRONTEND=noninteractive'
-  deb_opts='-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
+  deb_front = 'DEBIAN_FRONTEND=noninteractive'
+  deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
   apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
@@ -237,10 +237,11 @@ end
 
 log.debug 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
-err(status, 'os_patching/apt', stderr, starttime) if status != 0
+err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 if reboot == true
   log.info 'Rebooting'
-  reboot_out, stderr, status = Open3.capture3('/sbin/shutdown', '-r', '+1')
+  _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown', '-r', '+1')
+  err(status, 'os_patching/reboot', stderr, starttime) if status != 0
 end
 log.info 'os_patching run complete'
