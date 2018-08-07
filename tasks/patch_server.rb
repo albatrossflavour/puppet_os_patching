@@ -168,19 +168,24 @@ if (updatecount == 0)
   exit(0)
 end
 
+yum_output = ''
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
   log.error "Starting timeout code : #{timeout}"
   status = ''
-  stdout = ''
   stderr = ''
   Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
     begin
       Timeout.timeout(timeout) do
-        until e.eof? do
-          log.error 'sleeping'
-          sleep(1)
+        if select([o], nill, nill, 0.1) and e.eof?
+          log.error 'exited'
+          status = w.value
+          yum_output = o.read
+          stderr = e.read
+          break
+        else
+          log.error 'running'
         end
       end
     rescue Timeout::Error
@@ -189,7 +194,7 @@ if (facts['os']['family'] == 'RedHat')
       err(w.value,'os_patching/timeout',"yum timeout after #{timeout} seconds : #{error}",starttime)
     end
     status = w.value
-    output = o.read
+    yum_output = o.read
     stderr = e.read
   end
   err(status,'os_patching/yum',stderr,starttime) if status != 0
@@ -207,7 +212,7 @@ if (facts['os']['family'] == 'RedHat')
   err(status,'os_patching/yum',stderr,starttime) if status != 0
   pkg_array = updated_packages.split
 
-  output(yum_status.chomp,reboot,security_only,'Patching complete',pkg_array,o,yum_id.chomp,pinned_pkgs,starttime)
+  output(yum_status.chomp,reboot,security_only,'Patching complete',pkg_array,yum_output,yum_id.chomp,pinned_pkgs,starttime)
   log.debug 'Patching complete'
 elsif (facts['os']['family'] == 'Debian')
   if (security_only == true)
