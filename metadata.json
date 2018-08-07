@@ -8,7 +8,10 @@
   "project_page": "https://github.com/albatrossflavour/puppet_os_patching",
   "issues_url": "https://github.com/albatrossflavour/puppet_os_patching/issues",
   "dependencies": [
-    { "name":"puppetlabs/stdlib","version_requirement":">= 4.13.1 < 5.0.0" }
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 4.13.1 < 5.0.0"
+    }
   ],
   "operatingsystem_support": [
     {
@@ -61,7 +64,7 @@
       "version_requirement": ">= 5.3.2 < 6.0.0"
     }
   ],
-  "pdk-version": "1.4.1",
+  "pdk-version": "1.6.0",
   "template-url": "file:///opt/puppetlabs/pdk/share/cache/pdk-templates.git",
-  "template-ref": "1.4.1-0-g52adbbb"
+  "template-ref": "1.6.0-0-gf5564c0"
 }
