@@ -1,5 +1,14 @@
 # Changelog
 
+## Release 0.2.1
+
+- Major rewrite on most areas of the module
+- Patching task now written in ruby and has much better reporting and error handling
+- Facter is now ruby based but still uses cache data from a cron job
+- Blackout window functionality included
+- Documentation updates
+- SHOULD be backwards compatible
+
 ## Release 0.1.19
 
 - Bugfix on the debian task which caused incorrect reporting of patching status
