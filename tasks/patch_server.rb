@@ -70,6 +70,7 @@ facts = JSON.parse(full_facts)
 pinned_pkgs = facts['os_patching']['pinned_packages']
 
 # Should we do a reboot?
+reboot = ''
 if params['reboot']
   if ( params['reboot'] == 'true' )
     reboot = true
@@ -99,6 +100,7 @@ end
 log.debug "Reboot after patching set to #{reboot}"
 
 # Should we only apply security patches?
+security_only = ''
 if params['security_only']
   if ( params['security_only'] == 'true' )
     security_only = true
@@ -113,17 +115,15 @@ end
 log.debug "Apply only security patches set to #{security_only}"
 
 # Have we had any yum parameter specified?
+yum_params = []
 if params['yum_params']
-  yum_params = params['yum_params'].join(' ')
-else
-  yum_params = ''
+  yum_params = params['yum_params'].join
 end
 
 # Have we had any dpkg parameter specified?
+dpkg_params = []
 if params['dpkg_params']
-  dpkg_params = params['dpkg_params'].join(' ')
-else
-  dpkg_params = ''
+  dpkg_params = params['dpkg_params'].join
 end
 
 # Is the patching blocker flag set?
