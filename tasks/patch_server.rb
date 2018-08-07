@@ -162,7 +162,7 @@ else
 end
 
 # There are no updates available, exit cleanly
-if updatecount.zero
+if updatecount.zero?
   output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
   log.info 'No patches to apply, exiting'
   exit(0)
