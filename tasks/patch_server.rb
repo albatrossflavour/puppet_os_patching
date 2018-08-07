@@ -73,9 +73,9 @@ pinned_pkgs = facts['os_patching']['pinned_packages']
 
 # Should we do a reboot?
 if params['reboot']
-  if ( params['reboot'] == 'true' )
+  if params['reboot'] == 'true'
     reboot = true
-  elsif ( params['reboot'] == 'false' )
+  elsif params['reboot'] == 'false'
     reboot = false
   else
     err('108', 'os_patching/params', 'Invalid boolean to reboot parameter', starttime)
@@ -86,13 +86,13 @@ end
 
 # Is the reboot_override fact set?
 reboot_override = facts['os_patching']['reboot_override']
-if ( reboot_override == 'Invalid Entry' )
+if reboot_override == 'Invalid Entry'
   err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
 else
-  if ( reboot_override == true and reboot == false )
+  if reboot_override == true && reboot == false
     log.error 'Reboot override set to true but task said no.  Will reboot'
     reboot = true
-  elsif ( reboot_override == false and reboot == true )
+  elsif reboot_override == false && reboot == true
     log.error 'Reboot override set to false but task said yes.  Will not reboot'
     reboot = false
   end
@@ -103,12 +103,12 @@ log.debug "Reboot after patching set to #{reboot}"
 # Should we only apply security patches?
 security_only = ''
 if params['security_only']
-  if ( params['security_only'] == 'true' )
+  if params['security_only'] == 'true'
     security_only = true
-  elsif ( params['security_only'] == 'false' )
+  elsif params['security_only'] == 'false'
     security_only = false
   else
-    err('109', 'os_patching/params',"Invalid boolean to security_only parameter", starttime)
+    err('109', 'os_patching/params', 'Invalid boolean to security_only parameter', starttime)
   end
 else
   security_only = false
@@ -131,10 +131,10 @@ end
 
 # Set the timeout for the patch run
 if params['timeout']
-  if ( params['timeout'] > 0 )
+  if params['timeout'] > 0
     timeout = params['timeout']
   else
-    err('121', 'os_patching/timeout',"timeout set to #{timeout} seconds - invalid", starttime)
+    err('121', 'os_patching/timeout', "timeout set to #{timeout} seconds - invalid", starttime)
   end
 else
   timeout = 3600
@@ -142,18 +142,18 @@ end
 
 # Is the patching blocker flag set?
 blocker = facts['os_patching']['blocked']
-if (blocker.to_s.chomp == 'true')
+if blocker.to_s.chomp == 'true'
   # Patching is blocked, list the reasons and error
   # need to error as it SHOULDN'T ever happen if you
   # use the right workflow through tasks.
   log.error 'Patching blocked, not continuing'
   block_reason = facts['os_patching']['blocker_reasons']
-  err(100, 'os_patching/blocked',"Patching blocked #{block_reason}", starttime)
+  err(100, 'os_patching/blocked', "Patching blocked #{block_reason}", starttime)
 end
 
 # Should we look at security or all patches to determine if we need to patch?
 # (requires RedHat subscription or Debian based distro... for now)
-if (security_only == true)
+if security_only == true
   updatecount = facts['os_patching']['security_package_update_count']
   securityflag = '--security'
 else
@@ -162,7 +162,7 @@ else
 end
 
 # There are no updates available, exit cleanly
-if (updatecount == 0)
+if updatecount == 0
   output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
   log.info 'No patches to apply, exiting'
   exit(0)
@@ -170,7 +170,7 @@ end
 
 yum_output = ''
 # Run the patching
-if (facts['os']['family'] == 'RedHat')
+if facts['os']['family'] == 'RedHat'
   log.debug 'Running yum upgrade'
   log.error "Starting timeout code : #{timeout}"
   status = ''
@@ -180,7 +180,6 @@ if (facts['os']['family'] == 'RedHat')
     begin
       pid = w.pid
       Timeout.timeout(timeout) do
-        #until select([o], nil, nil, 0.1) and e.eof? do
         until e.eof? do
           sleep(1)
           log.debug "yum process #{pid} still running but within timeout threshold, sleeping"
@@ -189,7 +188,7 @@ if (facts['os']['family'] == 'RedHat')
     rescue Timeout::Error
       Process.kill("SIGTERM", pid)
       error = o.read
-      err(w.value, 'os_patching/timeout',"yum timeout after #{timeout} seconds : #{error}", starttime)
+      err(w.value, 'os_patching/timeout', "yum timeout after #{timeout} seconds : #{error}", starttime)
     end
     status = w.value
     yum_output = o.read
@@ -212,8 +211,8 @@ if (facts['os']['family'] == 'RedHat')
 
   output(yum_status.chomp, reboot, security_only, 'Patching complete', pkg_array, yum_output, yum_id.chomp, pinned_pkgs, starttime)
   log.debug 'Patching complete'
-elsif (facts['os']['family'] == 'Debian')
-  if (security_only == true)
+elsif facts['os']['family'] == 'Debian'
+  if security_only == true
     log.debug 'Debian upgrades, security only not currently supported'
     err(101, 'os_patching/security_only', 'Security only not supported on Debian at this point', starttime)
   end
@@ -237,7 +236,7 @@ end
 log.debug 'Running os_patching fact refresh'
 fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 
-if (reboot == true)
+if reboot == true
   log.info 'Rebooting'
   reboot_out, stderr, status = Open3.capture3('/sbin/shutdown', '-r', '+1')
 end
