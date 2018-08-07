@@ -114,15 +114,17 @@ end
 log.debug "Apply only security patches set to #{security_only}"
 
 # Have we had any yum parameter specified?
-yum_params = []
 if params['yum_params']
-  yum_params = params['yum_params'].split(' ')
+  yum_params = params['yum_params']
+else
+  yum_params = false
 end
 
 # Have we had any dpkg parameter specified?
-dpkg_params = []
 if params['dpkg_params']
-  dpkg_params = params['dpkg_params'].split(' ')
+  dpkg_params = params['dpkg_params']
+else
+  dpkg_params = false
 end
 
 # Is the patching blocker flag set?
@@ -156,7 +158,7 @@ end
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
-  yum_std_out,stderr,status = Open3.capture3('/bin/yum',securityflag,'upgrade','-y',yum_params)
+  yum_std_out,stderr,status = Open3.capture3("/bin/yum #{yum_params}",securityflag,'upgrade','-y')
   err(status,'os_patching/yum',stderr,starttime) if status != 0
 
   log.debug 'Getting yum job ID'
