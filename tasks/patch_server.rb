@@ -177,9 +177,11 @@ if (facts['os']['family'] == 'RedHat')
   stderr = ''
   Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
     begin
+      pid = w.pid
       Timeout.timeout(timeout) do
         until select([o], nil, nil, 0.1) and e.eof? do
-          log.error 'running'
+          sleep(5)
+          log.error "yum process #{pid} still running but within timeout threshold, sleeping"
         end
       end
     rescue Timeout::Error
