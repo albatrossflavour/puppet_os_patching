@@ -3,9 +3,7 @@
 
 This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat and Debian derivatives.
 
-## Table of contents
-
-<!--TOC-->
+Under the hood it uses the OS level tools to carry out the actual patching.
 
 ## Description
 
@@ -167,40 +165,73 @@ $ puppet task run os_patching::patch_server --query="inventory[certname] {facts.
 
 If there is nothing to be done, the task will report:
 
-```puppet
+```json
 {
-  "date" : "Mon May 28 12:23:33 AEST 2018",
-  "reboot" : "true",
-  "message" : "yum dry run shows no patching work to do",
-  "return-code" : "success",
-  "securityonly" : "false"
+  "pinned_packages" : [ ],
+  "security" : false,
+  "return" : "Success",
+  "start_time" : "2018-08-08T07:52:28+10:00",
+  "debug" : "",
+  "end_time" : "2018-08-08T07:52:46+10:00",
+  "reboot" : false,
+  "packages_updated" : "",
+  "job_id" : "",
+  "message" : "No patches to apply"
 }
 ```
 
-If patching was executed, the task will report:
+If patching was executed, the task will report similar to below:
 
-```puppet
+```json
 {
-  "date": "Mon May 28 12:29:23 AEST 2018",
-  "reboot": "true",
-  "message": "Patching complete",
-  "return-code": "Success",
-  "packagesupdated": [
-    "kernel-tools-3.10.0-862.2.3.el7.x86_64",
-    "kernel-tools-libs-3.10.0-862.2.3.el7.x86_64",
-    "postfix-2:2.10.1-6.el7.x86_64",
-    "procps-ng-3.3.10-17.el7.x86_64",
-    "python-perf-3.10.0-862.2.3.el7.x86_64"
-  ],
-  "securityonly": "false"
+  "pinned_packages" : [ ],
+  "security" : false,
+  "return" : "Success",
+  "start_time" : "2018-08-07T21:55:20+10:00",
+  "debug" : "TRIMMED DUE TO LENGTH FOR THIS EXAMPLE, WOULD NORMALLY CONTAIN FULL COMMAND OUTPUT",
+  "end_time" : "2018-08-07T21:57:11+10:00",
+  "reboot" : false,
+  "packages_updated" : [ "NetworkManager-1:1.10.2-14.el7_5.x86_64", "NetworkManager-libnm-1:1.10.2-14.el7_5.x86_64", "NetworkManager-team-1:1.10.2-14.el7_5.x86_64", "NetworkManager-tui-1:1.10.2-14.el7_5.x86_64", "binutils-2.27-27.base.el7.x86_64", "centos-release-7-5.1804.el7.centos.2.x86_64", "git-1.8.3.1-13.el7.x86_64", "gnupg2-2.0.22-4.el7.x86_64", "kernel-tools-3.10.0-862.3.3.el7.x86_64", "kernel-tools-libs-3.10.0-862.3.3.el7.x86_64", "perl-Git-1.8.3.1-13.el7.noarch", "python-2.7.5-68.el7.x86_64", "python-libs-2.7.5-68.el7.x86_64", "python-perf-3.10.0-862.3.3.el7.centos.plus.x86_64", "selinux-policy-3.13.1-192.el7_5.3.noarch", "selinux-policy-targeted-3.13.1-192.el7_5.3.noarch", "sudo-1.8.19p2-13.el7.x86_64", "yum-plugin-fastestmirror-1.1.31-45.el7.noarch", "yum-utils-1.1.31-45.el7.noarch" ],
+  "job_id" : "60",
+  "message" : "Patching complete"
 }
 ```
 
+If patching was blocked, the task will report similar to below:
+
+```json
+Error: Task exited : 100
+Patching blocked
+```
 A summary of the patch run is also written to `/etc/os_patching/run_history`, the last line of which is used by the `os_patching.last_run` fact.
+
+```
+2018-08-07T14:47:24+10:00|No patches to apply|Success|false|false|
+2018-08-07T14:56:56+10:00|Patching complete|Success|false|false|121
+2018-08-07T15:04:42+10:00|yum timeout after 2 seconds : Loaded plugins: versionlock|1|||
+2018-08-07T15:05:51+10:00|yum timeout after 3 seconds : Loaded plugins: versionlock|1|||
+2018-08-07T15:10:16+10:00|Patching complete|Success|false|false|127
+2018-08-07T21:31:47+10:00|Patching blocked |100|||
+2018-08-08T07:53:59+10:00|Patching blocked |100|||
+```
+
+### `/etc/os_patching` directory
+
+This directory contains the various control files needed for the fact and task to work correctly.  They are managed by the manifest.
+
+* `/etc/os_patching/blackout_windows` - contains name, start and end time for all blackout windows
+* `/etc/os_patching/package_updates` - a list of all package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
+* `/etc/os_patching/security_package_updates` - a list of all security_package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
+* `/etc/os_patching/run_history` - a summary of each run of the `os_patching::patch_server` task, populated by the task
+* `/etc/os_patching/reboot_override` - if present, overrides the `reboot=` parameter to the task
+* `/etc/os_patching/patch_window` - if present, sets the value for the fact `os_patching.patch_window`
+
 
 ## Limitations
 
 This module is for PE2018+ with agents capable of running tasks.  It is currently limited to the Red Hat and Debian operating system.
+
+Debian nodes currently do not allow `security_only` patch tasks to be set to `true`, a fix for this is being worked on.
 
 ## Development
 

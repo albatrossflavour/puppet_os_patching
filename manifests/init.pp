@@ -7,7 +7,8 @@
 # @param [Boolean] install_delta_rpm Should the deltarpm package be installed on RedHat family nodes
 # @param [Boolean] reboot_override Controls on a node level if a reboot should/should not be done after patching.
 #		This overrides the setting in the task
-# @param [Hash] blackout_windows A hash containing the patch blackout windows, which prevent patching
+# @param [Hash] blackout_windows A hash containing the patch blackout windows, which prevent patching.
+#   The dates are in full ISO8601 format.
 # @param [String] patch_window A freeform text entry used to allocate a node to a specific patch window (Optional)
 # @param [String] patch_cron_hour The hour(s) for the cron job to run (defaults to absent, which means '*' in cron)
 # @param [String] patch_cron_month The month(s) for the cron job to run (defaults to absent, which means '*' in cron)
