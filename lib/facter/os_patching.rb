@@ -1,4 +1,4 @@
-Facter.add('os_patching', type: aggregate) do
+Facter.add('os_patching', :type => :aggregate) do
   confine :kernel => 'Linux'
 
   require 'time'
