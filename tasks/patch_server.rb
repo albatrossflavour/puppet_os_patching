@@ -130,10 +130,14 @@ else
 end
 
 # Set the timeout for the patch run
-if ( params['timeout'] =~ /^[0-9]+$/ )
-  timeout = params['timeout']
+if params['timeout']
+  if ( params['timeout'] =~ /^\d$/ )
+    timeout = params['timeout']
+  else
+    timeout = 3600
+  end
 else
-  timeout = 3600
+  timeout = 7200
 end
 
 # Is the patching blocker flag set?
