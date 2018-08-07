@@ -179,7 +179,7 @@ if (facts['os']['family'] == 'RedHat')
         until o.eof? do
           log.error o
           log.error e
-          sleep(.1)
+          sleep(0.1)
         end
         log.error 'end 1'
       end
