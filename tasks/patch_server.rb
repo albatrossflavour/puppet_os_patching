@@ -180,10 +180,10 @@ if facts['os']['family'] == 'RedHat'
     begin
       pid = w.pid
       Timeout.timeout(timeout) do
-        until e.eof? {
+        until e.eof? do
           sleep(1)
           log.debug "yum process #{pid} still running but within timeout threshold, sleeping"
-        }
+        end
       end
     rescue Timeout::Error
       Process.kill('SIGTERM', pid)
