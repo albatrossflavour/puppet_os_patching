@@ -1,56 +1,22 @@
-Allow server to be exempted from patching +Exemptions
-Facts to view patch day +PatchDay +Reporting
-Facts to view exemption +Exemptions +Reporting
 Ability to use redis to set patch dates +PatchDay
 Use redis to set change freeze windows +ChangeFreeze
-Change freeze windows must have an end date +ChangeFreeze
 Change freeze windows must have a unique ID +ChangeFreeze
-Change freeze windows must have a free text field +ChangeFreeze
 Ability to query all change freezes set +ChangeFreeze +Reporting
-Ability to remove a change freeze +ChangeFreeze
-Ability to set the desired patch day for a server +PatchDay
-Patching task must check that it's not within a change freeze +ChangeFreeze
-Patching task must check that the server is not excempted +Exemptions
-Patching task must only run if it's the patch day for that server (??) +PatchDay
-x Manually trigger a patching task (contridicts above?) +Orchestration @Questions
-Manage any automation jobs (cron etc) required for processes to work +Orchestration
-x Why should it only be patchable on a specific day?  What about overrides? +Exemptions +PatchDay +Orchestration @Questions
-x Will servers be managed in batches?  Do we need to be able to assign to them if so? @Questions
 How will the patch run output be consumed? +Reporting @Questions
-x Are patch run dates important? +Reporting @Questions
 How do you want to see the patch dates? +PatchDay +Reporting @Questions
 How do you want to see the change freeze dates? +ChangeFreeze +Reporting @Questions
 How do you want to see the patch exemptions? +Exemptions +Reporting @Questions
-How often are change windows changed? @Questions
-How often are freezes changed? @Questions
-Split fact generation into a template with specifics for each OS covered +Improvements +Facter
-Allow a parameter for where to put the facter generation script +Improvements +Facter
 What problems are you trying to solve with the automation? @Questions
-What are the normal issues you encounter during patching? @Questions
 Who are our stakeholders? @Questions
-x How do you do patch releases? @Questions
 Take me through your ideal vision for how the patching will work if everything goes well @Questions
-What change control requirements do we need to take into account from a technical perspective? @Questions
-x Will the patch runs "just start" or will they always be manually initiated? @Questions
-How will success/failure of patch runs be tracked? @Questions
 Do we need to ensure the state of the yum config on the servers prior to patching? @Questions
 Should we ensure that the last puppet run was green before continuing? @Questions
 Should we ensure that the last puppet run was within X hours before starting patching? @Questions
 Should we do a puppet run prior to kicking off the patching to ensure state? @Questions
-x How many simulatious patch runs will you be running? @Questions
 What environment(s) do we have available to test in? @Questions
-x Which specific OS versions and releases are covered by the SOW? @Questions
 Can I feed a path variable into the task without hacking it? +Tasks @Research
-x Do you track minor or major release versions? @Questions
-Do you need to keep any kind of history about the patching? @Questions
 Do you allow packages to be pinned/locked to specific versions? @Questions
 Should we check that the kernel version installed is the same as the one running? @Questions
 How many kernels should be installed? @Questions
-x What RBAC do you need over manual patch runs? @Questions +RBAC
-x Who will be moving servers between patching windows? @Questions +RBAC
-Who will be able to set patch blocking flags? @Questions +RBAC
-Default repo include/exclude list. +Hiera
-Should each window be limited to servers of a specific type? @Questions
-Is it just that a server must be rebooted every 3(?) months (so use uptime) or that it must be rebooted during patching for it to count? @Questions
 Job that kills the patch run on a client if it's approaching a specific time.
-How do you track servers without a patching window defined? @Questions
+2018-08-07 Allow task to take a parameter for command arguments
