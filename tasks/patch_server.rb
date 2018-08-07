@@ -167,18 +167,19 @@ end
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
-  yum_std_out,stderr,status,w = Open3.capture3("/bin/yum #{yum_params} #{securityflag} upgrade -y")
-  begin
-    Timeout.timeout(timeout) do
-      until yum_std_out.eof? do
-        sleep(1)
+  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
+    begin
+      Timeout.timeout(timeout) do
+        until o.eof? do
+          sleep(1)
+        end
       end
+    rescue Timeout::Error
+      Process.kill("KILL",w.pid)
+      err('999','os_patching/timeout',"yum timeout after #{timeout} seconds : #{e}",starttime)
     end
-  rescue Timeout::Error
-    Process.kill("KILL",w.pid)
-    err('999','os_patching/timeout',"yum timeout after #{timeout} seconds : #{stderr}",starttime)
   end
-  err(status,'os_patching/yum',stderr,starttime) if status != 0
+  e(status,'os_patching/yum',stderr,starttime) if status != 0
 
   log.debug 'Getting yum job ID'
   yum_id,stderr,status = Open3.capture3("yum history | grep -E \"^[[:space:]]\" | awk '{print $1}' | head -1")
