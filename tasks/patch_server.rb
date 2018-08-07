@@ -70,11 +70,10 @@ facts = JSON.parse(full_facts)
 pinned_pkgs = facts['os_patching']['pinned_packages']
 
 # Should we do a reboot?
-reboot = ''
 if params['reboot']
   if ( params['reboot'] == 'true' )
     reboot = true
-  elsif
+  elsif ( params['reboot'] == 'false' )
     reboot = false
   else
     err('108','os_patching/params',"Invalid boolean to reboot parameter",starttime)
@@ -104,7 +103,7 @@ security_only = ''
 if params['security_only']
   if ( params['security_only'] == 'true' )
     security_only = true
-  elsif
+  elsif ( params['security_only'] == 'false' )
     security_only = false
   else
     err('109','os_patching/params',"Invalid boolean to security_only parameter",starttime)
@@ -117,13 +116,13 @@ log.debug "Apply only security patches set to #{security_only}"
 # Have we had any yum parameter specified?
 yum_params = []
 if params['yum_params']
-  yum_params = params['yum_params'].join
+  yum_params = params['yum_params'].split(' ')
 end
 
 # Have we had any dpkg parameter specified?
 dpkg_params = []
 if params['dpkg_params']
-  dpkg_params = params['dpkg_params'].join
+  dpkg_params = params['dpkg_params'].split(' ')
 end
 
 # Is the patching blocker flag set?
