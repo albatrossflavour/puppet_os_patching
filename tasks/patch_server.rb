@@ -130,7 +130,7 @@ else
 end
 
 # Set the timeout for the patch run
-if ( params['timeout'] and params['timeout'] =~ /^[0-9]+$/ )
+if ( params['timeout'] =~ /^[0-9]+$/ )
   timeout = params['timeout']
 else
   timeout = 3600
