@@ -139,7 +139,7 @@ Facter.add('os_patching', :type => :aggregate) do
                                 else
                                   ''
                                 end
-      end
+    end
     data
   end
 end
