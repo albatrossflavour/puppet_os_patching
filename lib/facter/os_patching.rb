@@ -152,15 +152,11 @@ Facter.add('os_patching', :type => :aggregate) do
 
   chunk(:reboot_override) do
     data = {}
-    if rebootoverride
-      case rebootoverride.last
-      when /^[Tt]rue$/
-        data['reboot_override'] = true
-      when /^[Ff]alse$/
-        data['reboot_override'] = false
-      else
-        data['reboot_override'] = 'invalid entry'
-      end
+    case rebootoverride.last
+    when /^[Tt]rue$/
+      data['reboot_override'] = true
+    when /^[Ff]alse$/
+      data['reboot_override'] = false
     else
       data['reboot_override'] = ''
     end
