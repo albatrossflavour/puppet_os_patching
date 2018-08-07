@@ -131,14 +131,13 @@ end
 
 # Set the timeout for the patch run
 if params['timeout']
-  if ( params['timeout'] =~ /^\d$/ )
+  if ( params['timeout'] > 0 )
     timeout = params['timeout']
   else
-    timeout = params['timeout']
-    #timeout = 3600
+    timeout = 3600
   end
 else
-  timeout = 7200
+  timeout = 3600
 end
 
 # Is the patching blocker flag set?
