@@ -1,5 +1,5 @@
-Facter.add('os_patching', :type => :aggregate) do
-  #confine :kernel => 'Linux'
+Facter.add('os_patching', type: aggregate) do
+  confine :kernel => 'Linux'
 
   require 'time'
   now = Time.now.iso8601
@@ -60,9 +60,9 @@ Facter.add('os_patching', :type => :aggregate) do
       blackouts.each_line do |line|
         matchdata = line.match(/^([\w ]*),([\d:T\-\\+]*),([\d:T\-\\+]*)$/)
         if matchdata
-          if !arraydata[matchdata[1]]
+          unless arraydata[matchdata[1]]
             arraydata[matchdata[1]] = {}
-            if (matchdata[2] > matchdata[3])
+            if matchdata[2] > matchdata[3]
               arraydata[matchdata[1]]['start'] = 'Start date after end date'
               arraydata[matchdata[1]]['end'] = 'Start date after end date'
             else
@@ -71,7 +71,7 @@ Facter.add('os_patching', :type => :aggregate) do
             end
           end
 
-          if (matchdata[2] .. matchdata[3]).cover?(now)
+          if matchdata[2]..matchdata[3]).cover?(now)
             data['blocked'] = true
             data['blocked_reasons'].push matchdata[1]
           end
@@ -82,7 +82,6 @@ Facter.add('os_patching', :type => :aggregate) do
     data['blackouts'] = arraydata
     data
   end
-
 
   # Are there any pinned packages in yum?
   pinnedpackagefile = '/etc/yum/pluginconf.d/versionlock.list'
@@ -113,19 +112,18 @@ Facter.add('os_patching', :type => :aggregate) do
 
   chunk(:history) do
     data = {}
-    history = {}
     if historyfile
       data['last_run'] = {}
       line = historyfile.last.chomp
       matchdata = line.split('|')
-			if matchdata[1]
+      if matchdata[1]
         data['last_run']['date'] = matchdata[0]
         data['last_run']['message'] = matchdata[1]
         data['last_run']['return_code'] = matchdata[2]
         data['last_run']['post_reboot'] = matchdata[3]
         data['last_run']['security_only'] = matchdata[4]
         data['last_run']['job_id'] = matchdata[5]
-			end
+      end
       data
     end
   end
@@ -138,13 +136,12 @@ Facter.add('os_patching', :type => :aggregate) do
 
   chunk(:patch_window) do
     data = {}
-    window = {}
     if patchwindow
       line = patchwindow.last
       matchdata = line.match(/^(.*)$/)
-			if matchdata[0]
+      if matchdata[0]
         data['patch_window'] = matchdata[0]
-			end
+      end
     end
     data
   end
@@ -159,8 +156,7 @@ Facter.add('os_patching', :type => :aggregate) do
     data = {}
     window = {}
     if rebootoverride
-      line = rebootoverride.last
-      case line
+      case rebootoverride.last
       when /^[Tt]rue$/
         data['reboot_override'] = true
       when /^[Ff]alse$/

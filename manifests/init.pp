@@ -74,48 +74,50 @@ class os_patching (
 
   $patch_window_file = '/etc/os_patching/patch_window'
   if ( $patch_window ) {
-		if ($patch_window !~ /[A-Za-z0-9\-_ ]+/ ){
-    	fail ('The patch window can only contain alphanumerics, space, underscore and dash')
-  	}
+    if ($patch_window !~ /[A-Za-z0-9\-_ ]+/ ){
+      fail ('The patch window can only contain alphanumerics, space, underscore and dash')
+    }
 
-  	file { $patch_window_file:
-    	ensure  => file,
-    	owner   => 'root',
-    	group   => 'root',
-    	mode    => '0644',
-    	content => $patch_window,
-    	require => File['/etc/os_patching'],
+    file { $patch_window_file:
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => $patch_window,
+      require => File['/etc/os_patching'],
       notify  => Exec[$fact_upload],
-  	}
-	} else {
-		file { $patch_window_file:
-			ensure => absent,
+    }
+  } else {
+    file { $patch_window_file:
+      ensure => absent,
       notify => Exec[$fact_upload],
-		}
-	}
+    }
+  }
 
-	$reboot_override_file = '/etc/os_patching/reboot_override'
+  $reboot_override_file = '/etc/os_patching/reboot_override'
   if ( $reboot_override != undef ) {
     case $reboot_override {
+      # lint:ignore:no_quoted_booleans
       true:  { $reboot_boolean = 'true' }
       false: { $reboot_boolean = 'false' }
       default: { fail ('reboot_override must be a boolean')}
+      # lint:endignore
     }
 
-  	file { $reboot_override_file:
-    	ensure  => file,
-    	owner   => 'root',
-    	group   => 'root',
-    	mode    => '0644',
-    	content => $reboot_boolean,
-    	require => File['/etc/os_patching'],
+    file { $reboot_override_file:
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => $reboot_boolean,
+      require => File['/etc/os_patching'],
       notify  => Exec[$fact_upload],
-  	}
-	} else {
-		file { $reboot_override_file:
-			ensure => absent,
+    }
+  } else {
+    file { $reboot_override_file:
+      ensure => absent,
       notify => Exec[$fact_upload],
-		}
+    }
   }
 
   $blackout_window_file = '/etc/os_patching/blackout_windows'
@@ -123,33 +125,33 @@ class os_patching (
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
       if ( $key !~ /^[A-Za-z0-9\-_ ]+$/ ){
-        fail ("Blackout description can only contain alphanumerics, space, dash and underscore")
+        fail ('Blackout description can only contain alphanumerics, space, dash and underscore')
       }
       if ( $value['start'] !~ /^[\d:T\-\\+]*$/ ){
-        fail ("Blackout start time must be in ISO 8601 format")
+        fail ('Blackout start time must be in ISO 8601 format')
       }
       if ( $value['end'] !~ /^[\d:T\-\\+]*$/ ){
-        fail ("Blackout end time must be in ISO 8601 format")
+        fail ('Blackout end time must be in ISO 8601 format')
       }
       if ( $value['start'] > $value['end'] ){
-        fail ("Blackout end time must after the start time")
+        fail ('Blackout end time must after the start time')
       }
     }
-  	file { $blackout_window_file:
-    	ensure  => file,
-    	owner   => 'root',
-    	group   => 'root',
-    	mode    => '0644',
+    file { $blackout_window_file:
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
       content => template("${module_name}/blackout_windows.erb"),
-    	require => File['/etc/os_patching'],
+      require => File['/etc/os_patching'],
       notify  => Exec[$fact_upload],
-  	}
-	} else {
-		file { $blackout_window_file:
-			ensure => absent,
+    }
+  } else {
+    file { $blackout_window_file:
+      ensure => absent,
       notify => Exec[$fact_upload],
-		}
-	}
+    }
+  }
 
   exec { $fact_upload:
     refreshonly => true,
