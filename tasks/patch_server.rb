@@ -134,7 +134,7 @@ if params['timeout']
   if ( params['timeout'] > 0 )
     timeout = params['timeout']
   else
-    timeout = 3600
+    err('121','os_patching/timeout',"timeout set to #{timeout} seconds - invalid",starttime)
   end
 else
   timeout = 3600
