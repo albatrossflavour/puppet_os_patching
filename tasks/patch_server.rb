@@ -13,7 +13,6 @@ starttime = Time.now.iso8601
 def history(dts,message,code,reboot,security,job)
   historyfile = '/etc/os_patching/run_history'
   open(historyfile, 'a') { |f|
-    
     f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
   }
 end
@@ -48,7 +47,7 @@ def err(code,kind,message,starttime)
   }}
 
   puts JSON.pretty_generate(json)
-  shortmsg = message.first.chomp
+  shortmsg = message.split.first.chomp
   history(starttime,shortmsg,exitcode,'','','')
   log = Syslog::Logger.new 'os_patching'
   log.error "ERROR : #{kind} : #{exitcode} : #{message}"
