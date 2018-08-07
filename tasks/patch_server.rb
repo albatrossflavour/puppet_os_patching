@@ -1,4 +1,4 @@
-#!/opt/puppetlabs/puppet/bin/ruby
+#.!/opt/puppetlabs/puppet/bin/ruby
 
 require 'open3'
 require 'json'
@@ -180,7 +180,8 @@ if (facts['os']['family'] == 'RedHat')
     begin
       pid = w.pid
       Timeout.timeout(timeout) do
-        until select([o], nil, nil, 0.1) and e.eof? do
+        #until select([o], nil, nil, 0.1) and e.eof? do
+        until e.eof? do
           sleep(1)
           log.debug "yum process #{pid} still running but within timeout threshold, sleeping"
         end
