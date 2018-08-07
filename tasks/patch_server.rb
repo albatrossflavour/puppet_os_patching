@@ -167,7 +167,7 @@ end
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
-  log.error 'starting timeout code : #{timeout}'
+  log.error "starting timeout code : #{timeout}"
   Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
     begin
       Timeout.timeout(timeout) do
