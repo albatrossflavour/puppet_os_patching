@@ -5,17 +5,7 @@ This module contains a set of tasks and custom facts to allow the automation of 
 
 ## Table of contents
 
-- [os_patching](#ospatching)
-  - [Table of contents](#table-of-contents)
-  - [Description](#description)
-  - [Setup](#setup)
-    - [What os_patching affects](#what-ospatching-affects)
-    - [Beginning with os_patching](#beginning-with-ospatching)
-  - [Usage](#usage)
-  - [Reference](#reference)
-  - [Limitations](#limitations)
-  - [Development](#development)
-  - [Contributors](#contributors)
+<!--TOC-->
 
 ## Description
 
@@ -25,11 +15,13 @@ If you're looking for a simple way to report on your OS patch levels, this modul
 
 It also uses security metadata (where available) to determine if there are security updates.  On Redhat, this is provided from Redhat as additional metadata in YUM.  On Debian, checks are done for which repo the updates are coming from.  There is a parameter to the task to only apply security updates.
 
+Blackout windows enable the support for time based change freezes where no patching can happen.  There can be multiple windows defined and each which will automatically expire after reaching the defined end date.
+
 ## Setup
 
 ### What os_patching affects
 
-The module, when added to a node, installs a script to generate the patching facts and a cron job to run the script.
+The module provides an additional fact (`os_patching`) and has a task to allow the patching of a server.  When the `os_patching` manifest is added to a node it installs a script and cron job to generate cache data used by the `os_patching` fact.
 
 ### Beginning with os_patching
 
@@ -37,26 +29,61 @@ Install the module using the Puppetfile, include it on your nodes and then use t
 
 ## Usage
 
+### Manifest
 Include the module:
 ```puppet
 include os_patching
 ```
 
-Run a basic patching task from the command line:
-```bash
-# puppet task show os_patching::patch_server
+More advanced usage:
+```puppet
+class { 'os_patching':
+  patch_window     => 'Week3',
+  reboot_override  => true,
+  blackout_windows => { 'End of year change freeze':
+    {
+      'start': '2018-12-15T00:00:00+1000',
+      'end': '2019-01-15T23:59:59+1000',
+    }
+  },
+}
+```
 
-os_patching::patch_server - Carry out OS patching on the server, optionally including a reboot
+In that example, the node is assigned to a "patch window", will be forced to reboot regardless of the setting specified in the task and has a blackout window defined for the period of 2018-12-15 - 2019-01-15, during which time no patching through the task can be carried out.
+
+### Task
+Run a basic patching task from the command line:
+```
+os_patching::patch_server - Carry out OS patching on the server, optionally including a reboot and/or only applying security related updates
 
 USAGE:
-$ puppet task run os_patching::patch_server reboot=<value> security_only=<value> <[--nodes, -n <node-names>] | [--query, -q <'query'>]>
+$ puppet task run os_patching::patch_server [dpkg_params=<value>] [reboot=<value>] [security_only=<value>] [timeout=<value>] [yum_params=<value>] <[--nodes, -n <node-names>] | [--query, -q <'query'>]>
 
 PARAMETERS:
-- reboot : Boolean
-    Should the server reboot after patching has been applied?
-- security_only : Boolean
-    Limit patches to those tagged as security related?
+- dpkg_params : Optional[String]
+    Any additional parameters to include in the dpkg command
+- reboot : Optional[Boolean]
+    Should the server reboot after patching has been applied? (Defaults to false)
+- security_only : Optional[Boolean]
+    Limit patches to those tagged as security related? (Defaults to false)
+- timeout : Optional[Integer]
+    How many seconds should we wait until timing out the patch run? (Defaults to 3600 seconds)
+- yum_params : Optional[String]
+    Any additional parameters to include in the yum upgrade command (such as including/excluding repos)
 ```
+
+Example:
+```bash
+$ puppet task run os_patching::patch_server reboot=true security_only=false --query="inventory[certname] { facts.os_patching.patch_window = 'Week3' and facts.os_patching.blocked = false and facts.os_patching.package_update_count > 0}"
+```
+
+This will run a patching task against all nodes which have facts matching:
+
+* `os_patching.patch_window` of 'Week3'
+* `os_patching.blocked` equals `false`
+* `os_patching.package_update_count` greater than 0
+
+The task will apply all patches (`security_only=false`) and will reboot the node after patching (`reboot=true`).
 
 ## Reference
 
@@ -65,16 +92,32 @@ PARAMETERS:
 Most of the reporting is driven off the custom fact `os_patching_data`, for example:
 
 ```yaml
-# facter os_patching
+# facter -p os_patching
 {
-  package_update_count => 0
+  package_update_count => 0,
+  package_updates => [],
+  security_package_updates => [],
+  security_package_update_count => 0,
+  blocked => false,
+  blocked_reasons => [],
+  blackouts => {},
+  patch_window = 'Week3',
+  pinned_packages => [],
+  last_run => {
+    date => "2018-08-07T21:55:20+10:00",
+    message => "Patching complete",
+    return_code => "Success",
+    post_reboot => "false",
+    security_only => "false",
+    job_id => "60"
+  }
 }
 ```
 
 This shows there are no updates which can be applied to this server.  When there are updates to add, you will see similar to this:
 
 ```yaml
-# facter os_patching
+# facter -p os_patching
 {
   package_update_count => 6,
   package_updates => [
@@ -85,10 +128,40 @@ This shows there are no updates which can be applied to this server.  When there
     "procps-ng.x86_64",
     "python-perf.x86_64"
   ]
+  security_package_updates => [],
+  security_package_update_count => 0,
+  blocked => false,
+  blocked_reasons => [],
+  blackouts => {
+    Test change freeze 2 => {
+      start => "2018-08-01T09:17:10+1000",
+      end => "2018-08-01T11:15:50+1000"
+    }
+  },
+  pinned_packages => [],
+  patch_window = 'Week3',
+  last_run => {
+    date => "2018-08-07T21:55:20+10:00",
+    message => "Patching complete",
+    return_code => "Success",
+    post_reboot => "false",
+    security_only => "false",
+    job_id => "60"
+  }
 }
 ```
 
-Where it shows 6 packages with available updates, along with an array of the package names.
+Where it shows 6 packages with available updates, along with an array of the package names.  None of the packges are tagged as security related (requires Debian or a subscription to RHEL).  There are no blockers to patching and the blackout window defined is not in effect.
+
+The pinned packages entry lists any packages which have been specifically excluded from being patched, from [version lock](https://access.redhat.com/solutions/98873) on Red Hat or by [pinning](https://wiki.debian.org/AptPreferences) in Debian.
+
+Last run shows a summary of the information from the last `os_patching::patch_server` task.
+
+The fact `os_patching.patch_window` can be used to assign nodes to an arbitrary group.  The fact can be used as part of the query fed into the task to determine which nodes to patch:
+
+```bash
+$ puppet task run os_patching::patch_server --query="inventory[certname] {facts.os_patching.patch_window = 'Week3'}"
+```
 
 ### Task output
 
@@ -97,7 +170,6 @@ If there is nothing to be done, the task will report:
 ```puppet
 {
   "date" : "Mon May 28 12:23:33 AEST 2018",
-  "fqdn" : "example.lab.vm",
   "reboot" : "true",
   "message" : "yum dry run shows no patching work to do",
   "return-code" : "success",
@@ -110,7 +182,6 @@ If patching was executed, the task will report:
 ```puppet
 {
   "date": "Mon May 28 12:29:23 AEST 2018",
-  "fqdn": "example.lab.vm",
   "reboot": "true",
   "message": "Patching complete",
   "return-code": "Success",
@@ -125,6 +196,7 @@ If patching was executed, the task will report:
 }
 ```
 
+A summary of the patch run is also written to `/etc/os_patching/run_history`, the last line of which is used by the `os_patching.last_run` fact.
 
 ## Limitations
 

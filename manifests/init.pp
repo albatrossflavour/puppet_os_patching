@@ -1,6 +1,55 @@
-# @summary This manifest sets up the script and cron job to write
-#   custom structured facts that contain patching data.
-# @example include os_patching
+# @summary This manifest sets up a script and cron job to populate
+#   the `os_patching` fact.
+#
+# @param [String] patch_data_owner User name for the owner of the patch data
+# @param [String] patch_data_group Group name for the owner of the patch data
+# @param [String] patch_cron_user User name to run the cron job as (defaults to patch_data_owner)
+# @param [Boolean] install_delta_rpm Should the deltarpm package be installed on RedHat family nodes
+# @param [Boolean] reboot_override Controls on a node level if a reboot should/should not be done after patching.
+#		This overrides the setting in the task
+# @param [Hash] blackout_windows A hash containing the patch blackout windows, which prevent patching
+# @param [String] patch_window A freeform text entry used to allocate a node to a specific patch window (Optional)
+# @param [String] patch_cron_hour The hour(s) for the cron job to run (defaults to absent, which means '*' in cron)
+# @param [String] patch_cron_month The month(s) for the cron job to run (defaults to absent, which means '*' in cron)
+# @param [String] patch_cron_monthday The monthday(s) for the cron job to run (defaults to absent, which means '*' in cron)
+# @param [String] patch_cron_weekday The weekday(s) for the cron job to run (defaults to absent, which means '*' in cron)
+# @param [String] patch_cron_min The min(s) for the cron job to run (defaults to a random number between 0 and 59)
+#
+# @example assign node to 'Week3' patching window, force a reboot and create a blackout window for the end of the year
+#   class { 'os_patching':
+#     patch_window     => 'Week3',
+#     reboot_override  => true,
+#     blackout_windows => { 'End of year change freeze':
+#       {
+#         'start': '2018-12-15T00:00:00+1000',
+#         'end': '2019-01-15T23:59:59+1000',
+#       }
+#     },
+#   }
+#
+# @example An example profile to setup patching, sourcing blackout windows from hiera
+#   class profiles::soe::patching (
+#     $patch_window     = undef,
+#     $blackout_windows = undef,
+#     $reboot_override  = undef,
+#   ){
+#     # Pull any blackout windows out of hiera
+#     $hiera_blackout_windows = lookup('profiles::soe::patching::blackout_windows',Hash,hash,{})
+#
+#     # Merge the blackout windows from the parameter and hiera
+#     $full_blackout_windows = $hiera_blackout_windows + $blackout_windows
+#
+#     # Call the os_patching class to set everything up
+#     class { 'os_patching':
+#       patch_window     => $patch_window,
+#       reboot_override  => $reboot_override,
+#       blackout_windows => $full_blackout_windows,
+#     }
+#   }
+#
+# @example JSON hash to specify a change freeze from 2018-12-15 to 2019-01-15
+#   {"End of year change freeze": {"start": "2018-12-15T00:00:00+1000", "end": "2019-01-15T23:59:59+1000"}}
+#
 class os_patching (
   String $patch_data_owner           = 'root',
   String $patch_data_group           = 'root',
