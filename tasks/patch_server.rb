@@ -65,7 +65,7 @@ params = JSON.parse(STDIN.read)
 # Cache fact data to speed things up
 log.info 'os_patching run started'
 log.debug 'Running os_patching fact refresh'
-fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+_fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
 log.debug 'Gathering facts'
 full_facts, stderr, status = Open3.capture3(facter, '-p', '-j')
@@ -180,10 +180,10 @@ if facts['os']['family'] == 'RedHat'
     begin
       pid = w.pid
       Timeout.timeout(timeout) do
-        until e.eof? do
+        until e.eof? {
           sleep(1)
           log.debug "yum process #{pid} still running but within timeout threshold, sleeping"
-        end
+        }
       end
     rescue Timeout::Error
       Process.kill('SIGTERM', pid)
