@@ -178,13 +178,7 @@ if (facts['os']['family'] == 'RedHat')
   Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
     begin
       Timeout.timeout(timeout) do
-        if select([o], nil, nil, 0.1) and e.eof?
-          log.error 'exited'
-          status = w.value
-          yum_output = o.read
-          stderr = e.read
-          break
-        else
+        until select([o], nil, nil, 0.1) and e.eof? do
           log.error 'running'
         end
       end
