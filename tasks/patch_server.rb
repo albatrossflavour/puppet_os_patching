@@ -13,6 +13,7 @@ starttime = Time.now.iso8601
 def history(dts,message,code,reboot,security,job)
   historyfile = '/etc/os_patching/run_history'
   open(historyfile, 'a') { |f|
+    
     f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
   }
 end
@@ -47,7 +48,8 @@ def err(code,kind,message,starttime)
   }}
 
   puts JSON.pretty_generate(json)
-  history(starttime,message,exitcode,'','','')
+  shortmsg = message.first.chomp
+  history(starttime,shortmsg,exitcode,'','','')
   log = Syslog::Logger.new 'os_patching'
   log.error "ERROR : #{kind} : #{exitcode} : #{message}"
   exit(exitcode.to_i)
@@ -183,12 +185,12 @@ elsif (facts['os']['family'] == 'Debian')
   end
 
   log.debug 'Getting package update list'
-  updated_packages,stderr,status = Open3.capture3("apt-get dist-upgrade -s | awk '/^Inst/ {print $2}'")
+  updated_packages,stderr,status = Open3.capture3("apt-get dist-upgrade -s #{dpkg_params} | awk '/^Inst/ {print $2}'")
   err(status,'os_patching/apt',stderr,starttime) if status != 0
   pkg_array = updated_packages.split
 
   log.debug 'Running apt update'
-  apt_std_out,stderr,status = Open3.capture3("DEBIAN_FRONTEND=noninteractive apt-get -y -o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends dist-upgrade")
+  apt_std_out,stderr,status = Open3.capture3("DEBIAN_FRONTEND=noninteractive apt-get #{dpkg_params} -y -o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends dist-upgrade")
   err(status,'os_patching/apt',stderr,starttime) if status != 0
 
   output('Success',reboot,security_only,'Patching complete',pkg_array,apt_std_out,'',pinned_pkgs,starttime)
