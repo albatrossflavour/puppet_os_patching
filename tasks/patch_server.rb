@@ -4,6 +4,7 @@ require 'open3'
 require 'json'
 require 'syslog/logger'
 require 'time'
+require 'timeout'
 
 facter = '/opt/puppetlabs/puppet/bin/facter'
 
@@ -128,6 +129,13 @@ else
   dpkg_params = false
 end
 
+# Set the timeout for the patch run
+if ( params['timeout'] and params['timeout'] =~ /^[0-9]+$/ )
+  timeout = params['timeout']
+else
+  timeout = 3600
+end
+
 # Is the patching blocker flag set?
 blocker = facts['os_patching']['blocked']
 if (blocker.to_s.chomp == 'true')
@@ -159,7 +167,17 @@ end
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
-  yum_std_out,stderr,status = Open3.capture3("/bin/yum #{yum_params} #{securityflag} upgrade -y")
+  yum_std_out,stderr,status,w = Open3.capture3("/bin/yum #{yum_params} #{securityflag} upgrade -y")
+  begin
+    Timeout.timeout(timeout) do
+      until yum_std_out.eof? do
+        sleep(1)
+      end
+    end
+  rescue Timeout::Error
+    Process.kill("KILL",w.pid)
+    err('999','os_patching/timeout',"yum timeout after #{timeout} seconds : #{stderr}",starttime)
+  end
   err(status,'os_patching/yum',stderr,starttime) if status != 0
 
   log.debug 'Getting yum job ID'
