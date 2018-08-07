@@ -70,12 +70,16 @@ facts = JSON.parse(full_facts)
 pinned_pkgs = facts['os_patching']['pinned_packages']
 
 # Should we do a reboot?
-if ( params['reboot'] == 'true' )
-  reboot = true
-elsif
-  reboot = false
+if params['reboot']
+  if ( params['reboot'] == 'true' )
+    reboot = true
+  elsif
+    reboot = false
+  else
+    err('108','os_patching/params',"Invalid boolean to reboot parameter",starttime)
+  end
 else
-  err('108','os_patching/params',"Invalid boolean to reboot parameter",starttime)
+  reboot = false
 end
 
 # Is the reboot_override fact set?
@@ -95,12 +99,16 @@ end
 log.debug "Reboot after patching set to #{reboot}"
 
 # Should we only apply security patches?
-if ( params['security_only'] == 'true' )
-  security_only = true
-elsif
-  security_only = false
+if params['security_only']
+  if ( params['security_only'] == 'true' )
+    security_only = true
+  elsif
+    security_only = false
+  else
+    err('109','os_patching/params',"Invalid boolean to security_only parameter",starttime)
+  end
 else
-  err('109','os_patching/params',"Invalid boolean to security_only parameter",starttime)
+  security_only = false
 end
 log.debug "Apply only security patches set to #{security_only}"
 
