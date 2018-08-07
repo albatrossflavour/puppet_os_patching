@@ -13,9 +13,9 @@ starttime = Time.now.iso8601
 
 def history(dts, message, code, reboot, security, job)
   historyfile = '/etc/os_patching/run_history'
-  open(historyfile, 'a') { |f|
+  open(historyfile, 'a') do |f|
     f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
-  }
+  end
 end
 
 def output(returncode, reboot, security, message, packages_updated, debug, job_id, pinned_packages, starttime)
@@ -47,7 +47,7 @@ def err(code, kind, message, starttime)
       :details    => { :exitcode => exitcode },
       :start_time => starttime,
       :end_time   => endtime,
-    }
+    },
   }
 
   puts JSON.pretty_generate(json)
