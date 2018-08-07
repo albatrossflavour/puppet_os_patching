@@ -97,7 +97,7 @@ class os_patching (
   $reboot_override_file = '/etc/os_patching/reboot_override'
   if ( $reboot_override != undef ) {
     case $reboot_override {
-      # lint:ignore:no_quoted_booleans
+      # lint:ignore:quoted_booleans
       true:  { $reboot_boolean = 'true' }
       false: { $reboot_boolean = 'false' }
       default: { fail ('reboot_override must be a boolean')}
