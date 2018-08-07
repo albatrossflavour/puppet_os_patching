@@ -127,14 +127,11 @@ Facter.add('os_patching', :type => :aggregate) do
   end
 
   # Patch window
-  patchwindowfile = '/etc/os_patching/patch_window'
-  if File.file?(patchwindowfile)
-    patchwindow = File.open(patchwindowfile, 'r').to_a
-  end
-
   chunk(:patch_window) do
     data = {}
-    if patchwindow
+    if File.file?(patchwindowfile)
+      patchwindowfile = '/etc/os_patching/patch_window'
+      patchwindow = File.open(patchwindowfile, 'r').to_a
       line = patchwindow.last
       matchdata = line.match(/^(.*)$/)
       if matchdata[0]
@@ -145,21 +142,20 @@ Facter.add('os_patching', :type => :aggregate) do
   end
 
   # Reboot override
-  rebootfile = '/etc/os_patching/reboot_override'
-  if File.file?(rebootfile)
-    rebootoverride = File.open(rebootfile, 'r').to_a
-  end
-
   chunk(:reboot_override) do
-    data = {}
-    data['reboot_override'] = case rebootoverride.last
-                              when /^[Tt]rue$/
-                                true
-                              when /^[Ff]alse$/
-                                false
-                              else
-                                ''
-                              end
+    rebootfile = '/etc/os_patching/reboot_override'
+    if File.file?(rebootfile)
+      rebootoverride = File.open(rebootfile, 'r').to_a
+      data = {}
+      data['reboot_override'] = case rebootoverride.last
+                                when /^[Tt]rue$/
+                                  true
+                                when /^[Ff]alse$/
+                                  false
+                                else
+                                  ''
+                                end
+      end
     data
   end
 end
