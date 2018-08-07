@@ -119,14 +119,14 @@ log.debug "Apply only security patches set to #{security_only}"
 if params['yum_params']
   yum_params = params['yum_params']
 else
-  yum_params = false
+  yum_params = ''
 end
 
 # Have we had any dpkg parameter specified?
 if params['dpkg_params']
   dpkg_params = params['dpkg_params']
 else
-  dpkg_params = false
+  dpkg_params = ''
 end
 
 # Set the timeout for the patch run
@@ -173,7 +173,7 @@ end
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
   log.error "starting timeout code : #{timeout}"
-  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
+  Open3.capture3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | o,e,s,w |
     begin
       Timeout.timeout(timeout) do
         until o.eof? do
