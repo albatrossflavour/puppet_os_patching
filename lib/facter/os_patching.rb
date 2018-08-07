@@ -71,7 +71,7 @@ Facter.add('os_patching', :type => :aggregate) do
             end
           end
 
-          if matchdata[2]..matchdata[3].cover?(now)
+          if (matchdata[2]..matchdata[3]).cover?(now)
             data['blocked'] = true
             data['blocked_reasons'].push matchdata[1]
           end
