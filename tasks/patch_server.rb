@@ -39,13 +39,16 @@ end
 def err(code, kind, message, starttime)
   endtime = Time.now.iso8601
   exitcode = code.to_s.split.last
-  json = { :_error => {
-     :msg        => "Task exited : #{exitcode}\n#{message}",
-     :kind       => kind,
-     :details    => { :exitcode => exitcode },
-     :start_time => starttime,
-     :end_time   => endtime,
-  } }
+  json = {
+    :_error =>
+    {
+      :msg        => "Task exited : #{exitcode}\n#{message}",
+      :kind       => kind,
+      :details    => { :exitcode => exitcode },
+      :start_time => starttime,
+      :end_time   => endtime,
+    }
+  }
 
   puts JSON.pretty_generate(json)
   shortmsg = message.split("\n").first.chomp
@@ -159,7 +162,7 @@ else
 end
 
 # There are no updates available, exit cleanly
-if updatecount == 0
+if updatecount.zero
   output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
   log.info 'No patches to apply, exiting'
   exit(0)
@@ -173,7 +176,7 @@ if facts['os']['family'] == 'RedHat'
   status = ''
   stderr = ''
   pid = ''
-  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | _i, o, e, w |
+  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do |_i, o, e, w|
     begin
       pid = w.pid
       Timeout.timeout(timeout) do
@@ -183,7 +186,7 @@ if facts['os']['family'] == 'RedHat'
         end
       end
     rescue Timeout::Error
-      Process.kill("SIGTERM", pid)
+      Process.kill('SIGTERM', pid)
       error = o.read
       err(w.value, 'os_patching/timeout', "yum timeout after #{timeout} seconds : #{error}", starttime)
     end
@@ -220,7 +223,9 @@ elsif facts['os']['family'] == 'Debian'
   pkg_array = updated_packages.split
 
   log.debug 'Running apt update'
-  apt_std_out, stderr, status = Open3.capture3("DEBIAN_FRONTEND=noninteractive apt-get #{dpkg_params} -y -o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends dist-upgrade")
+  deb_front='DEBIAN_FRONTEND=noninteractive'
+  deb_opts='-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
+  apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
   output('Success', reboot, security_only, 'Patching complete', pkg_array, apt_std_out, '', pinned_pkgs, starttime)
@@ -231,7 +236,8 @@ else
 end
 
 log.debug 'Running os_patching fact refresh'
-fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+_fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
 if reboot == true
   log.info 'Rebooting'
