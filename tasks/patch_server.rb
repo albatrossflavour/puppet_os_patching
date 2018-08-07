@@ -1,4 +1,4 @@
-#.!/opt/puppetlabs/puppet/bin/ruby
+#!/opt/puppetlabs/puppet/bin/ruby
 
 require 'open3'
 require 'json'
@@ -78,7 +78,7 @@ if params['reboot']
   elsif ( params['reboot'] == 'false' )
     reboot = false
   else
-    err('108','os_patching/params',"Invalid boolean to reboot parameter",starttime)
+    err('108','os_patching/params','Invalid boolean to reboot parameter',starttime)
   end
 else
   reboot = false
