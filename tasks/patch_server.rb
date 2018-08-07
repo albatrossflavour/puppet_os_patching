@@ -114,14 +114,14 @@ log.debug "Apply only security patches set to #{security_only}"
 
 # Have we had any yum parameter specified?
 if params['yum_params']
-  yum_params = params['yum_params']
+  yum_params = params['yum_params'].join(' ')
 else
   yum_params = ''
 end
 
 # Have we had any dpkg parameter specified?
 if params['dpkg_params']
-  dpkg_params = params['dpkg_params']
+  dpkg_params = params['dpkg_params'].join(' ')
 else
   dpkg_params = ''
 end
