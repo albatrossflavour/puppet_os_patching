@@ -47,7 +47,7 @@ def err(code,kind,message,starttime)
   }}
 
   puts JSON.pretty_generate(json)
-  shortmsg = message.split.first.chomp
+  shortmsg = message.split("\n").first.chomp
   history(starttime,shortmsg,exitcode,'','','')
   log = Syslog::Logger.new 'os_patching'
   log.error "ERROR : #{kind} : #{exitcode} : #{message}"
