@@ -177,7 +177,8 @@ if (facts['os']['family'] == 'RedHat')
     begin
       Timeout.timeout(timeout) do
         until o.eof? do
-          log.error 'sleeping'
+          log.error o
+          log.error e
           sleep(1)
         end
         log.error 'end 1'
