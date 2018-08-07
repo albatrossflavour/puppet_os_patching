@@ -175,6 +175,7 @@ if (facts['os']['family'] == 'RedHat')
   log.error "Starting timeout code : #{timeout}"
   status = ''
   stderr = ''
+  pid = ''
   Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
     begin
       pid = w.pid
@@ -185,7 +186,7 @@ if (facts['os']['family'] == 'RedHat')
         end
       end
     rescue Timeout::Error
-      Process.kill("SIGTERM",w.pid)
+      Process.kill("SIGTERM",pid)
       error = e.read
       err(w.value,'os_patching/timeout',"yum timeout after #{timeout} seconds : #{error}",starttime)
     end
