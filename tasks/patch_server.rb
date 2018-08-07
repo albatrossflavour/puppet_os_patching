@@ -184,7 +184,7 @@ if (facts['os']['family'] == 'RedHat')
         end
       end
     rescue Timeout::Error
-      Process.kill("KILL",w.pid)
+      Process.kill("SIGTERM",w.pid)
       error = e.read
       err(w.value,'os_patching/timeout',"yum timeout after #{timeout} seconds : #{error}",starttime)
     end
