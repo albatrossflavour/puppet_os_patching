@@ -171,24 +171,28 @@ end
 # Run the patching
 if (facts['os']['family'] == 'RedHat')
   log.debug 'Running yum upgrade'
-  log.error "starting timeout code : #{timeout}"
-  Open3.capture3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
+  log.error "Starting timeout code : #{timeout}"
+  status = ''
+  stdout = ''
+  stderr = ''
+  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
     begin
       Timeout.timeout(timeout) do
         until o.eof? do
-          log.error o
-          log.error e
-          sleep(0.1)
+          log.error 'sleeping'
+          sleep(1)
         end
-        log.error 'end 1'
       end
-      log.error 'end 2'
     rescue Timeout::Error
       Process.kill("KILL",w.pid)
-      err('999','os_patching/timeout',"yum timeout after #{timeout} seconds : #{e}",starttime)
+      error = e.read
+      err(w.value,'os_patching/timeout',"yum timeout after #{timeout} seconds : #{error}",starttime)
     end
+    status = w.value
+    output = o.read
+    stderr = e.read
   end
-  e(status,'os_patching/yum',stderr,starttime) if status != 0
+  err(status,'os_patching/yum',stderr,starttime) if status != 0
 
   log.debug 'Getting yum job ID'
   yum_id,stderr,status = Open3.capture3("yum history | grep -E \"^[[:space:]]\" | awk '{print $1}' | head -1")
@@ -228,10 +232,10 @@ else
 end
 
 log.debug 'Running os_patching fact refresh'
-fact_out,stdout,stderr = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+fact_out,stderr,status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 
 if (reboot == true)
   log.info 'Rebooting'
-  reboot_out,stdout,stderr = Open3.capture3('/sbin/shutdown','-r','+1')
+  reboot_out,stderr,status = Open3.capture3('/sbin/shutdown','-r','+1')
 end
 log.info 'os_patching run complete'
