@@ -116,18 +116,18 @@ end
 log.debug "Apply only security patches set to #{security_only}"
 
 # Have we had any yum parameter specified?
-if params['yum_params']
-  yum_params = params['yum_params']
-else
-  yum_params = ''
-end
+yum_params = if params['yum_params']
+               params['yum_params']
+             else
+               ''
+             end
 
 # Have we had any dpkg parameter specified?
-if params['dpkg_params']
-  dpkg_params = params['dpkg_params']
-else
-  dpkg_params = ''
-end
+dpkg_params = if params['dpkg_params']
+                params['dpkg_params']
+              else
+                ''
+              end
 
 # Set the timeout for the patch run
 if params['timeout']
