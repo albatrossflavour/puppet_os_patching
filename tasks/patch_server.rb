@@ -21,16 +21,16 @@ end
 def output(returncode, reboot, security, message, packages_updated, debug, job_id, pinned_packages, starttime)
   endtime = Time.now.iso8601
   json = {
-    :return => returncode,
-    :reboot => reboot,
-    :security => security,
-    :message => message,
+    :return           => returncode,
+    :reboot           => reboot,
+    :security         => security,
+    :message          => message,
     :packages_updated => packages_updated,
-    :debug => debug,
-    :job_id => job_id,
-    :pinned_packages => pinned_packages,
-    :start_time => starttime,
-    :end_time => endtime
+    :debug            => debug,
+    :job_id           => job_id,
+    :pinned_packages  => pinned_packages,
+    :start_time       => starttime,
+    :end_time         => endtime,
   }
   puts JSON.pretty_generate(json)
   history(starttime, message, returncode, reboot, security, job_id)
@@ -40,12 +40,12 @@ def err(code, kind, message, starttime)
   endtime = Time.now.iso8601
   exitcode = code.to_s.split.last
   json = { :_error => {
-	   :msg => "Task exited : #{exitcode}\n#{message}",
-	   :kind => kind,
-	   :details => { :exitcode => exitcode },
+     :msg        => "Task exited : #{exitcode}\n#{message}",
+     :kind       => kind,
+     :details    => { :exitcode => exitcode },
      :start_time => starttime,
-     :end_time => endtime
-  }}
+     :end_time   => endtime,
+  } }
 
   puts JSON.pretty_generate(json)
   shortmsg = message.split("\n").first.chomp
@@ -67,7 +67,6 @@ err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
 log.debug 'Gathering facts'
 full_facts, stderr, status = Open3.capture3(facter, '-p', '-j')
 err(status, 'os_patching/facter', stderr, starttime) if status != 0
-facts = {}
 facts = JSON.parse(full_facts)
 pinned_pkgs = facts['os_patching']['pinned_packages']
 
@@ -88,14 +87,12 @@ end
 reboot_override = facts['os_patching']['reboot_override']
 if reboot_override == 'Invalid Entry'
   err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
-else
-  if reboot_override == true && reboot == false
-    log.error 'Reboot override set to true but task said no.  Will reboot'
-    reboot = true
-  elsif reboot_override == false && reboot == true
-    log.error 'Reboot override set to false but task said yes.  Will not reboot'
-    reboot = false
-  end
+elsif reboot_override == true && reboot == false
+  log.error 'Reboot override set to true but task said no.  Will reboot'
+  reboot = true
+elsif reboot_override == false && reboot == true
+  log.error 'Reboot override set to false but task said yes.  Will not reboot'
+  reboot = false
 end
 
 log.debug "Reboot after patching set to #{reboot}"
@@ -176,7 +173,7 @@ if facts['os']['family'] == 'RedHat'
   status = ''
   stderr = ''
   pid = ''
-  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | i,o,e,w |
+  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do | _i, o, e, w |
     begin
       pid = w.pid
       Timeout.timeout(timeout) do
@@ -204,7 +201,7 @@ if facts['os']['family'] == 'RedHat'
   yum_status, stderr, status = Open3.capture3("yum history info #{yum_id.chomp} | awk '/^Return-Code/ {print $3}'")
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
 
-  log.debug "Getting updated package list	for job #{yum_id.chomp}"
+  log.debug "Getting updated package list  for job #{yum_id.chomp}"
   updated_packages, stderr, status = Open3.capture3("yum history info #{yum_id.chomp} | awk '/Updated/ {print $2}'")
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
   pkg_array = updated_packages.split

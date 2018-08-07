@@ -154,7 +154,6 @@ Facter.add('os_patching', :type => :aggregate) do
 
   chunk(:reboot_override) do
     data = {}
-    window = {}
     if rebootoverride
       case rebootoverride.last
       when /^[Tt]rue$/
