@@ -4,16 +4,12 @@ Facter.add('os_patching', :type => :aggregate) do
   require 'time'
   now = Time.now.iso8601
 
-  updatefile = '/etc/os_patching/package_updates'
-  if File.file?(updatefile)
-    updates = File.open(updatefile, 'r').read
-  end
-
   chunk(:updates) do
     data = {}
-    updatelist = {}
     updatelist = []
-    if updates
+    updatefile = '/etc/os_patching/package_updates'
+    if File.file?(updatefile)
+      updates = File.open(updatefile, 'r').read
       updates.each_line do |line|
         next if line.empty?
         next if line.include? '^#'
@@ -25,16 +21,12 @@ Facter.add('os_patching', :type => :aggregate) do
     data
   end
 
-  secupdatefile = '/etc/os_patching/security_package_updates'
-  if File.file?(secupdatefile)
-    secupdates = File.open(secupdatefile, 'r').read
-  end
-
   chunk(:secupdates) do
     data = {}
-    secupdatelist = {}
     secupdatelist = []
-    if secupdates
+    secupdatefile = '/etc/os_patching/security_package_updates'
+    if File.file?(secupdatefile)
+      secupdates = File.open(secupdatefile, 'r').read
       secupdates.each_line do |line|
         next if line.empty?
         next if line.include? '^#'
@@ -46,36 +38,32 @@ Facter.add('os_patching', :type => :aggregate) do
     data
   end
 
-  blackoutfile = '/etc/os_patching/blackout_windows'
-  if File.file?(blackoutfile)
-    blackouts = File.open(blackoutfile, 'r').read
-  end
   chunk(:blackouts) do
     data = {}
     arraydata = {}
     data['blocked'] = false
     data['blocked_reasons'] = {}
     data['blocked_reasons'] = []
-    if blackouts
+    blackoutfile = '/etc/os_patching/blackout_windows'
+    if File.file?(blackoutfile)
+      blackouts = File.open(blackoutfile, 'r').read
       blackouts.each_line do |line|
         matchdata = line.match(/^([\w ]*),([\d:T\-\\+]*),([\d:T\-\\+]*)$/)
-        if matchdata
-          unless arraydata[matchdata[1]]
-            arraydata[matchdata[1]] = {}
-            if matchdata[2] > matchdata[3]
-              arraydata[matchdata[1]]['start'] = 'Start date after end date'
-              arraydata[matchdata[1]]['end'] = 'Start date after end date'
-            else
-              arraydata[matchdata[1]]['start'] = matchdata[2]
-              arraydata[matchdata[1]]['end'] = matchdata[3]
-            end
+        next unless matchdata
+        unless arraydata[matchdata[1]]
+          arraydata[matchdata[1]] = {}
+          if matchdata[2] > matchdata[3]
+            arraydata[matchdata[1]]['start'] = 'Start date after end date'
+            arraydata[matchdata[1]]['end'] = 'Start date after end date'
+          else
+            arraydata[matchdata[1]]['start'] = matchdata[2]
+            arraydata[matchdata[1]]['end'] = matchdata[3]
           end
+        end
 
-          if (matchdata[2]..matchdata[3]).cover?(now)
-            data['blocked'] = true
-            data['blocked_reasons'].push matchdata[1]
-          end
-
+        if (matchdata[2]..matchdata[3]).cover?(now)
+          data['blocked'] = true
+          data['blocked_reasons'].push matchdata[1]
         end
       end
     end
@@ -84,15 +72,12 @@ Facter.add('os_patching', :type => :aggregate) do
   end
 
   # Are there any pinned packages in yum?
-  pinnedpackagefile = '/etc/yum/pluginconf.d/versionlock.list'
-  if File.file?(pinnedpackagefile)
-    pinnedfile = File.open(pinnedpackagefile, 'r').read
-  end
   chunk(:pinned) do
     data = {}
-    pinnedpkgs = {}
     pinnedpkgs = []
-    if pinnedfile
+    pinnedpackagefile = '/etc/yum/pluginconf.d/versionlock.list'
+    if File.file?(pinnedpackagefile)
+      pinnedfile = File.open(pinnedpackagefile, 'r').read
       pinnedfile.each_line do |line|
         matchdata = line.match(/^[0-9]:(.*)/)
         if matchdata
@@ -105,14 +90,11 @@ Facter.add('os_patching', :type => :aggregate) do
   end
 
   # History info
-  patchhistoryfile = '/etc/os_patching/run_history'
-  if File.file?(patchhistoryfile)
-    historyfile = File.open(patchhistoryfile, 'r').to_a
-  end
-
   chunk(:history) do
     data = {}
-    if historyfile
+    patchhistoryfile = '/etc/os_patching/run_history'
+    if File.file?(patchhistoryfile)
+      historyfile = File.open(patchhistoryfile, 'r').to_a
       data['last_run'] = {}
       line = historyfile.last.chomp
       matchdata = line.split('|')
@@ -129,14 +111,11 @@ Facter.add('os_patching', :type => :aggregate) do
   end
 
   # Patch window
-  patchwindowfile = '/etc/os_patching/patch_window'
-  if File.file?(patchwindowfile)
-    patchwindow = File.open(patchwindowfile, 'r').to_a
-  end
-
   chunk(:patch_window) do
     data = {}
-    if patchwindow
+    patchwindowfile = '/etc/os_patching/patch_window'
+    if File.file?(patchwindowfile)
+      patchwindow = File.open(patchwindowfile, 'r').to_a
       line = patchwindow.last
       matchdata = line.match(/^(.*)$/)
       if matchdata[0]
@@ -147,25 +126,19 @@ Facter.add('os_patching', :type => :aggregate) do
   end
 
   # Reboot override
-  rebootfile = '/etc/os_patching/reboot_override'
-  if File.file?(rebootfile)
-    rebootoverride = File.open(rebootfile, 'r').to_a
-  end
-
   chunk(:reboot_override) do
-    data = {}
-    window = {}
-    if rebootoverride
-      case rebootoverride.last
-      when /^[Tt]rue$/
-        data['reboot_override'] = true
-      when /^[Ff]alse$/
-        data['reboot_override'] = false
-      else
-        data['reboot_override'] = 'invalid entry'
-      end
-    else
-      data['reboot_override'] = ''
+    rebootfile = '/etc/os_patching/reboot_override'
+    if File.file?(rebootfile)
+      rebootoverride = File.open(rebootfile, 'r').to_a
+      data = {}
+      data['reboot_override'] = case rebootoverride.last
+                                when /^[Tt]rue$/
+                                  true
+                                when /^[Ff]alse$/
+                                  false
+                                else
+                                  ''
+                                end
     end
     data
   end
