@@ -134,7 +134,8 @@ if params['timeout']
   if ( params['timeout'] =~ /^\d$/ )
     timeout = params['timeout']
   else
-    timeout = 3600
+    timeout = params['timeout']
+    #timeout = 3600
   end
 else
   timeout = 7200
