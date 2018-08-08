@@ -1,4 +1,4 @@
-class profiles::soe::patching (
+class sample_patching_profile {
   $patch_window     = undef,
   $blackout_windows = undef,
   $reboot_override  = undef,
