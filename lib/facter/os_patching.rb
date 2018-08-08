@@ -93,9 +93,9 @@ Facter.add('os_patching', :type => :aggregate) do
   chunk(:history) do
     data = {}
     patchhistoryfile = '/etc/os_patching/run_history'
+    data['last_run'] = {}
     if File.file?(patchhistoryfile)
       historyfile = File.open(patchhistoryfile, 'r').to_a
-      data['last_run'] = {}
       line = historyfile.last.chomp
       matchdata = line.split('|')
       if matchdata[1]
@@ -106,8 +106,8 @@ Facter.add('os_patching', :type => :aggregate) do
         data['last_run']['security_only'] = matchdata[4]
         data['last_run']['job_id'] = matchdata[5]
       end
-      data
     end
+    data
   end
 
   # Patch window
@@ -121,6 +121,8 @@ Facter.add('os_patching', :type => :aggregate) do
       if matchdata[0]
         data['patch_window'] = matchdata[0]
       end
+    else
+      data['patch_window'] = ''
     end
     data
   end
