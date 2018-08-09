@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.3.3
+
+- Ensure we honour reboot_override even if the OS says a reboot isn't required
+
 ## Release 0.3.2
 
 - Fix data validation issue with yum_params and dpkg_params
