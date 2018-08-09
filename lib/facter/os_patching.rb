@@ -173,9 +173,9 @@ Facter.add('os_patching', :type => :aggregate) do
         data['reboots']['apps_needing_restart'][key_value[0]] = key_value[1]
       end
       data['reboots']['app_restart_required'] = if data['reboots']['apps_needing_restart'].size == 0
-                                                  true
-                                                else
                                                   false
+                                                else
+                                                  true
                                                 end
     end
     data
