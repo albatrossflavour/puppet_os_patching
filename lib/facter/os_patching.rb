@@ -144,4 +144,39 @@ Facter.add('os_patching', :type => :aggregate) do
     end
     data
   end
+
+  # Reboot or restarts required?
+  chunk(:reboot_required) do
+    data = {}
+    reboot_required_file = '/etc/os_patching/reboot_required'
+    if File.file?(reboot_required_file)
+      reboot_required_fh = File.open(reboot_required_file, 'r').to_a
+      data['reboot_required'] = case reboot_required_fh.last
+                                when /^[Tt]rue$/
+                                  true
+                                when /^[Ff]alse$/
+                                  false
+                                else
+                                  ''
+                                end
+    else
+      data['reboot_required'] = 'unknown'
+    end
+    app_restart_file = '/etc/os_patching/apps_to_restart'
+    if File.file?(app_restart_file)
+      app_restart_fh = File.open(app_restart_file, 'r').to_a
+      data['apps_needing_restart'] = {}
+      app_restart_fh.each do |line|
+        line.chomp!
+        key_value = line.split(" : ")
+        data['apps_needing_restart'][key_value[0]] = key_value[1]
+      end
+    end
+    data['app_restart_required'] = if data['apps_needing_restart'].empty?
+                                     true
+                                   else
+                                     false
+                                   end
+    data
+  end
 end

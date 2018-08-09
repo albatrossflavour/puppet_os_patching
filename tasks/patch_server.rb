@@ -62,11 +62,11 @@ def reboot_required()
   family = 'RedHat'
   if family == 'RedHat' and File.file?('/bin/needs-restarting')
     _output, _stderr, status = Open3.capture3('/bin/needs-restarting -r')
-    if status != 0
-      response = true
-    else
-			response = false
-    end
+    response = if status != 0
+                 true
+               else
+                 false
+               end
     return response
   elsif family == 'Redhat'
     return false
@@ -182,16 +182,16 @@ end
 
 # There are no updates available, exit cleanly rebooting if the override flag is set
 if updatecount.zero?
-	if reboot_override == true
-  	log.info 'Rebooting'
-  	_reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
-  	err(status, 'os_patching/reboot', stderr, starttime) if status != 0
-  	output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
-  	log.info 'No patches to apply, rebooting as requested'
-	else
-  	output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
-  	log.info 'No patches to apply, exiting'
-	end
+  if reboot_override == true
+    log.info 'Rebooting'
+    _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
+    err(status, 'os_patching/reboot', stderr, starttime) if status != 0
+    output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
+    log.info 'No patches to apply, rebooting as requested'
+  else
+    output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
+    log.info 'No patches to apply, exiting'
+  end
   exit(0)
 end
 
@@ -268,7 +268,7 @@ err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 need_to_reboot = reboot_required
 
-if reboot == true and need_to_reboot == true
+if reboot == true && need_to_reboot == true
   log.info 'Rebooting'
   _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   err(status, 'os_patching/reboot', stderr, starttime) if status != 0
