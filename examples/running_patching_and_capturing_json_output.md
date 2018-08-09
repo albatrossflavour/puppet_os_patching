@@ -39,7 +39,7 @@ This will give you a full task report, with status per node and an overall statu
       }
     },
     {
-      "name": "linode-centos-73.bandcamp.tv",
+      "name": "centos.example.com",
       "state": "finished",
       "results": {
         "pinned_packages": [],
@@ -55,7 +55,7 @@ This will give you a full task report, with status per node and an overall statu
       }
     },
     {
-      "name": "puppetmaster.bandcamp.tv",
+      "name": "puppetmaster.example.com",
       "state": "failed",
       "results": {
         "_error": {
