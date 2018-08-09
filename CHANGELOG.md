@@ -1,5 +1,14 @@
 # Changelog
 
+## Release 0.3.1
+
+- A new fact (reboots) is available.
+  - reboots.reboot_required shows if the OS belives it needs to be restarted
+  - app_restart_required shows if the OS can detect and processes using previously patched files
+  - apps_needing_restart is a hash of the PID and command line of those processes
+- Reboots integrated into patching task
+- Documentation and examples updated
+
 ## Release 0.2.1
 
 - Major rewrite on most areas of the module
