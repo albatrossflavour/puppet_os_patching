@@ -141,7 +141,7 @@ yum_params = if params['yum_params']
                ''
              end
 
-if yum_params =~ %r{[\$\|\/;]}
+if yum_params =~ %r{[\$\|\/;`&]}
   err('110', 'os_patching/yum_params', 'Unsafe content in yum_params', starttime)
 end
 
@@ -152,7 +152,7 @@ dpkg_params = if params['dpkg_params']
                 ''
               end
 
-if dpkg_params =~ %r{[\$\|\/;]}
+if dpkg_params =~ %r{[\$\|\/;`&]}
   err('110', 'os_patching/dpkg_params', 'Unsafe content in dpkg_params', starttime)
 end
 
