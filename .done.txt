@@ -35,3 +35,17 @@ x 2018-08-07 What are the normal issues you encounter during patching? @Question
 x 2018-08-07 Change freeze windows must have an end date +ChangeFreeze
 x 2018-08-07 2018-08-07 Allow task to take a parameter for command arguments
 x 2018-08-07 Job that kills the patch run on a client if it's approaching a specific time.
+x 2018-08-09 Ability to use redis to set patch dates +PatchDay
+x 2018-08-09 Do you allow packages to be pinned/locked to specific versions? @Questions
+x 2018-08-09 Change freeze windows must have a unique ID +ChangeFreeze
+x 2018-08-09 Can I feed a path variable into the task without hacking it? +Tasks @Research
+x 2018-08-09 What problems are you trying to solve with the automation? @Questions
+x 2018-08-09 Who are our stakeholders? @Questions
+x 2018-08-09 Take me through your ideal vision for how the patching will work if everything goes well @Questions
+x 2018-08-09 What environment(s) do we have available to test in? @Questions
+x 2018-08-09 Use redis to set change freeze windows +ChangeFreeze
+x 2018-08-09 Ability to query all change freezes set +ChangeFreeze +Reporting
+x 2018-08-09 How will the patch run output be consumed? +Reporting @Questions
+x 2018-08-09 How do you want to see the change freeze dates? +ChangeFreeze +Reporting @Questions
+x 2018-08-09 How do you want to see the patch dates? +PatchDay +Reporting @Questions
+x 2018-08-09 How do you want to see the patch exemptions? +Exemptions +Reporting @Questions

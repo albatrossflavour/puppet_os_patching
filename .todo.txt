@@ -1,20 +1,7 @@
-Ability to use redis to set patch dates +PatchDay
-Use redis to set change freeze windows +ChangeFreeze
-Change freeze windows must have a unique ID +ChangeFreeze
-Ability to query all change freezes set +ChangeFreeze +Reporting
-How will the patch run output be consumed? +Reporting @Questions
-How do you want to see the patch dates? +PatchDay +Reporting @Questions
-How do you want to see the change freeze dates? +ChangeFreeze +Reporting @Questions
-How do you want to see the patch exemptions? +Exemptions +Reporting @Questions
-What problems are you trying to solve with the automation? @Questions
-Who are our stakeholders? @Questions
-Take me through your ideal vision for how the patching will work if everything goes well @Questions
 Do we need to ensure the state of the yum config on the servers prior to patching? @Questions
 Should we ensure that the last puppet run was green before continuing? @Questions
 Should we ensure that the last puppet run was within X hours before starting patching? @Questions
 Should we do a puppet run prior to kicking off the patching to ensure state? @Questions
-What environment(s) do we have available to test in? @Questions
-Can I feed a path variable into the task without hacking it? +Tasks @Research
-Do you allow packages to be pinned/locked to specific versions? @Questions
 Should we check that the kernel version installed is the same as the one running? @Questions
 How many kernels should be installed? @Questions
+(A) 2018-08-09 security issues with the yum_params options
