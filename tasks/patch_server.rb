@@ -184,7 +184,7 @@ end
 if updatecount.zero?
 	if reboot == true and need_to_reboot == true
   	log.info 'Rebooting'
-  	_reboot_out, stderr, status = Open3.capture3('/sbin/shutdown', '-r +1')
+  	_reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   	err(status, 'os_patching/reboot', stderr, starttime) if status != 0
   	output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
   	log.info 'No patches to apply, exiting'
@@ -270,7 +270,7 @@ need_to_reboot = reboot_required
 
 if reboot == true and need_to_reboot == true
   log.info 'Rebooting'
-  _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown', '-r +1')
+  _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   err(status, 'os_patching/reboot', stderr, starttime) if status != 0
 end
 log.info 'os_patching run complete'
