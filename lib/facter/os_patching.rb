@@ -93,9 +93,9 @@ Facter.add('os_patching', :type => :aggregate) do
   chunk(:history) do
     data = {}
     patchhistoryfile = '/etc/os_patching/run_history'
+    data['last_run'] = {}
     if File.file?(patchhistoryfile)
       historyfile = File.open(patchhistoryfile, 'r').to_a
-      data['last_run'] = {}
       line = historyfile.last.chomp
       matchdata = line.split('|')
       if matchdata[1]
@@ -106,8 +106,8 @@ Facter.add('os_patching', :type => :aggregate) do
         data['last_run']['security_only'] = matchdata[4]
         data['last_run']['job_id'] = matchdata[5]
       end
-      data
     end
+    data
   end
 
   # Patch window
@@ -121,6 +121,8 @@ Facter.add('os_patching', :type => :aggregate) do
       if matchdata[0]
         data['patch_window'] = matchdata[0]
       end
+    else
+      data['patch_window'] = ''
     end
     data
   end
@@ -139,6 +141,42 @@ Facter.add('os_patching', :type => :aggregate) do
                                 else
                                   ''
                                 end
+    end
+    data
+  end
+
+  # Reboot or restarts required?
+  chunk(:reboot_required) do
+    data = {}
+    data['reboots'] = {}
+    reboot_required_file = '/etc/os_patching/reboot_required'
+    if File.file?(reboot_required_file)
+      reboot_required_fh = File.open(reboot_required_file, 'r').to_a
+      data['reboots']['reboot_required'] = case reboot_required_fh.last
+                                           when /^[Tt]rue$/
+                                             true
+                                           when /^[Ff]alse$/
+                                             false
+                                           else
+                                             ''
+                                           end
+    else
+      data['reboots']['reboot_required'] = 'unknown'
+    end
+    app_restart_file = '/etc/os_patching/apps_to_restart'
+    if File.file?(app_restart_file)
+      app_restart_fh = File.open(app_restart_file, 'r').to_a
+      data['reboots']['apps_needing_restart'] = {}
+      app_restart_fh.each do |line|
+        line.chomp!
+        key_value = line.split(' : ')
+        data['reboots']['apps_needing_restart'][key_value[0]] = key_value[1]
+      end
+      data['reboots']['app_restart_required'] = if data['reboots']['apps_needing_restart'].empty?
+                                                  false
+                                                else
+                                                  true
+                                                end
     end
     data
   end

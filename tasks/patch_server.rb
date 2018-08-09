@@ -58,6 +58,25 @@ def err(code, kind, message, starttime)
   exit(exitcode.to_i)
 end
 
+def reboot_required
+  family = 'RedHat'
+  if family == 'RedHat' && File.file?('/bin/needs-restarting')
+    _output, _stderr, status = Open3.capture3('/bin/needs-restarting -r')
+    response = if status != 0
+                 true
+               else
+                 false
+               end
+    return response
+  elsif family == 'Redhat'
+    return false
+  elsif family == 'Debian' && File.file?('/var/run/reboot-required')
+    return true
+  elsif family == 'Debian'
+    return false
+  end
+end
+
 # Parse input
 
 params = JSON.parse(STDIN.read)
@@ -75,9 +94,9 @@ pinned_pkgs = facts['os_patching']['pinned_packages']
 
 # Should we do a reboot?
 if params['reboot']
-  if params['reboot'] == 'true'
+  if params['reboot'] == true
     reboot = true
-  elsif params['reboot'] == 'false'
+  elsif params['reboot'] == false
     reboot = false
   else
     err('108', 'os_patching/params', 'Invalid boolean to reboot parameter', starttime)
@@ -161,10 +180,18 @@ else
   securityflag = ''
 end
 
-# There are no updates available, exit cleanly
+# There are no updates available, exit cleanly rebooting if the override flag is set
 if updatecount.zero?
-  output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
-  log.info 'No patches to apply, exiting'
+  if reboot_override == true
+    log.info 'Rebooting'
+    _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
+    err(status, 'os_patching/reboot', stderr, starttime) if status != 0
+    output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
+    log.info 'No patches to apply, rebooting as requested'
+  else
+    output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
+    log.info 'No patches to apply, exiting'
+  end
   exit(0)
 end
 
@@ -239,9 +266,11 @@ log.debug 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
-if reboot == true
+need_to_reboot = reboot_required
+
+if reboot == true && need_to_reboot == true
   log.info 'Rebooting'
-  _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown', '-r', '+1')
+  _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   err(status, 'os_patching/reboot', stderr, starttime) if status != 0
 end
 log.info 'os_patching run complete'
