@@ -49,3 +49,4 @@ x 2018-08-09 How will the patch run output be consumed? +Reporting @Questions
 x 2018-08-09 How do you want to see the change freeze dates? +ChangeFreeze +Reporting @Questions
 x 2018-08-09 How do you want to see the patch dates? +PatchDay +Reporting @Questions
 x 2018-08-09 How do you want to see the patch exemptions? +Exemptions +Reporting @Questions
+x 2018-08-09 2018-08-09 security issues with the yum_params options
