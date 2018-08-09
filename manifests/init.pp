@@ -121,6 +121,14 @@ class os_patching (
     require  => File[$fact_cmd],
   }
 
+  cron { 'Cache patching data at reboot':
+    ensure  => present,
+    command => $fact_cmd,
+    user    => $patch_cron_user,
+    special => 'reboot',
+    require => File[$fact_cmd],
+  }
+
 
   $patch_window_file = '/etc/os_patching/patch_window'
   if ( $patch_window ) {
