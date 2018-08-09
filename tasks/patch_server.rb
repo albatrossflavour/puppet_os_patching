@@ -58,9 +58,9 @@ def err(code, kind, message, starttime)
   exit(exitcode.to_i)
 end
 
-def reboot_required()
+def reboot_required
   family = 'RedHat'
-  if family == 'RedHat' and File.file?('/bin/needs-restarting')
+  if family == 'RedHat' && File.file?('/bin/needs-restarting')
     _output, _stderr, status = Open3.capture3('/bin/needs-restarting -r')
     response = if status != 0
                  true
@@ -70,7 +70,7 @@ def reboot_required()
     return response
   elsif family == 'Redhat'
     return false
-  elsif family == 'Debian' and File.file?('/var/run/reboot-required')
+  elsif family == 'Debian' && File.file?('/var/run/reboot-required')
     return true
   elsif family == 'Debian'
     return false

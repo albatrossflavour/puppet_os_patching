@@ -169,10 +169,10 @@ Facter.add('os_patching', :type => :aggregate) do
       data['reboots']['apps_needing_restart'] = {}
       app_restart_fh.each do |line|
         line.chomp!
-        key_value = line.split(" : ")
+        key_value = line.split(' : ')
         data['reboots']['apps_needing_restart'][key_value[0]] = key_value[1]
       end
-      data['reboots']['app_restart_required'] = if data['reboots']['apps_needing_restart'].size == 0
+      data['reboots']['app_restart_required'] = if data['reboots']['apps_needing_restart'].empty?
                                                   false
                                                 else
                                                   true
