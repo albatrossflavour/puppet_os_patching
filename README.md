@@ -109,10 +109,15 @@ Most of the reporting is driven off the custom fact `os_patching_data`, for exam
     security_only => "false",
     job_id => "60"
   }
+  reboots => {
+    reboot_required => false,
+    apps_needing_restart => { },
+    app_restart_required => false
+  }
 }
 ```
 
-This shows there are no updates which can be applied to this server.  When there are updates to add, you will see similar to this:
+This shows there are no updates which can be applied to this server and the server doesn't need a reboot or any application restarts.  When there are updates to add, you will see similar to this:
 
 ```yaml
 # facter -p os_patching
@@ -146,10 +151,21 @@ This shows there are no updates which can be applied to this server.  When there
     security_only => "false",
     job_id => "60"
   }
+  reboots => {
+    reboot_required => true,
+    apps_needing_restart => {
+      630 => "/usr/sbin/NetworkManager --no-daemon ",
+      1451 => "/usr/bin/python2 -s /usr/bin/fail2ban-server -s /var/run/fail2ban/fail2ban.sock -p /var/run/fail2ban/fail2ban.pid -x -b ",
+      1232 => "/usr/bin/python -Es /usr/sbin/tuned -l -P "
+    },
+    app_restart_required => true
+  }
 }
 ```
 
 Where it shows 6 packages with available updates, along with an array of the package names.  None of the packges are tagged as security related (requires Debian or a subscription to RHEL).  There are no blockers to patching and the blackout window defined is not in effect.
+
+The reboot_required flag is set to true, which means there have been changes to packages that require a reboot (libc, kernel etc) but a reboot hasn't happened.  The apps_needing_restart shows the PID and command line of applications that are using files that have been upgraded but the process hasn't been restarted.
 
 The pinned packages entry lists any packages which have been specifically excluded from being patched, from [version lock](https://access.redhat.com/solutions/98873) on Red Hat or by [pinning](https://wiki.debian.org/AptPreferences) in Debian.
 
@@ -225,7 +241,10 @@ This directory contains the various control files needed for the fact and task t
 * `/etc/os_patching/run_history` - a summary of each run of the `os_patching::patch_server` task, populated by the task
 * `/etc/os_patching/reboot_override` - if present, overrides the `reboot=` parameter to the task
 * `/etc/os_patching/patch_window` - if present, sets the value for the fact `os_patching.patch_window`
+* `/etc/os_patching/reboot_required` - if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
+* `/etc/os_patching/apps_to_restart` - a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.
 
+With the exception of the run_history file, all files in /etc/os_patching will be regenerated after a puppet run and a run of the os_patching_fact_generation.sh script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum and syslog.
 
 ## Limitations
 
