@@ -41,6 +41,18 @@ do
   echo "$UPDATE" >> ${SECUPDATEFILE} || exit 1
 done
 
+if [ -f '/bin/needs-restarting' ]
+then
+  /bin/needs-restarting -r 2>/dev/null 1>/dev/null
+  if [ $? -gt 0 ]
+  then
+    echo "true" > /etc/os_patching/reboot_required
+  else
+    echo "false" > /etc/os_patching/reboot_required
+  fi
+  /bin/needs-restarting 2>/dev/null >/etc/os_patching/apps_to_restart
+fi
+
 /opt/puppetlabs/bin/puppet facts upload 2>/dev/null 1>/dev/null
 /usr/bin/logger -p info -t os_patching_fact_generation.sh "patch data fact refreshed"
 
