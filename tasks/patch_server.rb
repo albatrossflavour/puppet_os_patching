@@ -276,7 +276,7 @@ err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 need_to_reboot = reboot_required
 
-if reboot == true && need_to_reboot == true
+if ( reboot == true && need_to_reboot == true ) || reboot_override = true
   log.info 'Rebooting'
   _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   err(status, 'os_patching/reboot', stderr, starttime) if status != 0
