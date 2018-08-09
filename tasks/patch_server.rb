@@ -180,14 +180,14 @@ else
   securityflag = ''
 end
 
-# There are no updates available, exit cleanly
+# There are no updates available, exit cleanly rebooting if the override flag is set
 if updatecount.zero?
-	if reboot == true
+	if reboot_override == true
   	log.info 'Rebooting'
   	_reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   	err(status, 'os_patching/reboot', stderr, starttime) if status != 0
   	output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
-  	log.info 'No patches to apply, exiting'
+  	log.info 'No patches to apply, rebooting as requested'
 	else
   	output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
   	log.info 'No patches to apply, exiting'
