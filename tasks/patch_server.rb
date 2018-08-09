@@ -58,6 +58,25 @@ def err(code, kind, message, starttime)
   exit(exitcode.to_i)
 end
 
+def reboot_required()
+  family = 'RedHat'
+  if family == 'RedHat' and File.file?('/bin/needs-restarting')
+    _output, _stderr, status = Open3.capture3('/bin/needs-restarting -r')
+    if status != 0
+      response = true
+    else
+			response = false
+    end
+    return response
+  elsif family == 'Redhat'
+    return false
+  elsif family == 'Debian' and File.file?('/var/run/reboot-required')
+    return true
+  elsif family == 'Debian'
+    return false
+  end
+end
+
 # Parse input
 
 params = JSON.parse(STDIN.read)
@@ -163,8 +182,16 @@ end
 
 # There are no updates available, exit cleanly
 if updatecount.zero?
-  output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
-  log.info 'No patches to apply, exiting'
+	if reboot == true and need_to_reboot == true
+  	log.info 'Rebooting'
+  	_reboot_out, stderr, status = Open3.capture3('/sbin/shutdown', '-r', '+1')
+  	err(status, 'os_patching/reboot', stderr, starttime) if status != 0
+  	output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
+  	log.info 'No patches to apply, exiting'
+	else
+  	output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
+  	log.info 'No patches to apply, exiting'
+	end
   exit(0)
 end
 
@@ -239,7 +266,9 @@ log.debug 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
-if reboot == true
+need_to_reboot = reboot_required
+
+if reboot == true and need_to_reboot == true
   log.info 'Rebooting'
   _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown', '-r', '+1')
   err(status, 'os_patching/reboot', stderr, starttime) if status != 0
