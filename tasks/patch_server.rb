@@ -141,8 +141,8 @@ yum_params = if params['yum_params']
                ''
              end
 
-if yum_params =~ /[\$\|\/;]/
-    err('110', 'os_patching/yum_params', 'Unsafe content in yum_params', starttime)
+if yum_params =~ %r{[\$\|\/;]}
+  err('110', 'os_patching/yum_params', 'Unsafe content in yum_params', starttime)
 end
 
 # Have we had any dpkg parameter specified?
@@ -152,8 +152,8 @@ dpkg_params = if params['dpkg_params']
                 ''
               end
 
-if dpkg_params =~ /[\$\|\/;]/
-    err('110', 'os_patching/dpkg_params', 'Unsafe content in dpkg_params', starttime)
+if dpkg_params =~ %r{[\$\|\/;]}
+  err('110', 'os_patching/dpkg_params', 'Unsafe content in dpkg_params', starttime)
 end
 
 # Set the timeout for the patch run
