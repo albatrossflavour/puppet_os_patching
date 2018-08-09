@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.3.2
+
+- Fix data validation issue with yum_params and dpkg_params
+
 ## Release 0.3.1
 
 - A new fact (reboots) is available.
