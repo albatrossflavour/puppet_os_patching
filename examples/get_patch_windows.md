@@ -8,12 +8,12 @@ puppet-task run facter_task fact=os_patching -q 'nodes[certname] { }' --format j
 
 ```json
 {
-  "node": "linode-centos-73.bandcamp.tv",
+  "node": "centos.example.com",
   "patch_window": null,
   "blocked": false
 }
 {
-  "node": "puppetmaster.bandcamp.tv",
+  "node": "puppetmaster.example.com",
   "patch_window": "42",
   "blocked": true
 }
@@ -26,7 +26,7 @@ puppet-task run facter_task fact=os_patching -q 'inventory[certname] { facts.os_
 
 ```json
 {
-  "node": "puppetmaster.bandcamp.tv",
+  "node": "puppetmaster.example.com",
   "patch_window": "42",
   "blocked": true
 }
@@ -39,7 +39,7 @@ puppet-task run facter_task fact=os_patching -q 'inventory[certname] { facts.os_
 
 ```json
 {
-  "node": "linode-centos-73.bandcamp.tv",
+  "node": "centos.example.com",
   "patch_window": null,
   "blocked": false
 }

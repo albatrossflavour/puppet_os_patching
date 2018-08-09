@@ -50,3 +50,5 @@ x 2018-08-09 How do you want to see the change freeze dates? +ChangeFreeze +Repo
 x 2018-08-09 How do you want to see the patch dates? +PatchDay +Reporting @Questions
 x 2018-08-09 How do you want to see the patch exemptions? +Exemptions +Reporting @Questions
 x 2018-08-09 2018-08-09 security issues with the yum_params options
+x 2018-08-10 How many kernels should be installed? @Questions
+x 2018-08-10 Should we check that the kernel version installed is the same as the one running? @Questions

@@ -10,12 +10,12 @@ puppet-task run facter_task fact=os_patching -q 'nodes[certname] { }' --format j
 The output will look like this:
 ```json
 {
-  "node": "linode-centos-73.bandcamp.tv",
+  "node": "centos.example.com",
   "reboot_required": false,
   "app_restart_required": false
 }
 {
-  "node": "puppetmaster.bandcamp.tv",
+  "node": "puppetmaster.example.com",
   "reboot_required": true,
   "app_restart_required": true
 }

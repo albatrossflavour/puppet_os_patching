@@ -4,7 +4,7 @@ You can use the puppet facts to query the patching status on your nodes.
 
 
 ```bash
-root@puppetmaster ~ # puppet-task run facter_task fact=os_patching --nodes linode-centos-73.bandcamp.tv --format json  | jq '.'
+root@puppetmaster ~ # puppet-task run facter_task fact=os_patching --nodes centos.example.com --format json  | jq '.'
 ```
 
 The output will look like this:
@@ -17,7 +17,7 @@ The output will look like this:
     "task": "facter_task",
     "scope": {
       "nodes": [
-        "linode-centos-73.bandcamp.tv"
+        "centos.example.com"
       ]
     },
     "params": {
@@ -31,7 +31,7 @@ The output will look like this:
   "start_timestamp": "2018-08-08T22:26:11Z",
   "items": [
     {
-      "name": "linode-centos-73.bandcamp.tv",
+      "name": "centos.example.com",
       "state": "finished",
       "results": {
         "os_patching": {
@@ -84,19 +84,19 @@ which will output:
   "date": null
 }
 {
-  "node": "centos-desktop.bandcamp.tv",
+  "node": "centos-desktop.example.com",
   "status": null,
   "message": null,
   "date": null
 }
 {
-  "node": "puppetmaster.bandcamp.tv",
+  "node": "puppetmaster.example.com",
   "status": "Success",
   "message": "No patches to apply",
   "date": "2018-08-08T07:53:26+10:00"
 }
 {
-  "node": "linode-centos-73.bandcamp.tv",
+  "node": "centos.example.com",
   "status": "Success",
   "message": "No patches to apply",
   "date": "2018-08-08T10:18:50+10:00"
