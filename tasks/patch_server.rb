@@ -182,7 +182,7 @@ end
 
 # There are no updates available, exit cleanly
 if updatecount.zero?
-	if reboot == true and need_to_reboot == true
+	if reboot == true
   	log.info 'Rebooting'
   	_reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   	err(status, 'os_patching/reboot', stderr, starttime) if status != 0
