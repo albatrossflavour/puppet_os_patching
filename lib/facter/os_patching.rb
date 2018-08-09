@@ -153,13 +153,13 @@ Facter.add('os_patching', :type => :aggregate) do
     if File.file?(reboot_required_file)
       reboot_required_fh = File.open(reboot_required_file, 'r').to_a
       data['reboots']['reboot_required'] = case reboot_required_fh.last
-                                when /^[Tt]rue$/
-                                  true
-                                when /^[Ff]alse$/
-                                  false
-                                else
-                                  ''
-                                end
+                                           when /^[Tt]rue$/
+                                             true
+                                           when /^[Ff]alse$/
+                                             false
+                                           else
+                                             ''
+                                           end
     else
       data['reboots']['reboot_required'] = 'unknown'
     end
