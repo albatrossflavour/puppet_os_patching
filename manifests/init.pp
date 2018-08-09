@@ -129,7 +129,6 @@ class os_patching (
     require => File[$fact_cmd],
   }
 
-
   $patch_window_file = '/etc/os_patching/patch_window'
   if ( $patch_window ) {
     if ($patch_window !~ /[A-Za-z0-9\-_ ]+/ ){
