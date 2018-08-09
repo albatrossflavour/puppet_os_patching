@@ -94,9 +94,9 @@ pinned_pkgs = facts['os_patching']['pinned_packages']
 
 # Should we do a reboot?
 if params['reboot']
-  if params['reboot'] == 'true'
+  if params['reboot'] == true
     reboot = true
-  elsif params['reboot'] == 'false'
+  elsif params['reboot'] == false
     reboot = false
   else
     err('108', 'os_patching/params', 'Invalid boolean to reboot parameter', starttime)
