@@ -3,8 +3,12 @@
 You can use the puppet facts to query the patching status on your nodes.
 
 
-```json
+```bash
 root@puppetmaster ~ # puppet-task run facter_task fact=os_patching --nodes linode-centos-73.bandcamp.tv --format json  | jq '.'
+```
+
+The output will look like this:
+```json
 {
   "job_id": "308",
   "command": "task",
