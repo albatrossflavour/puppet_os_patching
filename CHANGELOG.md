@@ -1,5 +1,11 @@
 # Changelog
 
+## Release 0.3.4
+
+- Got rid of a lot of the old hacky shell code from the scripts
+- Improved the output of the packages affected by patching on yum based systems
+- Lots of doco and example updates
+
 ## Release 0.3.3
 
 - Ensure we honour reboot_override even if the OS says a reboot isn't required
