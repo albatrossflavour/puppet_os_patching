@@ -240,16 +240,16 @@ if facts['os']['family'] == 'RedHat'
   # Capture the yum job ID
   log.debug 'Getting yum job ID'
   job = ''
-  yum_id, stderr, status = Open3.capture3("yum history")
+  yum_id, stderr, status = Open3.capture3('yum history')
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
   yum_id.split("\n").each do |line|
-  	matchdata = line.to_s.match(/^\s+(\d+)\s/)
-  	next unless matchdata
-  	if matchdata[1]
-    	job = matchdata[1]
-    	break
-  	end
-	end
+    matchdata = line.to_s.match(/^\s+(\d+)\s/)
+    next unless matchdata
+    if matchdata[1]
+      job = matchdata[1]
+      break
+    end
+  end
 
   # Capture the yum return code
   log.debug "Getting yum return code for job #{job}"
