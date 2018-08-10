@@ -258,7 +258,7 @@ if facts['os']['family'] == 'RedHat'
   yum_status.split("\n").each do |line|
     matchdata = line.match(/^Return-Code\s+:\s+(.*)$/)
     next unless matchdata
-    puts matchdata[1]
+    yum_return = matchdata[1]
   end
 
   pkg_hash = {}
@@ -272,7 +272,7 @@ if facts['os']['family'] == 'RedHat'
     pkg_hash[matchdata[2]] = matchdata[1]
   end
 
-  output(yum_status.chomp, reboot, security_only, 'Patching complete', pkg_hash, yum_output, job, pinned_pkgs, starttime)
+  output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, yum_output, job, pinned_pkgs, starttime)
   log.debug 'Patching complete'
 elsif facts['os']['family'] == 'Debian'
   # The security only workflow for Debain is a little complex, retiring it for now
