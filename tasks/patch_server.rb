@@ -254,6 +254,7 @@ if facts['os']['family'] == 'RedHat'
   # Capture the yum return code
   log.debug "Getting yum return code for job #{job}"
   yum_status, stderr, status = Open3.capture3("yum history info #{job}")
+  yum_return = ''
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
   yum_status.split("\n").each do |line|
     matchdata = line.match(/^Return-Code\s+:\s+(.*)$/)
