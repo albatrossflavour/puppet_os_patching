@@ -269,7 +269,7 @@ if facts['os']['family'] == 'RedHat'
   updated_packages.split("\n").each do |line|
     matchdata = line.match(/^\s+(Installed|Upgraded|Erased|Updated)\s+(\S+)\s/)
     next unless matchdata
-    pkg_hash[matchdata[2] = matchdata[1]
+    pkg_hash[matchdata[2]] = matchdata[1]
   end
 
   output(yum_status.chomp, reboot, security_only, 'Patching complete', pkg_hash, yum_output, job, pinned_pkgs, starttime)
