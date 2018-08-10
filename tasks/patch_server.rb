@@ -11,6 +11,7 @@ facter = '/opt/puppetlabs/puppet/bin/facter'
 log = Syslog::Logger.new 'os_patching'
 starttime = Time.now.iso8601
 
+# Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
   historyfile = '/etc/os_patching/run_history'
   open(historyfile, 'a') do |f|
@@ -18,6 +19,7 @@ def history(dts, message, code, reboot, security, job)
   end
 end
 
+# Default output function
 def output(returncode, reboot, security, message, packages_updated, debug, job_id, pinned_packages, starttime)
   endtime = Time.now.iso8601
   json = {
@@ -36,6 +38,7 @@ def output(returncode, reboot, security, message, packages_updated, debug, job_i
   history(starttime, message, returncode, reboot, security, job_id)
 end
 
+# Error output function
 def err(code, kind, message, starttime)
   endtime = Time.now.iso8601
   exitcode = code.to_s.split.last
@@ -58,6 +61,7 @@ def err(code, kind, message, starttime)
   exit(exitcode.to_i)
 end
 
+# Figure out if we need to reboot
 def reboot_required
   family = 'RedHat'
   if family == 'RedHat' && File.file?('/bin/needs-restarting')
@@ -78,7 +82,6 @@ def reboot_required
 end
 
 # Parse input
-
 params = JSON.parse(STDIN.read)
 
 # Cache fact data to speed things up
@@ -141,6 +144,7 @@ yum_params = if params['yum_params']
                ''
              end
 
+# Make sure we're not doing something unsafe
 if yum_params =~ %r{[\$\|\/;`&]}
   err('110', 'os_patching/yum_params', 'Unsafe content in yum_params', starttime)
 end
@@ -152,6 +156,7 @@ dpkg_params = if params['dpkg_params']
                 ''
               end
 
+# Make sure we're not doing something unsafe
 if dpkg_params =~ %r{[\$\|\/;`&]}
   err('110', 'os_patching/dpkg_params', 'Unsafe content in dpkg_params', starttime)
 end
@@ -211,6 +216,7 @@ if facts['os']['family'] == 'RedHat'
   status = ''
   stderr = ''
   pid = ''
+  # Go into a loop for the timeout to work
   Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do |_i, o, e, w|
     begin
       pid = w.pid
@@ -231,22 +237,45 @@ if facts['os']['family'] == 'RedHat'
   end
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
 
+  # Capture the yum job ID
   log.debug 'Getting yum job ID'
-  yum_id, stderr, status = Open3.capture3("yum history | grep -E \"^[[:space:]]\" | awk '{print $1}' | head -1")
+  job = ''
+  yum_id, stderr, status = Open3.capture3("yum history")
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
+  yum_id.split("\n").each do |line|
+  	matchdata = line.to_s.match(/^\s+(\d+)\s/)
+  	next unless matchdata
+  	if matchdata[1]
+    	job = matchdata[1]
+    	break
+  	end
+	end
 
-  log.debug "Getting yum return code for job #{yum_id.chomp}"
-  yum_status, stderr, status = Open3.capture3("yum history info #{yum_id.chomp} | awk '/^Return-Code/ {print $3}'")
+  # Capture the yum return code
+  log.debug "Getting yum return code for job #{job}"
+  yum_status, stderr, status = Open3.capture3("yum history info #{job}")
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
+  yum_status.split("\n").each do |line|
+    matchdata = line.match(/^Return-Code\s+:\s+(.*)$/)
+    next unless matchdata
+    puts matchdata[1]
+  end
 
-  log.debug "Getting updated package list  for job #{yum_id.chomp}"
-  updated_packages, stderr, status = Open3.capture3("yum history info #{yum_id.chomp} | awk '/Updated/ {print $2}'")
+  pkg_hash = {}
+  # Pull out the updated package list from yum history
+  log.debug "Getting updated package list  for job #{job}"
+  updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
-  pkg_array = updated_packages.split
+  updated_packages.split("\n").each do |line|
+    matchdata = line.match(/^\s+(Installed|Upgraded|Erased|Updated)\s+(\S+)\s/)
+    next unless matchdata
+    pkg_hash[matchdata[2] = matchdata[1]
+  end
 
-  output(yum_status.chomp, reboot, security_only, 'Patching complete', pkg_array, yum_output, yum_id.chomp, pinned_pkgs, starttime)
+  output(yum_status.chomp, reboot, security_only, 'Patching complete', pkg_hash, yum_output, job, pinned_pkgs, starttime)
   log.debug 'Patching complete'
 elsif facts['os']['family'] == 'Debian'
+  # The security only workflow for Debain is a little complex, retiring it for now
   if security_only == true
     log.debug 'Debian upgrades, security only not currently supported'
     err(101, 'os_patching/security_only', 'Security only not supported on Debian at this point', starttime)
@@ -257,6 +286,7 @@ elsif facts['os']['family'] == 'Debian'
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
   pkg_array = updated_packages.split
 
+  # Do the patching
   log.debug 'Running apt update'
   deb_front = 'DEBIAN_FRONTEND=noninteractive'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
@@ -266,16 +296,20 @@ elsif facts['os']['family'] == 'Debian'
   output('Success', reboot, security_only, 'Patching complete', pkg_array, apt_std_out, '', pinned_pkgs, starttime)
   log.debug 'Patching complete'
 else
+  # Only works on Redhat & Debian at the moment
   log.error 'Unsupported OS - exiting'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
+# Refresh the facts now that we've patched
 log.debug 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
+# Figure out if we have to reboot
 need_to_reboot = reboot_required
 
+# Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
 if (reboot == true && need_to_reboot == true) || reboot_override == true
   log.info 'Rebooting'
   _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
