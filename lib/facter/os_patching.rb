@@ -60,15 +60,13 @@ else
         blackouts.each_line do |line|
           matchdata = line.match(/^([\w ]*),([\d:T\-\\+]*),([\d:T\-\\+]*)$/)
           next unless matchdata
-          unless arraydata[matchdata[1]]
-            arraydata[matchdata[1]] = {}
-            if matchdata[2] > matchdata[3]
-              arraydata[matchdata[1]]['start'] = 'Start date after end date'
-              arraydata[matchdata[1]]['end'] = 'Start date after end date'
-            else
-              arraydata[matchdata[1]]['start'] = matchdata[2]
-              arraydata[matchdata[1]]['end'] = matchdata[3]
-            end
+          arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
+          if matchdata[2] > matchdata[3]
+            arraydata[matchdata[1]]['start'] = 'Start date after end date'
+            arraydata[matchdata[1]]['end'] = 'Start date after end date'
+          else
+            arraydata[matchdata[1]]['start'] = matchdata[2]
+            arraydata[matchdata[1]]['end'] = matchdata[3]
           end
 
           if (matchdata[2]..matchdata[3]).cover?(now)
