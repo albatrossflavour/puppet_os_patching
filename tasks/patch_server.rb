@@ -125,9 +125,9 @@ log.debug "Reboot after patching set to #{reboot}"
 # Should we only apply security patches?
 security_only = ''
 if params['security_only']
-  if params['security_only'] == 'true'
+  if params['security_only'] == true
     security_only = true
-  elsif params['security_only'] == 'false'
+  elsif params['security_only'] == false
     security_only = false
   else
     err('109', 'os_patching/params', 'Invalid boolean to security_only parameter', starttime)
