@@ -217,7 +217,7 @@ if facts['os']['family'] == 'RedHat'
   stderr = ''
   pid = ''
   # Go into a loop for the timeout to work
-  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do |_i, o, e, w|
+  Open3.popen3("yum #{yum_params} #{securityflag} upgrade -y") do |_i, o, e, w|
     begin
       pid = w.pid
       Timeout.timeout(timeout) do
