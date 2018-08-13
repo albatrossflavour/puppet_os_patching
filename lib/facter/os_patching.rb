@@ -1,3 +1,6 @@
+if Facter.value(:kernel) == 'Windows' then
+ exit(0)
+end
 Facter.add('os_patching', :type => :aggregate) do
   confine :kernel => 'Linux'
 
