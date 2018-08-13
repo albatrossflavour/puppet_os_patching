@@ -1,7 +1,7 @@
 # Ensure that this fact does not try to be loaded
 # on old (pre v.2) versions of facter as it uses
 # aggregate facts
-if Facter.value(:facterversion).split(".")[0].to_i < 2
+if Facter.value(:facterversion).split('.')[0].to_i < 2
   exit(0)
 end
 Facter.add('os_patching', :type => :aggregate) do
