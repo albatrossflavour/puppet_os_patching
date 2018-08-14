@@ -202,7 +202,8 @@ end
 if updatecount.zero?
   if reboot_override == true
     log.info 'Rebooting'
-    system('nohup /sbin/shutdown -r +1 &')
+    p1 = fork {system('sleep 2;/sbin/shutdown -r +1')}
+    Process.detach(p1)
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     log.info 'No patches to apply, rebooting as requested'
   else
