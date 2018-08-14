@@ -22,6 +22,7 @@ def history(dts, message, code, reboot, security, job)
 end
 
 def run_with_timeout(command, timeout, tick)
+  BUFFER_SIZE = 4096
   output = ''
   begin
     # Start task in another thread, which spawns a process
