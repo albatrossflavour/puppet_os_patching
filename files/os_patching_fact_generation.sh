@@ -5,6 +5,10 @@
 
 PATH=/usr/bin:/usr/sbin:/bin:/usr/local/bin
 
+LOCKFILE=/var/run/os_patching_fact_generation.lock
+
+lockfile -r 0 $LOCKFILE
+
 case $(/usr/local/bin/facter osfamily) in
   RedHat)
     PKGS=$(yum -q check-update | awk '/^[a-z]/ {print $1}')
@@ -15,6 +19,7 @@ case $(/usr/local/bin/facter osfamily) in
     SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /security/ {print $2}')
   ;;
   *)
+    rm $LOCKFILE
     exit 1
   ;;
 esac
@@ -26,6 +31,7 @@ SECUPDATEFILE="$DATADIR/security_package_updates"
 if [ ! -d "${DATADIR}" ]
 then
   /usr/bin/logger -p error -t os_patching_fact_generation.sh "Can't find ${DATADIR}, exiting"
+  rm $LOCKFILE
   exit 1
 fi
 
@@ -56,4 +62,5 @@ fi
 /opt/puppetlabs/bin/puppet facts upload 2>/dev/null 1>/dev/null
 /usr/bin/logger -p info -t os_patching_fact_generation.sh "patch data fact refreshed"
 
+rm $LOCKFILE
 exit 0
