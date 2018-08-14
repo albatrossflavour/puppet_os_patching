@@ -207,7 +207,7 @@ if updatecount.zero?
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
     log.info 'No patches to apply, rebooting as requested'
-    p1 = fork { system('nohup /sbin/shutdown -r +1 &') }
+    p1 = fork { system('nohup /sbin/shutdown -r +10 &') }
     Process.detach(p1)
   else
     output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
