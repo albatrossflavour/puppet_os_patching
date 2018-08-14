@@ -12,6 +12,7 @@ facter = '/opt/puppetlabs/puppet/bin/facter'
 
 log = Syslog::Logger.new 'os_patching'
 starttime = Time.now.iso8601
+BUFFER_SIZE = 4096
 
 # Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
@@ -22,7 +23,6 @@ def history(dts, message, code, reboot, security, job)
 end
 
 def run_with_timeout(command, timeout, tick)
-  BUFFER_SIZE = 4096
   output = ''
   begin
     # Start task in another thread, which spawns a process
