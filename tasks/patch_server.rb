@@ -6,6 +6,8 @@ require 'syslog/logger'
 require 'time'
 require 'timeout'
 
+$stdout.sync = true
+
 facter = '/opt/puppetlabs/puppet/bin/facter'
 
 log = Syslog::Logger.new 'os_patching'
