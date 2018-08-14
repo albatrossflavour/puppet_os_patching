@@ -21,6 +21,43 @@ def history(dts, message, code, reboot, security, job)
   end
 end
 
+def run_with_timeout(command, timeout, tick)
+  output = ''
+  begin
+    # Start task in another thread, which spawns a process
+    stdin, stderrout, thread = Open3.popen2e(command)
+    # Get the pid of the spawned process
+    pid = thread[:pid]
+    start = Time.now
+
+    while (Time.now - start) < timeout and thread.alive?
+      # Wait up to `tick` seconds for output/error data
+      Kernel.select([stderrout], nil, nil, tick)
+      # Try to read the data
+      begin
+        output << stderrout.read_nonblock(BUFFER_SIZE)
+      rescue IO::WaitReadable
+        # A read would block, so loop around for another select
+      rescue EOFError
+        # Command has completed, not really an error...
+        break
+      end
+    end
+    # Give Ruby time to clean up the other thread
+    sleep 1
+
+    if thread.alive?
+      # We need to kill the process, because killing the thread leaves
+      # the process alive but detached, annoyingly enough.
+      Process.kill("TERM", pid)
+    end
+  ensure
+    stdin.close if stdin
+    stderrout.close if stderrout
+  end
+  return output
+end
+
 # Default output function
 def output(returncode, reboot, security, message, packages_updated, debug, job_id, pinned_packages, starttime)
   endtime = Time.now.iso8601
@@ -220,12 +257,27 @@ yum_output = ''
 # Run the patching
 if facts['os']['family'] == 'RedHat'
   log.debug 'Running yum upgrade'
-  log.error "Starting timeout code : #{timeout}"
   status = ''
   stderr = ''
   pid = ''
-  yum_output, stderr, status = Open3.capture3("yum #{yum_params} #{securityflag} upgrade -y")
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
+  #yum_output, stderr, status = Open3.capture3("yum #{yum_params} #{securityflag} upgrade -y")
+  #err(status, 'os_patching/yum', stderr, starttime) if status != 0
+
+
+
+	###############################################################################
+	###############################################################################
+	###############################################################################
+	###############################################################################
+  # popen2e combines stdout and stderr into one IO object
+  yum_stdout = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y",timeout,10)
+	###############################################################################
+	###############################################################################
+	###############################################################################
+	###############################################################################
+
+
+
 
   # Capture the yum job ID
   log.debug 'Getting yum job ID'
