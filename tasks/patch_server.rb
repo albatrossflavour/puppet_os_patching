@@ -78,13 +78,13 @@ def reboot_required(family, release)
       output, _stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
       response = true unless output.empty?
     end
-    return response
+    response
   elsif family == 'Redhat'
-    return false
+    false
   elsif family == 'Debian' && File.file?('/var/run/reboot-required')
-    return true
+    true
   elsif family == 'Debian'
-    return false
+    false
   end
 end
 
@@ -207,7 +207,7 @@ if updatecount.zero?
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
     log.info 'No patches to apply, rebooting as requested'
-    p1 = fork {system('nohup /sbin/shutdown -r +1 &')}
+    p1 = fork { system('nohup /sbin/shutdown -r +1 &') }
     Process.detach(p1)
   else
     output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
@@ -319,7 +319,7 @@ err(status, 'os_patching/fact', stderr, starttime) if status != 0
 needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
 if (reboot == true && needs_reboot == true) || reboot_override == true
   log.info 'Rebooting'
-  p1 = fork {system('nohup /sbin/shutdown -r &')}
+  p1 = fork { system('nohup /sbin/shutdown -r +1 &') }
   Process.detach(p1)
 end
 log.info 'os_patching run complete'
