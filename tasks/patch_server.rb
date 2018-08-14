@@ -205,6 +205,7 @@ if updatecount.zero?
   if reboot_override == true
     log.info 'Rebooting'
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
+    $stdout.flush
     log.info 'No patches to apply, rebooting as requested'
     p1 = fork {system('nohup /sbin/shutdown -r +1 &')}
     Process.detach(p1)
