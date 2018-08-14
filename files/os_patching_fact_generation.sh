@@ -10,7 +10,7 @@ LOCKFILE=/var/run/os_patching_fact_generation.lock
 if [ -f "$LOCKFILE" ]
 then
   echo "Locked, exiting" >&2
-  exit 1
+  exit 0
 else
   echo "$$" > $LOCKFILE
 fi
