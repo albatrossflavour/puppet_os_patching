@@ -224,25 +224,7 @@ if facts['os']['family'] == 'RedHat'
   status = ''
   stderr = ''
   pid = ''
-  # Go into a loop for the timeout to work
-  Open3.popen3("yum #{yum_params} #{securityflag} upgrade -y") do |_i, o, e, w|
-    begin
-      pid = w.pid
-      Timeout.timeout(timeout) do
-        until e.eof?
-          sleep(1)
-          log.debug "yum process #{pid} still running but within timeout threshold, sleeping"
-        end
-      end
-    rescue Timeout::Error
-      Process.kill('SIGTERM', pid)
-      error = o.read
-      err(w.value, 'os_patching/timeout', "yum timeout after #{timeout} seconds : #{error}", starttime)
-    end
-    status = w.value
-    yum_output = o.read
-    stderr = e.read
-  end
+  yum_output, stderr, status = Open3.capture3("yum #{yum_params} #{securityflag} upgrade -y")
   err(status, 'os_patching/yum', stderr, starttime) if status != 0
 
   # Capture the yum job ID
