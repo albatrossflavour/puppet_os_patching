@@ -62,7 +62,7 @@ def err(code, kind, message, starttime)
 end
 
 # Figure out if we need to reboot
-def reboot_required(family,release)
+def reboot_required(family, release)
   if family == 'RedHat' && File.file?('/usr/bin/needs-restarting')
     response = ''
     if release == 7
@@ -314,7 +314,7 @@ err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
 needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
-if (reboot == true && reboot_required == true) || reboot_override == true
+if (reboot == true && needs_reboot == true) || reboot_override == true
   log.info 'Rebooting'
   _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   err(status, 'os_patching/reboot', stderr, starttime) if status != 0
