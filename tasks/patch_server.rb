@@ -316,7 +316,7 @@ err(status, 'os_patching/fact', stderr, starttime) if status != 0
 needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
 if (reboot == true && needs_reboot == true) || reboot_override == true
   log.info 'Rebooting'
-  p1 = fork {system('nohup /sbin/shutdown -r +1 &')}
+  p1 = fork {system('sleep 2;/sbin/shutdown -r')}
   Process.detach(p1)
 end
 log.info 'os_patching run complete'
