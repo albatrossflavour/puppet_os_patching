@@ -7,7 +7,13 @@ PATH=/usr/bin:/usr/sbin:/bin:/usr/local/bin
 
 LOCKFILE=/var/run/os_patching_fact_generation.lock
 
-lockfile -r 0 $LOCKFILE
+if [ -f "$LOCKFILE" ]
+then
+  echo "Locked, exiting" >&2
+  exit 1
+else
+  echo "$$" > $LOCKFILE
+fi
 
 case $(/usr/local/bin/facter osfamily) in
   RedHat)
