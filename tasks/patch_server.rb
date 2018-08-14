@@ -271,7 +271,8 @@ if facts['os']['family'] == 'RedHat'
 	###############################################################################
 	###############################################################################
   # popen2e combines stdout and stderr into one IO object
-  yum_stdout = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y",timeout,10)
+  log.error "Timeout value set to : #{timeout}"
+  yum_stdout = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y",timeout,2)
 	###############################################################################
 	###############################################################################
 	###############################################################################
