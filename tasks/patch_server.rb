@@ -51,6 +51,7 @@ def run_with_timeout(command, timeout, tick)
       # We need to kill the process, because killing the thread leaves
       # the process alive but detached, annoyingly enough.
       Process.kill("TERM", pid)
+      err(status, 'os_patching/fact_refresh', output, start)
     end
   ensure
     stdin.close if stdin
@@ -273,7 +274,7 @@ if facts['os']['family'] == 'RedHat'
   # popen2e combines stdout and stderr into one IO object
   log.error "Timeout value set to : #{timeout}"
   #yum_stdout = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y",timeout,2)
-  yum_stdout = run_with_timeout("sleep 30",timeout,2)
+  yum_stdout = run_with_timeout("sleep 300",timeout,2)
 	###############################################################################
 	###############################################################################
 	###############################################################################
