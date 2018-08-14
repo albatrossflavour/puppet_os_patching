@@ -70,12 +70,12 @@ def reboot_required
     if release == 7
       _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
       response = if status != 0
-                  true
-                else
-                  false
-                end
+                   true
+                 else
+                   false
+                 end
     else
-      output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting')
+      output, _stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
       response = true if output
     end
     return response
