@@ -47,16 +47,31 @@ do
   echo "$UPDATE" >> ${SECUPDATEFILE} || exit 1
 done
 
-if [ -f '/bin/needs-restarting' ]
+if [ -f '/usr/bin/needs-restarting' ]
 then
-  /bin/needs-restarting -r 2>/dev/null 1>/dev/null
-  if [ $? -gt 0 ]
-  then
-    echo "true" > /etc/os_patching/reboot_required
-  else
-    echo "false" > /etc/os_patching/reboot_required
-  fi
-  /bin/needs-restarting 2>/dev/null >/etc/os_patching/apps_to_restart
+  case $(facter os.release.major) in
+    7)
+      /usr/bin/needs-restarting -r 2>/dev/null 1>/dev/null
+      if [ $? -gt 0 ]
+      then
+        echo "true" > /etc/os_patching/reboot_required
+      else
+        echo "false" > /etc/os_patching/reboot_required
+      fi
+      /usr/bin/needs-restarting 2>/dev/null >/etc/os_patching/apps_to_restart
+    ;;
+    6)
+      OUTPUT=`/usr/bin/needs-restarting`
+      if [ -n "$OUTPUT" ]
+      then
+        echo "true" > /etc/os_patching/reboot_required
+        echo $OUTPUT > /etc/os_patching/apps_to_restart
+      else
+        echo "false" > /etc/os_patching/reboot_required
+        echo "" > /etc/os_patching/apps_to_restart
+      fi
+    ;;
+  esac
 fi
 
 /opt/puppetlabs/bin/puppet facts upload 2>/dev/null 1>/dev/null
