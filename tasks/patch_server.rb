@@ -51,7 +51,7 @@ def run_with_timeout(command, timeout, tick)
       # We need to kill the process, because killing the thread leaves
       # the process alive but detached, annoyingly enough.
       Process.kill("TERM", pid)
-      err(status, 'os_patching/fact_refresh', output, start)
+      err('403', 'os_patching/fact_refresh', output, start)
     end
   ensure
     stdin.close if stdin
