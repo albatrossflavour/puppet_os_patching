@@ -71,7 +71,7 @@ then
       if [ -n "$OUTPUT" ]
       then
         echo "true" > /etc/os_patching/reboot_required
-        echo $OUTPUT > /etc/os_patching/apps_to_restart
+        /usr/bin/needs-restarting > /etc/os_patching/apps_to_restart
       else
         echo "false" > /etc/os_patching/reboot_required
         echo "" > /etc/os_patching/apps_to_restart
