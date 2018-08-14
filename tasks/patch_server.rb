@@ -63,6 +63,9 @@ end
 
 # Figure out if we need to reboot
 def reboot_required
+  full_facts, stderr, status = Open3.capture3(facter, '-p', '-j')
+  err(status, 'os_patching/facter', stderr, starttime) if status != 0
+  facts = JSON.parse(full_facts)
   family = facts['os']['family']
   if family == 'RedHat' && File.file?('/usr/bin/needs-restarting')
     release = facts['os']['release']['major']
@@ -314,11 +317,8 @@ log.debug 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
-# Figure out if we have to reboot
-need_to_reboot = reboot_required
-
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
-if (reboot == true && need_to_reboot == true) || reboot_override == true
+if (reboot == true && reboot_required == true) || reboot_override == true
   log.info 'Rebooting'
   _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
   err(status, 'os_patching/reboot', stderr, starttime) if status != 0
