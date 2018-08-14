@@ -76,7 +76,7 @@ def reboot_required
                  end
     else
       output, _stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
-      response = true if output
+      response = true unless output.empty?
     end
     return response
   elsif family == 'Redhat'
