@@ -63,14 +63,21 @@ end
 
 # Figure out if we need to reboot
 def reboot_required
-  family = 'RedHat'
-  if family == 'RedHat' && File.file?('/bin/needs-restarting')
-    _output, _stderr, status = Open3.capture3('/bin/needs-restarting -r')
-    response = if status != 0
-                 true
-               else
-                 false
-               end
+  family = facts['os']['family']
+  if family == 'RedHat' && File.file?('/usr/bin/needs-restarting')
+    release = facts['os']['release']['major']
+    response = ''
+    if release == 7
+      _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
+      response = if status != 0
+                  true
+                else
+                  false
+                end
+    else
+      output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting')
+      response = true if output
+    end
     return response
   elsif family == 'Redhat'
     return false
