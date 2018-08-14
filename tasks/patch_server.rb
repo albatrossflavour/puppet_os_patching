@@ -67,7 +67,7 @@ end
 def reboot_required(family, release)
   if family == 'RedHat' && File.file?('/usr/bin/needs-restarting')
     response = ''
-    if release > 6
+    if release.to_i > 6
       _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
       response = if status != 0
                    true
