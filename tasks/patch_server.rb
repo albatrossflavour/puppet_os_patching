@@ -12,6 +12,7 @@ facter = '/opt/puppetlabs/puppet/bin/facter'
 
 log = Syslog::Logger.new 'os_patching'
 starttime = Time.now.iso8601
+BUFFER_SIZE = 4096
 
 # Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
@@ -19,6 +20,44 @@ def history(dts, message, code, reboot, security, job)
   open(historyfile, 'a') do |f|
     f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
   end
+end
+
+def run_with_timeout(command, timeout, tick)
+  output = ''
+  begin
+    # Start task in another thread, which spawns a process
+    stdin, stderrout, thread = Open3.popen2e(command)
+    # Get the pid of the spawned process
+    pid = thread[:pid]
+    start = Time.now
+
+    while (Time.now - start) < timeout and thread.alive?
+      # Wait up to `tick` seconds for output/error data
+      Kernel.select([stderrout], nil, nil, tick)
+      # Try to read the data
+      begin
+        output << stderrout.read_nonblock(BUFFER_SIZE)
+      rescue IO::WaitReadable
+        # A read would block, so loop around for another select
+      rescue EOFError
+        # Command has completed, not really an error...
+        break
+      end
+    end
+    # Give Ruby time to clean up the other thread
+    sleep 1
+
+    if thread.alive?
+      # We need to kill the process, because killing the thread leaves
+      # the process alive but detached, annoyingly enough.
+      Process.kill("TERM", pid)
+      err('403', 'os_patching/fact_refresh', "TIMEOUT AFTER #{timeout} seconds\n#{output}", start)
+    end
+  ensure
+    stdin.close if stdin
+    stderrout.close if stderrout
+  end
+  return output
 end
 
 # Default output function
@@ -220,30 +259,8 @@ yum_output = ''
 # Run the patching
 if facts['os']['family'] == 'RedHat'
   log.debug 'Running yum upgrade'
-  log.error "Starting timeout code : #{timeout}"
-  status = ''
-  stderr = ''
-  pid = ''
-  # Go into a loop for the timeout to work
-  Open3.popen3("yum #{yum_params} #{securityflag} upgrade -y") do |_i, o, e, w|
-    begin
-      pid = w.pid
-      Timeout.timeout(timeout) do
-        until e.eof?
-          sleep(1)
-          log.debug "yum process #{pid} still running but within timeout threshold, sleeping"
-        end
-      end
-    rescue Timeout::Error
-      Process.kill('SIGTERM', pid)
-      error = o.read
-      err(w.value, 'os_patching/timeout', "yum timeout after #{timeout} seconds : #{error}", starttime)
-    end
-    status = w.value
-    yum_output = o.read
-    stderr = e.read
-  end
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
+  log.debug "Timeout value set to : #{timeout}"
+  yum_stdout = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y",timeout,2)
 
   # Capture the yum job ID
   log.debug 'Getting yum job ID'

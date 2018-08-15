@@ -10,7 +10,7 @@ LOCKFILE=/var/run/os_patching_fact_generation.lock
 if [ -f "$LOCKFILE" ]
 then
   echo "Locked, exiting" >&2
-  exit 1
+  exit 0
 else
   echo "$$" > $LOCKFILE
 fi
@@ -74,7 +74,7 @@ then
         /usr/bin/needs-restarting > /etc/os_patching/apps_to_restart
       else
         echo "false" > /etc/os_patching/reboot_required
-        echo "" > /etc/os_patching/apps_to_restart
+        cat /dev/null > /etc/os_patching/apps_to_restart
       fi
     ;;
   esac

@@ -1,4 +1,3 @@
-Do we need to ensure the state of the yum config on the servers prior to patching? @Questions
 Should we ensure that the last puppet run was green before continuing? @Questions
 Should we ensure that the last puppet run was within X hours before starting patching? @Questions
 Should we do a puppet run prior to kicking off the patching to ensure state? @Questions
