@@ -74,7 +74,7 @@ then
         /usr/bin/needs-restarting > /etc/os_patching/apps_to_restart
       else
         echo "false" > /etc/os_patching/reboot_required
-        echo "" > /etc/os_patching/apps_to_restart
+        cat /dev/null > /etc/os_patching/apps_to_restart
       fi
     ;;
   esac
