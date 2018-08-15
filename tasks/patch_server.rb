@@ -39,6 +39,7 @@ def run_with_timeout(command, timeout, tick)
         output << stderrout.read_nonblock(BUFFER_SIZE)
       rescue IO::WaitReadable
         # A read would block, so loop around for another select
+        sleep 1
       rescue EOFError
         # Command has completed, not really an error...
         break
