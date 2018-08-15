@@ -256,7 +256,6 @@ if updatecount.zero?
   exit(0)
 end
 
-yum_output = ''
 # Run the patching
 if facts['os']['family'] == 'RedHat'
   log.debug 'Running yum upgrade'
