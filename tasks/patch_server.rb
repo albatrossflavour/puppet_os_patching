@@ -31,7 +31,7 @@ def run_with_timeout(command, timeout, tick)
     pid = thread[:pid]
     start = Time.now
 
-    while (Time.now - start) < timeout and thread.alive?
+    while (Time.now - start) < timeout && thread.alive?
       # Wait up to `tick` seconds for output/error data
       Kernel.select([stderrout], nil, nil, tick)
       # Try to read the data
@@ -50,14 +50,14 @@ def run_with_timeout(command, timeout, tick)
     if thread.alive?
       # We need to kill the process, because killing the thread leaves
       # the process alive but detached, annoyingly enough.
-      Process.kill("TERM", pid)
+      Process.kill('TERM', pid)
       err('403', 'os_patching/fact_refresh', "TIMEOUT AFTER #{timeout} seconds\n#{output}", start)
     end
   ensure
     stdin.close if stdin
     stderrout.close if stderrout
   end
-  return output
+  output
 end
 
 # Default output function
@@ -260,7 +260,7 @@ yum_output = ''
 if facts['os']['family'] == 'RedHat'
   log.debug 'Running yum upgrade'
   log.debug "Timeout value set to : #{timeout}"
-  yum_stdout = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y",timeout,2)
+  yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
 
   # Capture the yum job ID
   log.debug 'Getting yum job ID'
