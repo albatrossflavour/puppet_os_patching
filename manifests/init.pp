@@ -85,6 +85,7 @@ class os_patching (
     owner  => 'root',
     group  => 'root',
     mode   => '0644',
+    notify => Exec[$fact_cmd],
   }
 
   unless defined(Class['os_patching::block']) {

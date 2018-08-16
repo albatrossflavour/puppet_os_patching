@@ -6,10 +6,13 @@ require 'syslog/logger'
 require 'time'
 require 'timeout'
 
+$stdout.sync = true
+
 facter = '/opt/puppetlabs/puppet/bin/facter'
 
 log = Syslog::Logger.new 'os_patching'
 starttime = Time.now.iso8601
+BUFFER_SIZE = 4096
 
 # Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
@@ -17,6 +20,45 @@ def history(dts, message, code, reboot, security, job)
   open(historyfile, 'a') do |f|
     f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
   end
+end
+
+def run_with_timeout(command, timeout, tick)
+  output = ''
+  begin
+    # Start task in another thread, which spawns a process
+    stdin, stderrout, thread = Open3.popen2e(command)
+    # Get the pid of the spawned process
+    pid = thread[:pid]
+    start = Time.now
+
+    while (Time.now - start) < timeout && thread.alive?
+      # Wait up to `tick` seconds for output/error data
+      Kernel.select([stderrout], nil, nil, tick)
+      # Try to read the data
+      begin
+        output << stderrout.read_nonblock(BUFFER_SIZE)
+      rescue IO::WaitReadable
+        # A read would block, so loop around for another select
+        sleep 1
+      rescue EOFError
+        # Command has completed, not really an error...
+        break
+      end
+    end
+    # Give Ruby time to clean up the other thread
+    sleep 1
+
+    if thread.alive?
+      # We need to kill the process, because killing the thread leaves
+      # the process alive but detached, annoyingly enough.
+      Process.kill('TERM', pid)
+      err('403', 'os_patching/fact_refresh', "TIMEOUT AFTER #{timeout} seconds\n#{output}", start)
+    end
+  ensure
+    stdin.close if stdin
+    stderrout.close if stderrout
+  end
+  output
 end
 
 # Default output function
@@ -62,22 +104,32 @@ def err(code, kind, message, starttime)
 end
 
 # Figure out if we need to reboot
-def reboot_required
-  family = 'RedHat'
-  if family == 'RedHat' && File.file?('/bin/needs-restarting')
-    _output, _stderr, status = Open3.capture3('/bin/needs-restarting -r')
-    response = if status != 0
-                 true
-               else
-                 false
-               end
-    return response
+def reboot_required(family, release)
+  if family == 'RedHat' && File.file?('/usr/bin/needs-restarting')
+    response = ''
+    if release.to_i > 6
+      _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
+      response = if status != 0
+                   true
+                 else
+                   false
+                 end
+    elsif release.to_i == 6
+      # If needs restart returns processes on RHEL6, consider that the node
+      # needs a reboot
+      output, _stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
+      response = true unless output.empty?
+    else
+      # Needs-restart doesn't exist before RHEL6
+      response = true
+    end
+    response
   elsif family == 'Redhat'
-    return false
+    false
   elsif family == 'Debian' && File.file?('/var/run/reboot-required')
-    return true
+    true
   elsif family == 'Debian'
-    return false
+    false
   end
 end
 
@@ -125,9 +177,9 @@ log.debug "Reboot after patching set to #{reboot}"
 # Should we only apply security patches?
 security_only = ''
 if params['security_only']
-  if params['security_only'] == 'true'
+  if params['security_only'] == true
     security_only = true
-  elsif params['security_only'] == 'false'
+  elsif params['security_only'] == false
     security_only = false
   else
     err('109', 'os_patching/params', 'Invalid boolean to security_only parameter', starttime)
@@ -197,10 +249,11 @@ end
 if updatecount.zero?
   if reboot_override == true
     log.info 'Rebooting'
-    _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
-    err(status, 'os_patching/reboot', stderr, starttime) if status != 0
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
+    $stdout.flush
     log.info 'No patches to apply, rebooting as requested'
+    p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
+    Process.detach(p1)
   else
     output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
     log.info 'No patches to apply, exiting'
@@ -208,69 +261,52 @@ if updatecount.zero?
   exit(0)
 end
 
-yum_output = ''
 # Run the patching
 if facts['os']['family'] == 'RedHat'
   log.debug 'Running yum upgrade'
-  log.error "Starting timeout code : #{timeout}"
-  status = ''
-  stderr = ''
-  pid = ''
-  # Go into a loop for the timeout to work
-  Open3.popen3("/bin/yum #{yum_params} #{securityflag} upgrade -y") do |_i, o, e, w|
-    begin
-      pid = w.pid
-      Timeout.timeout(timeout) do
-        until e.eof?
-          sleep(1)
-          log.debug "yum process #{pid} still running but within timeout threshold, sleeping"
-        end
+  log.debug "Timeout value set to : #{timeout}"
+  yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
+
+  if facts['os']['release']['major'].to_i > 5
+    # Capture the yum job ID
+    log.debug 'Getting yum job ID'
+    job = ''
+    yum_id, stderr, status = Open3.capture3('yum history')
+    err(status, 'os_patching/yum', stderr, starttime) if status != 0
+    yum_id.split("\n").each do |line|
+      matchdata = line.to_s.match(/^\s+(\d+)\s/)
+      next unless matchdata
+      if matchdata[1]
+        job = matchdata[1]
+        break
       end
-    rescue Timeout::Error
-      Process.kill('SIGTERM', pid)
-      error = o.read
-      err(w.value, 'os_patching/timeout', "yum timeout after #{timeout} seconds : #{error}", starttime)
     end
-    status = w.value
-    yum_output = o.read
-    stderr = e.read
-  end
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
 
-  # Capture the yum job ID
-  log.debug 'Getting yum job ID'
-  job = ''
-  yum_id, stderr, status = Open3.capture3('yum history')
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
-  yum_id.split("\n").each do |line|
-    matchdata = line.to_s.match(/^\s+(\d+)\s/)
-    next unless matchdata
-    if matchdata[1]
-      job = matchdata[1]
-      break
+    # Capture the yum return code
+    log.debug "Getting yum return code for job #{job}"
+    yum_status, stderr, status = Open3.capture3("yum history info #{job}")
+    yum_return = ''
+    err(status, 'os_patching/yum', stderr, starttime) if status != 0
+    yum_status.split("\n").each do |line|
+      matchdata = line.match(/^Return-Code\s+:\s+(.*)$/)
+      next unless matchdata
+      yum_return = matchdata[1]
     end
-  end
 
-  # Capture the yum return code
-  log.debug "Getting yum return code for job #{job}"
-  yum_status, stderr, status = Open3.capture3("yum history info #{job}")
-  yum_return = ''
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
-  yum_status.split("\n").each do |line|
-    matchdata = line.match(/^Return-Code\s+:\s+(.*)$/)
-    next unless matchdata
-    yum_return = matchdata[1]
-  end
-
-  pkg_hash = {}
-  # Pull out the updated package list from yum history
-  log.debug "Getting updated package list  for job #{job}"
-  updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
-  updated_packages.split("\n").each do |line|
-    matchdata = line.match(/^\s+(Installed|Upgraded|Erased|Updated)\s+(\S+)\s/)
-    next unless matchdata
-    pkg_hash[matchdata[2]] = matchdata[1]
+    pkg_hash = {}
+    # Pull out the updated package list from yum history
+    log.debug "Getting updated package list  for job #{job}"
+    updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
+    err(status, 'os_patching/yum', stderr, starttime) if status != 0
+    updated_packages.split("\n").each do |line|
+      matchdata = line.match(/^\s+(Installed|Upgraded|Erased|Updated)\s+(\S+)\s/)
+      next unless matchdata
+      pkg_hash[matchdata[2]] = matchdata[1]
+    end
+  else
+    yum_return = 'Assumed successful - further details not available on RHEL5'
+    job = 'Unsupported on RHEL5'
+    pkg_hash = {}
   end
 
   output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, yum_output, job, pinned_pkgs, starttime)
@@ -307,13 +343,11 @@ log.debug 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
-# Figure out if we have to reboot
-need_to_reboot = reboot_required
-
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
-if (reboot == true && need_to_reboot == true) || reboot_override == true
+needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
+if (reboot == true && needs_reboot == true) || reboot_override == true
   log.info 'Rebooting'
-  _reboot_out, stderr, status = Open3.capture3('/sbin/shutdown -r +1')
-  err(status, 'os_patching/reboot', stderr, starttime) if status != 0
+  p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
+  Process.detach(p1)
 end
 log.info 'os_patching run complete'

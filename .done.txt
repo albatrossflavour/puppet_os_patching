@@ -53,3 +53,4 @@ x 2018-08-09 2018-08-09 security issues with the yum_params options
 x 2018-08-10 How many kernels should be installed? @Questions
 x 2018-08-10 Should we check that the kernel version installed is the same as the one running? @Questions
 x 2018-08-10 2018-08-10 Get rid of awk and grep
+x 2018-08-10 Do we need to ensure the state of the yum config on the servers prior to patching? @Questions
