@@ -1,5 +1,13 @@
 # Changelog
 
+## Release 0.3.5
+
+- Bugfixes for the timeout code, specifically affected earlier versions of RHEL
+- Fix for the 'needs reboot' variances across OS versions
+- stdout buffering fix for RHEL6
+- Doco updates
+- Many rubocop fixes
+
 ## Release 0.3.4
 
 - Got rid of a lot of the old hacky shell code from the scripts
