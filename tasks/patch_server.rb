@@ -114,9 +114,14 @@ def reboot_required(family, release)
                  else
                    false
                  end
-    else
+    elsif release.to_i == 6
+      # If needs restart returns processes on RHEL6, consider that the node
+      # needs a reboot
       output, _stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
       response = true unless output.empty?
+    else
+      # Needs-restart doesn't exist before RHEL6
+      response = true
     end
     response
   elsif family == 'Redhat'
@@ -262,40 +267,46 @@ if facts['os']['family'] == 'RedHat'
   log.debug "Timeout value set to : #{timeout}"
   yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
 
-  # Capture the yum job ID
-  log.debug 'Getting yum job ID'
-  job = ''
-  yum_id, stderr, status = Open3.capture3('yum history')
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
-  yum_id.split("\n").each do |line|
-    matchdata = line.to_s.match(/^\s+(\d+)\s/)
-    next unless matchdata
-    if matchdata[1]
-      job = matchdata[1]
-      break
+  if facts['os']['release']['major'].to_i > 5
+    # Capture the yum job ID
+    log.debug 'Getting yum job ID'
+    job = ''
+    yum_id, stderr, status = Open3.capture3('yum history')
+    err(status, 'os_patching/yum', stderr, starttime) if status != 0
+    yum_id.split("\n").each do |line|
+      matchdata = line.to_s.match(/^\s+(\d+)\s/)
+      next unless matchdata
+      if matchdata[1]
+        job = matchdata[1]
+        break
+      end
     end
-  end
 
-  # Capture the yum return code
-  log.debug "Getting yum return code for job #{job}"
-  yum_status, stderr, status = Open3.capture3("yum history info #{job}")
-  yum_return = ''
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
-  yum_status.split("\n").each do |line|
-    matchdata = line.match(/^Return-Code\s+:\s+(.*)$/)
-    next unless matchdata
-    yum_return = matchdata[1]
-  end
+    # Capture the yum return code
+    log.debug "Getting yum return code for job #{job}"
+    yum_status, stderr, status = Open3.capture3("yum history info #{job}")
+    yum_return = ''
+    err(status, 'os_patching/yum', stderr, starttime) if status != 0
+    yum_status.split("\n").each do |line|
+      matchdata = line.match(/^Return-Code\s+:\s+(.*)$/)
+      next unless matchdata
+      yum_return = matchdata[1]
+    end
 
-  pkg_hash = {}
-  # Pull out the updated package list from yum history
-  log.debug "Getting updated package list  for job #{job}"
-  updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
-  err(status, 'os_patching/yum', stderr, starttime) if status != 0
-  updated_packages.split("\n").each do |line|
-    matchdata = line.match(/^\s+(Installed|Upgraded|Erased|Updated)\s+(\S+)\s/)
-    next unless matchdata
-    pkg_hash[matchdata[2]] = matchdata[1]
+    pkg_hash = {}
+    # Pull out the updated package list from yum history
+    log.debug "Getting updated package list  for job #{job}"
+    updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
+    err(status, 'os_patching/yum', stderr, starttime) if status != 0
+    updated_packages.split("\n").each do |line|
+      matchdata = line.match(/^\s+(Installed|Upgraded|Erased|Updated)\s+(\S+)\s/)
+      next unless matchdata
+      pkg_hash[matchdata[2]] = matchdata[1]
+    end
+  else
+    yum_return = 'Assumed successful - further details not available on RHEL5'
+    job = 'Unsupported on RHEL5'
+    pkg_hash = {}
   end
 
   output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, yum_output, job, pinned_pkgs, starttime)
