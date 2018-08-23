@@ -9,7 +9,6 @@ if Facter.value(:facterversion).split('.')[0].to_i < 2
   end
 else
   Facter.add('os_patching', :type => :aggregate) do
-
     require 'time'
     now = Time.now.iso8601
 
@@ -26,7 +25,7 @@ else
       if File.file?(updatefile)
         updates = File.open(updatefile, 'r').read
         updates.each_line do |line|
-          next unless line.match(/[A-Za-z0-9]+/)
+          next unless line =~ /[A-Za-z0-9]+/
           next if line.include? '^#'
           line.sub! 'Title : ', ''
           updatelist.push line.chomp
