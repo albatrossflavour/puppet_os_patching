@@ -9,20 +9,25 @@ if Facter.value(:facterversion).split('.')[0].to_i < 2
   end
 else
   Facter.add('os_patching', :type => :aggregate) do
-    confine :kernel => 'Linux'
-
     require 'time'
     now = Time.now.iso8601
+
+    if Facter.value(:kernel) == 'Linux'
+      os_patching_dir = '/etc/os_patching'
+    elsif Facter.value(:kernel) == 'windows'
+      os_patching_dir = 'C:\ProgramData\PuppetLabs\puppet\cache'
+    end
 
     chunk(:updates) do
       data = {}
       updatelist = []
-      updatefile = '/etc/os_patching/package_updates'
+      updatefile = os_patching_dir + '/package_updates'
       if File.file?(updatefile)
         updates = File.open(updatefile, 'r').read
         updates.each_line do |line|
-          next if line.empty?
+          next unless line =~ /[A-Za-z0-9]+/
           next if line.include? '^#'
+          line.sub! 'Title : ', ''
           updatelist.push line.chomp
         end
       end
@@ -34,7 +39,7 @@ else
     chunk(:secupdates) do
       data = {}
       secupdatelist = []
-      secupdatefile = '/etc/os_patching/security_package_updates'
+      secupdatefile = os_patching_dir + '/security_package_updates'
       if File.file?(secupdatefile)
         secupdates = File.open(secupdatefile, 'r').read
         secupdates.each_line do |line|
@@ -54,7 +59,7 @@ else
       data['blocked'] = false
       data['blocked_reasons'] = {}
       data['blocked_reasons'] = []
-      blackoutfile = '/etc/os_patching/blackout_windows'
+      blackoutfile = os_patching_dir + '/blackout_windows'
       if File.file?(blackoutfile)
         blackouts = File.open(blackoutfile, 'r').read
         blackouts.each_line do |line|
@@ -100,7 +105,7 @@ else
     # History info
     chunk(:history) do
       data = {}
-      patchhistoryfile = '/etc/os_patching/run_history'
+      patchhistoryfile = os_patching_dir + '/run_history'
       data['last_run'] = {}
       if File.file?(patchhistoryfile)
         historyfile = File.open(patchhistoryfile, 'r').to_a
@@ -121,7 +126,7 @@ else
     # Patch window
     chunk(:patch_window) do
       data = {}
-      patchwindowfile = '/etc/os_patching/patch_window'
+      patchwindowfile = os_patching_dir + '/patch_window'
       if File.file?(patchwindowfile)
         patchwindow = File.open(patchwindowfile, 'r').to_a
         line = patchwindow.last
@@ -137,7 +142,7 @@ else
 
     # Reboot override
     chunk(:reboot_override) do
-      rebootfile = '/etc/os_patching/reboot_override'
+      rebootfile = os_patching_dir + '/reboot_override'
       if File.file?(rebootfile)
         rebootoverride = File.open(rebootfile, 'r').to_a
         data = {}
@@ -157,7 +162,7 @@ else
     chunk(:reboot_required) do
       data = {}
       data['reboots'] = {}
-      reboot_required_file = '/etc/os_patching/reboot_required'
+      reboot_required_file = os_patching_dir + '/reboot_required'
       if File.file?(reboot_required_file)
         reboot_required_fh = File.open(reboot_required_file, 'r').to_a
         data['reboots']['reboot_required'] = case reboot_required_fh.last
@@ -171,7 +176,7 @@ else
       else
         data['reboots']['reboot_required'] = 'unknown'
       end
-      app_restart_file = '/etc/os_patching/apps_to_restart'
+      app_restart_file = os_patching_dir + '/apps_to_restart'
       if File.file?(app_restart_file)
         app_restart_fh = File.open(app_restart_file, 'r').to_a
         data['reboots']['apps_needing_restart'] = {}
