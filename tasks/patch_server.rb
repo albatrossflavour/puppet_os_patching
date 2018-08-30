@@ -306,7 +306,7 @@ if facts['os']['family'] == 'RedHat'
     updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
     updated_packages.split("\n").each do |line|
-      matchdata = line.match(/^\s+(Install|Upgraded|Erased|Updated)\s+(\S+)\s/)
+      matchdata = line.match(/^\s+(Installed|Install|Upgraded|Erased|Updated)\s+(\S+)\s/)
       next unless matchdata
       pkg_hash[matchdata[2]] = matchdata[1]
     end
