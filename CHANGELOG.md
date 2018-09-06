@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.3.6
+
+- Some [issues](https://github.com/albatrossflavour/puppet_os_patching/issues/36) found with the use of needs-restarting on RHEL6 based systems under certain circumstances.  Updated the tasks and facts to cope with it.
+
 ## Release 0.3.5
 
 - Bugfixes for the timeout code, specifically affected earlier versions of RHEL
