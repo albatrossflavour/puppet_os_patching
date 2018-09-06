@@ -11,7 +11,7 @@ else
   Facter.add('os_patching', :type => :aggregate) do
     require 'time'
     now = Time.now.iso8601
-    errors = {}
+    warnings = {}
 
     if Facter.value(:kernel) == 'Linux'
       os_patching_dir = '/etc/os_patching'
@@ -32,7 +32,7 @@ else
           updatelist.push line.chomp
         end
       else
-        errors['update_file'] = 'Update file not found, update information invalid'
+        warnings['update_file'] = 'Update file not found, update information invalid'
       end
       data['package_updates'] = updatelist
       data['package_update_count'] = updatelist.count
@@ -50,6 +50,8 @@ else
           next if line.include? '^#'
           secupdatelist.push line.chomp
         end
+      else
+        warnings['security_update_file'] = 'Security update file not found, update information invalid'
       end
       data['security_package_updates'] = secupdatelist
       data['security_package_update_count'] = secupdatelist.count
@@ -196,8 +198,12 @@ else
       end
       data
     end
-    chunk(:errors) do
-      errors
+    chunk(:warnings) do
+      data = {}
+      data['warnings'] = {}
+      data['warnings'] = warnings
+      data['warning_count'] = data.count
+      data
     end
   end
 end
