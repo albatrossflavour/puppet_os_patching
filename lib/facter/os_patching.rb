@@ -24,9 +24,9 @@ else
       updatelist = []
       updatefile = os_patching_dir + '/package_updates'
       if File.file?(updatefile)
-	      if (Time.now - File.mtime(updatefile))/(24*3600) > 10
-	        warnings['update_file_time'] = 'Update file has not been updated in 10 days'
-	      end
+        if (Time.now - File.mtime(updatefile))/(24*3600) > 10
+          warnings['update_file_time'] = 'Update file has not been updated in 10 days'
+        end
 
         updates = File.open(updatefile, 'r').read
         updates.each_line do |line|
@@ -48,9 +48,9 @@ else
       secupdatelist = []
       secupdatefile = os_patching_dir + '/security_package_updates'
       if File.file?(secupdatefile)
-	      if (Time.now - File.mtime(secupdatefile))/(24*3600) > 10
-	        warnings['sec_update_file_time'] = 'Security update file has not been updated in 10 days'
-	      end
+        if (Time.now - File.mtime(secupdatefile))/(24*3600) > 10
+          warnings['sec_update_file_time'] = 'Security update file has not been updated in 10 days'
+        end
         secupdates = File.open(secupdatefile, 'r').read
         secupdates.each_line do |line|
           next if line.empty?
@@ -176,9 +176,9 @@ else
       data['reboots'] = {}
       reboot_required_file = os_patching_dir + '/reboot_required'
       if File.file?(reboot_required_file)
-	      if (Time.now - File.mtime(reboot_required_file))/(24*3600) > 10
-	        warnings['reboot_required_file_time'] = 'Reboot required file has not been updated in 10 days'
-	      end
+        if (Time.now - File.mtime(reboot_required_file))/(24*3600) > 10
+          warnings['reboot_required_file_time'] = 'Reboot required file has not been updated in 10 days'
+        end
         reboot_required_fh = File.open(reboot_required_file, 'r').to_a
         data['reboots']['reboot_required'] = case reboot_required_fh.last
                                              when /^[Tt]rue$/
