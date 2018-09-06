@@ -212,7 +212,7 @@ else
       data = {}
       data['warnings'] = {}
       data['warnings'] = warnings
-      data['warning_count'] = data.count
+      data['warning_count'] = warnings.count
       data
     end
   end
