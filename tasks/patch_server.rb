@@ -124,8 +124,12 @@ def reboot_required(family, release)
     elsif release.to_i == 6
       # If needs restart returns processes on RHEL6, consider that the node
       # needs a reboot
-      output, _stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
-      response = true unless output.empty?
+      output, stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
+      response = if output.empty? && stderr.empty?
+                   true
+                 else
+                   false
+                 end
     else
       # Needs-restart doesn't exist before RHEL6
       response = true

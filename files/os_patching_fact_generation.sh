@@ -44,13 +44,13 @@ fi
 cat /dev/null > ${UPDATEFILE}
 for UPDATE in $PKGS
 do
-  echo "$UPDATE" >> ${UPDATEFILE} || exit 1
+  echo "$UPDATE" >> ${UPDATEFILE}
 done
 
 cat /dev/null > ${SECUPDATEFILE}
 for UPDATE in $SECPKGS
 do
-  echo "$UPDATE" >> ${SECUPDATEFILE} || exit 1
+  echo "$UPDATE" >> ${SECUPDATEFILE}
 done
 
 if [ -f '/usr/bin/needs-restarting' ]
@@ -67,14 +67,18 @@ then
       /usr/bin/needs-restarting 2>/dev/null >/etc/os_patching/apps_to_restart
     ;;
     6)
-      OUTPUT=`/usr/bin/needs-restarting`
-      if [ -n "$OUTPUT" ]
+      /usr/bin/needs-restarting 2>/dev/null 1>/etc/os_patching/apps_to_restart
+      if [ $? -gt 0 ]
       then
         echo "true" > /etc/os_patching/reboot_required
-        /usr/bin/needs-restarting > /etc/os_patching/apps_to_restart
       else
-        echo "false" > /etc/os_patching/reboot_required
-        cat /dev/null > /etc/os_patching/apps_to_restart
+        APPS_TO_RESTART=$(wc -l /etc/os_patching/apps_to_restart | awk '{print $1}')
+        if [ $APPS_TO_RESTART -gt 0 ]
+        then
+          echo "true" > /etc/os_patching/reboot_required
+        else
+          echo "false" > /etc/os_patching/reboot_required
+        fi
       fi
     ;;
   esac
