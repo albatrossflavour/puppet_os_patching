@@ -72,7 +72,7 @@ then
       then
         echo "true" > /etc/os_patching/reboot_required
       else
-        APPS_TO_RESTART=$(grep -c /etc/os_patching/apps_to_restart)
+        APPS_TO_RESTART=$(wc -l /etc/os_patching/apps_to_restart)
         if [ $APPS_TO_RESTART -gt 0 ]
         then
           echo "true" > /etc/os_patching/reboot_required
