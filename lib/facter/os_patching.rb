@@ -11,6 +11,7 @@ else
   Facter.add('os_patching', :type => :aggregate) do
     require 'time'
     now = Time.now.iso8601
+    errors = {}
 
     if Facter.value(:kernel) == 'Linux'
       os_patching_dir = '/etc/os_patching'
@@ -30,6 +31,8 @@ else
           line.sub! 'Title : ', ''
           updatelist.push line.chomp
         end
+      else
+        errors['update_file'] = 'Update file not found, update information invalid'
       end
       data['package_updates'] = updatelist
       data['package_update_count'] = updatelist.count
@@ -192,6 +195,9 @@ else
                                                   end
       end
       data
+    end
+    chunk(:errors) do
+      errors
     end
   end
 end
