@@ -126,9 +126,9 @@ def reboot_required(family, release)
       # needs a reboot
       output, stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
       response = if output.empty? && stderr.empty?
-                   true
-                 else
                    false
+                 else
+                   true
                  end
     else
       # Needs-restart doesn't exist before RHEL6
