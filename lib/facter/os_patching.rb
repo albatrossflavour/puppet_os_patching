@@ -210,9 +210,7 @@ else
     end
     chunk(:warnings) do
       data = {}
-      data['warnings'] = {}
       data['warnings'] = warnings
-      data['warning_count'] = warnings.count
       data
     end
   end
