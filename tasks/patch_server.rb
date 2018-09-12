@@ -362,3 +362,4 @@ if (reboot == true && needs_reboot == true) || reboot_override == true
   Process.detach(p1)
 end
 log.info 'os_patching run complete'
+exit 0
