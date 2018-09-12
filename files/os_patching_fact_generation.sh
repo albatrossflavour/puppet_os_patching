@@ -17,8 +17,8 @@ fi
 
 case $(/usr/local/bin/facter osfamily) in
   RedHat)
-    PKGS=$(yum -q check-update | awk '/^[a-z]/ {print $1}')
-    SECPKGS=$(yum -q --security check-update | awk '/^[a-z]/ {print $1}')
+    PKGS=$(yum -q check-update | awk '/^[[:alnum:]]/ {print $1}')
+    SECPKGS=$(yum -q --security check-update | awk '/^[[:alnum:]]/ {print $1}')
   ;;
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
