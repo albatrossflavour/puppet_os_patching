@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.4.1
+
+- Missed some metadata info updates in 0.4.0
+
 ## Release 0.4.0
 
 - Some [issues](https://github.com/albatrossflavour/puppet_os_patching/issues/36) found with the use of needs-restarting on RHEL6 based systems under certain circumstances.  Updated the tasks and facts to cope with it.
