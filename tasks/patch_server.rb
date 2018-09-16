@@ -363,4 +363,3 @@ if (reboot == true && needs_reboot == true) || reboot_override == true
 end
 log.info 'os_patching run complete'
 exit 0
-
