@@ -295,7 +295,7 @@ if facts['os']['family'] == 'RedHat'
       next unless matchdata
       if matchdata[1]
         job = matchdata[1]
-        yum_end = matchdata[1]
+        yum_end = matchdata[2]
         break
       end
     end
