@@ -299,8 +299,11 @@ if facts['os']['family'] == 'RedHat'
     # Fail if we didn't capture a job ID
     err(status, 'os_patching/yum', 'yum job ID not found', starttime) if job.empty?
 
+    # Fail if we didn't capture a job ID
+    err(status, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
+
     # Check that the first yum history entry was after the yum_start time we captured
-    err(status, 'os_patching/yum', 'Unknown yum error', starttime) if yum_end < yum_start
+    err(status, 'os_patching/yum', 'Yum did not appear to run', starttime) if yum_end < yum_start
 
     # Capture the yum return code
     log.debug "Getting yum return code for job #{job}"
