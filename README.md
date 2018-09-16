@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/albatrossflavour/puppet_os_patching.svg?branch=master)](https://travis-ci.org/albatrossflavour/puppet_os_patching)
 # os_patching
 
-This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat and Debian derivatives.
+This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching.  Currently patching restricted to Redhat and Debian derivatives, however reporting should work on Redhat/Debian derivatives and Windows.
 
 Under the hood it uses the OS level tools to carry out the actual patching.
 
@@ -235,26 +235,24 @@ A summary of the patch run is also written to `/etc/os_patching/run_history`, th
 
 This directory contains the various control files needed for the fact and task to work correctly.  They are managed by the manifest.
 
-|File|Purpose|
-|-|-|
-|`/etc/os_patching/blackout_windows`|contains name, start and end time for all blackout windows|
-|`/etc/os_patching/package_updates`|a list of all package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron|
-|`/etc/os_patching/security_package_updates`|a list of all security_package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron|
-|`/etc/os_patching/run_history`|a summary of each run of the `os_patching::patch_server` task, populated by the task|
-|`/etc/os_patching/reboot_override`|if present, overrides the `reboot=` parameter to the task|
-|`/etc/os_patching/patch_window`|if present, sets the value for the fact `os_patching.patch_window`|
-|`/etc/os_patching/reboot_required`|if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.|
-|`/etc/os_patching/apps_to_restart`|a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.|
+* `/etc/os_patching/blackout_windows` : contains name, start and end time for all blackout windows
+* `/etc/os_patching/package_updates` : a list of all package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
+* `/etc/os_patching/security_package_updates` : a list of all security_package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
+* `/etc/os_patching/run_history` : a summary of each run of the `os_patching::patch_server` task, populated by the task
+* `/etc/os_patching/reboot_override` : if present, overrides the `reboot=` parameter to the task
+* `/etc/os_patching/patch_window` : if present, sets the value for the fact `os_patching.patch_window`
+* `/etc/os_patching/reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
+* `/etc/os_patching/apps_to_restart` : a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.
 
 With the exception of the run_history file, all files in /etc/os_patching will be regenerated after a puppet run and a run of the os_patching_fact_generation.sh script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum and syslog.
 
 ## Limitations
 
-This module is for PE2018+ with agents capable of running tasks.  It is currently limited to the Red Hat and Debian operating system.
+This module is for PE2018+ with agents capable of running tasks.  It is currently limited to the Red Hat and Debian based operating systems (CentOS, Ubuntu, Debian, RedHat etc).  Windows (WSUS) functionality is being actively worked on.
 
-Debian nodes currently do not allow `security_only` patch tasks to be set to `true`, a fix for this is being worked on.
+Debian based systems currently do not allow `security_only` patch tasks to be set to `true`, a fix for this is being worked on.
 
-RedHat 5 has support but lacks a lot of the yum functionality added in 6, so things like the upgraded package list and job ID will be missing.
+RedHat 5 based systems have support but lack a lot of the yum functionality added in 6, so things like the upgraded package list and job ID will be missing.
 
 ## Development
 
@@ -265,3 +263,6 @@ Fork, develop, submit a pull request
 - [Tony Green](tgreen@albatrossflavour.com)
     - [@albatrossflavor](https://twitter.com/albatrossflavor)
     - [http://albatrossflavour.com](http://albatrossflavour.com)
+- [Brett Gray](https://github.com/beergeek)
+- [Rob Nelson](https://github.com/rnelson0)
+- [Tommy McNeely](https://github.com/tjm)

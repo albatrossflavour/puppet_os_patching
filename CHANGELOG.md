@@ -1,5 +1,12 @@
 # Changelog
 
+## Release 0.3.6
+
+- Some [issues](https://github.com/albatrossflavour/puppet_os_patching/issues/36) found with the use of needs-restarting on RHEL6 based systems under certain circumstances.  Updated the tasks and facts to cope with it.
+- Ensure lock file is cleaned up if the os_patching_fact_generation.sh script is interupted or killed.
+- Fix the regex matching for packages that start with a numeric or a capital letter
+- Add a new 'warning' entry in the os_patching fact to allow highlighting of potential issues (cache files not updated in a while or not present)
+
 ## Release 0.3.5
 
 - Bugfixes for the timeout code, specifically affected earlier versions of RHEL
