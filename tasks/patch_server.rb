@@ -292,7 +292,7 @@ if facts['os']['family'] == 'RedHat'
     yum_id, stderr, status = Open3.capture3('yum history')
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
     yum_id.split("\n").each do |line|
-      matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\- ]*\|\s*([\d:\- ]*)/)
+      matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\-<> ]*\|\s*([\d:\- ]*)/)
       next unless matchdata
       if matchdata[1]
         job = matchdata[1]
