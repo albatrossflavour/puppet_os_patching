@@ -31,6 +31,7 @@ end
 
 def run_with_timeout(command, timeout, tick)
   output = ''
+  status = ''
   begin
     # Start task in another thread, which spawns a process
     stdin, stderrout, thread = Open3.popen2e(command)
@@ -52,6 +53,7 @@ def run_with_timeout(command, timeout, tick)
         break
       end
     end
+    status = thread.value.exitstatus
     # Give Ruby time to clean up the other thread
     sleep 1
 
@@ -59,13 +61,13 @@ def run_with_timeout(command, timeout, tick)
       # We need to kill the process, because killing the thread leaves
       # the process alive but detached, annoyingly enough.
       Process.kill('TERM', pid)
-      err('403', 'os_patching/fact_refresh', "TIMEOUT AFTER #{timeout} seconds\n#{output}", start)
+      err('403', 'os_patching/patching', "TIMEOUT AFTER #{timeout} seconds\n#{output}", start)
     end
   ensure
     stdin.close if stdin
     stderrout.close if stderrout
   end
-  output
+  status
 end
 
 # Default output function
@@ -279,6 +281,7 @@ if facts['os']['family'] == 'RedHat'
   yum_start = Time.now
   yum_end = ''
   yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
+  err(status, 'os_patching/yum', "yum upgrade returned non-zero #{yum_output}", starttime) if yum_output != 0
 
   if facts['os']['release']['major'].to_i > 5
     # Capture the yum job ID
@@ -299,7 +302,7 @@ if facts['os']['family'] == 'RedHat'
     # Fail if we didn't capture a job ID
     err(status, 'os_patching/yum', 'yum job ID not found', starttime) if job.empty?
 
-    # Fail if we didn't capture a job ID
+    # Fail if we didn't capture a job time
     err(status, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
     # Check that the first yum history entry was after the yum_start time we captured
