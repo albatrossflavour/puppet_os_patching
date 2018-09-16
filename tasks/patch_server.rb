@@ -327,7 +327,7 @@ if facts['os']['family'] == 'RedHat'
 
     pkg_hash = {}
     # Pull out the updated package list from yum history
-    log.error "Getting updated package list  for job #{job}"
+    log.error "Getting updated package list for job #{job}"
     updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
     updated_packages.split("\n").each do |line|
@@ -341,7 +341,7 @@ if facts['os']['family'] == 'RedHat'
     pkg_hash = {}
   end
 
-  output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, yum_output, job, pinned_pkgs, starttime)
+  output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, output, job, pinned_pkgs, starttime)
   log.error 'Patching complete'
 elsif facts['os']['family'] == 'Debian'
   # The security only workflow for Debain is a little complex, retiring it for now
