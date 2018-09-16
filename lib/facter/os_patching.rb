@@ -152,6 +152,22 @@ else
       data
     end
 
+    # Smart reboot enabled?
+    chunk(:smart_reboot) do
+      smartrebootfile = os_patching_dir + '/smart_reboot'
+      if File.file?(smartrebootfile)
+        smart_reboot = File.open(smartrebootfile, 'r').to_a
+        data = {}
+        data['smart_reboot'] = case smart_reboot.last
+                               when /^[Ff]alse$/
+                                 false
+                               else
+                                 true
+                               end
+      end
+      data
+    end
+
     # Reboot override
     chunk(:reboot_override) do
       rebootfile = os_patching_dir + '/reboot_override'

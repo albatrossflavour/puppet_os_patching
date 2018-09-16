@@ -5,6 +5,7 @@
 # @param [String] patch_data_group Group name for the owner of the patch data
 # @param [String] patch_cron_user User name to run the cron job as (defaults to patch_data_owner)
 # @param [Boolean] install_delta_rpm Should the deltarpm package be installed on RedHat family nodes
+# @param [Boolean] smart_reboot Should the task only reboot if the OS indicates it is required?
 # @param [Boolean] reboot_override Controls on a node level if a reboot should/should not be done after patching.
 #		This overrides the setting in the task
 # @param [Hash] blackout_windows A hash containing the patch blackout windows, which prevent patching.
@@ -19,6 +20,7 @@
 # @example assign node to 'Week3' patching window, force a reboot and create a blackout window for the end of the year
 #   class { 'os_patching':
 #     patch_window     => 'Week3',
+#     smart_reboot     => true,
 #     reboot_override  => true,
 #     blackout_windows => { 'End of year change freeze':
 #       {
@@ -33,6 +35,7 @@
 #     $patch_window     = undef,
 #     $blackout_windows = undef,
 #     $reboot_override  = undef,
+#     $smart_reboot     = undef,
 #   ){
 #     # Pull any blackout windows out of hiera
 #     $hiera_blackout_windows = lookup('profiles::soe::patching::blackout_windows',Hash,hash,{})
@@ -42,6 +45,7 @@
 #
 #     # Call the os_patching class to set everything up
 #     class { 'os_patching':
+#       smart_reboot     => $smart_reboot,
 #       patch_window     => $patch_window,
 #       reboot_override  => $reboot_override,
 #       blackout_windows => $full_blackout_windows,
@@ -56,6 +60,7 @@ class os_patching (
   String $patch_data_group           = 'root',
   String $patch_cron_user            = $patch_data_owner,
   Boolean $install_delta_rpm         = false,
+  Optional[Boolean] $smart_reboot    = undef,
   Optional[Boolean] $reboot_override = undef,
   Optional[Hash] $blackout_windows   = undef,
   $patch_window                      = undef,
@@ -147,6 +152,32 @@ class os_patching (
     }
   } else {
     file { $patch_window_file:
+      ensure => absent,
+      notify => Exec[$fact_upload],
+    }
+  }
+
+  $smart_reboot_file = '/etc/os_patching/smart_reboot'
+  if ( $smart_reboot != undef ) {
+    case $smart_reboot {
+      # lint:ignore:quoted_booleans
+      true:  { $smart_reboot_boolean = 'true' }
+      false: { $smart_reboot_boolean = 'false' }
+      default: { fail ('smart_reboot must be a boolean')}
+      # lint:endignore
+    }
+
+    file { $smart_reboot_file:
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => $smart_reboot_boolean,
+      require => File['/etc/os_patching'],
+      notify  => Exec[$fact_upload],
+    }
+  } else {
+    file { $smart_reboot_file:
       ensure => absent,
       notify => Exec[$fact_upload],
     }
