@@ -126,9 +126,9 @@ def reboot_required(family, release)
       # needs a reboot
       output, stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
       response = if output.empty? && stderr.empty?
-                   true
-                 else
                    false
+                 else
+                   true
                  end
     else
       # Needs-restart doesn't exist before RHEL6
@@ -362,3 +362,4 @@ if (reboot == true && needs_reboot == true) || reboot_override == true
   Process.detach(p1)
 end
 log.info 'os_patching run complete'
+exit 0
