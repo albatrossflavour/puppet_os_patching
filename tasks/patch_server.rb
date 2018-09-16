@@ -279,7 +279,6 @@ end
 if facts['os']['family'] == 'RedHat'
   log.error 'Running yum upgrade'
   log.error "Timeout value set to : #{timeout}"
-  yum_start = Time.now
   yum_end = ''
   status, output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
   err(status, 'os_patching/yum', "yum upgrade returned non-zero (#{status}) : #{output}", starttime) if status != 0
@@ -308,10 +307,7 @@ if facts['os']['family'] == 'RedHat'
 
     # Check that the first yum history entry was after the yum_start time we captured
     parsed_end = Time.parse(yum_end) 
-    log.error "ID : #{job}"
-    log.error "Start : #{yum_start}"
-    log.error "End : #{yum_end}"
-    err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < yum_start
+    err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < starttime
 
     # Capture the yum return code
     log.error "Getting yum return code for job #{job}"
