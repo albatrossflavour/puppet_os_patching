@@ -7,6 +7,8 @@ PATH=/usr/bin:/usr/sbin:/bin:/usr/local/bin
 
 LOCKFILE=/var/run/os_patching_fact_generation.lock
 
+trap "{ rm -f $LOCKFILE ; exit 255; }" 2 3 15
+
 if [ -f "$LOCKFILE" ]
 then
   echo "Locked, exiting" >&2
