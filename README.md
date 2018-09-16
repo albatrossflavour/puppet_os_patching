@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/albatrossflavour/puppet_os_patching.svg?branch=master)](https://travis-ci.org/albatrossflavour/puppet_os_patching)
 # os_patching
 
-This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching, currently restricted to Redhat and Debian derivatives.
+This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently patching restricted to Redhat and Debian derivatives, however reporting should work on Redhat/Debian derivatives and Windows.
 
 Under the hood it uses the OS level tools to carry out the actual patching.
 
