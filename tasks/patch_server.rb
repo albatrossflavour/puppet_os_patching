@@ -306,7 +306,7 @@ if facts['os']['family'] == 'RedHat'
     err(1, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
     # Check that the first yum history entry was after the yum_start time we captured
-    parsed_end = Time.parse(yum_end) 
+    parsed_end = Time.parse(yum_end).iso8601
     err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < starttime
 
     # Capture the yum return code
