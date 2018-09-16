@@ -287,7 +287,7 @@ if facts['os']['family'] == 'RedHat'
 
   if facts['os']['release']['major'].to_i > 5
     # Capture the yum job ID
-    log.debug 'Getting yum job ID'
+    log.info 'Getting yum job ID'
     job = ''
     yum_id, stderr, status = Open3.capture3('yum history')
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
@@ -308,8 +308,8 @@ if facts['os']['family'] == 'RedHat'
     err(status, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
     # Check that the first yum history entry was after the yum_start time we captured
-    log.info "END : #{yum_end}"
-    log.info "START : #{yum_start}"
+    log.info 'END : #{yum_end}' + yum_end
+    log.info 'START : #{yum_start}' + yum_start
     parsed_end = Time.parse(yum_end) 
     err(status, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < yum_start
 
