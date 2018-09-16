@@ -281,9 +281,8 @@ if facts['os']['family'] == 'RedHat'
   log.error "Timeout value set to : #{timeout}"
   yum_start = Time.now
   yum_end = ''
-  yum_status, yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
-  log.error "YUM_OUTPUT : #{yum_status}"
-  err(status, 'os_patching/yum', "yum upgrade returned non-zero #{yum_status} : #{yum_output}", starttime) if yum_status != 0
+  status, output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
+  err(status, 'os_patching/yum', "yum upgrade returned non-zero (#{status}) : #{output}", starttime) if status != 0
 
   if facts['os']['release']['major'].to_i > 5
     # Capture the yum job ID
@@ -302,16 +301,16 @@ if facts['os']['family'] == 'RedHat'
     end
 
     # Fail if we didn't capture a job ID
-    err(status, 'os_patching/yum', 'yum job ID not found', starttime) if job.empty?
+    err(1, 'os_patching/yum', 'yum job ID not found', starttime) if job.empty?
 
     # Fail if we didn't capture a job time
-    err(status, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
+    err(1, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
     # Check that the first yum history entry was after the yum_start time we captured
     log.error 'END : #{yum_end}' + yum_end
     log.error 'START : #{yum_start}' + yum_start
     parsed_end = Time.parse(yum_end) 
-    err(status, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < yum_start
+    err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < yum_start
 
     # Capture the yum return code
     log.error "Getting yum return code for job #{job}"
