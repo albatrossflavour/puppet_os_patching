@@ -276,6 +276,8 @@ end
 if facts['os']['family'] == 'RedHat'
   log.debug 'Running yum upgrade'
   log.debug "Timeout value set to : #{timeout}"
+  yum_start = Time.now
+  yum_end = ''
   yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
 
   if facts['os']['release']['major'].to_i > 5
@@ -285,13 +287,20 @@ if facts['os']['family'] == 'RedHat'
     yum_id, stderr, status = Open3.capture3('yum history')
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
     yum_id.split("\n").each do |line|
-      matchdata = line.to_s.match(/^\s+(\d+)\s/)
+      matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\- ]*\|\s*([\d:\- ]*)/)
       next unless matchdata
       if matchdata[1]
         job = matchdata[1]
+        yum_end = matchdata[1]
         break
       end
     end
+
+    # Fail if we didn't capture a job ID
+    err(status, 'os_patching/yum', 'yum job ID not found', starttime) if job.empty?
+
+    # Check that the first yum history entry was after the yum_start time we captured
+    err(status, 'os_patching/yum', 'Unknown yum error', starttime) if yum_end < yum_start
 
     # Capture the yum return code
     log.debug "Getting yum return code for job #{job}"
@@ -302,7 +311,10 @@ if facts['os']['family'] == 'RedHat'
       matchdata = line.match(/^Return-Code\s+:\s+(.*)$/)
       next unless matchdata
       yum_return = matchdata[1]
+      break
     end
+
+    err(status, 'os_patching/yum', 'yum return code not found', starttime) if yum_return.empty?
 
     pkg_hash = {}
     # Pull out the updated package list from yum history
