@@ -155,15 +155,17 @@ else
     # Smart reboot enabled?
     chunk(:smart_reboot) do
       smartrebootfile = os_patching_dir + '/smart_reboot'
+      data = {}
       if File.file?(smartrebootfile)
         smart_reboot = File.open(smartrebootfile, 'r').to_a
-        data = {}
         data['smart_reboot'] = case smart_reboot.last
                                when /^[Ff]alse$/
                                  false
                                else
                                  true
                                end
+      else
+        data['smart_reboot'] = true
       end
       data
     end
