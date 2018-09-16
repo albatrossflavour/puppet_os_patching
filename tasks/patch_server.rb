@@ -68,7 +68,7 @@ def run_with_timeout(command, timeout, tick)
     stderrout.close if stderrout
     status = thread.value.exitstatus
   end
-  status
+  return status,output
 end
 
 # Default output function
@@ -281,9 +281,9 @@ if facts['os']['family'] == 'RedHat'
   log.error "Timeout value set to : #{timeout}"
   yum_start = Time.now
   yum_end = ''
-  yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
-  log.error "YUM_OUTPUT : #{yum_output}"
-  err(status, 'os_patching/yum', "yum upgrade returned non-zero #{yum_output}", starttime) if yum_output != 0
+  yum_status, yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
+  log.error "YUM_OUTPUT : #{yum_status}"
+  err(status, 'os_patching/yum', "yum upgrade returned non-zero #{yum_status} : #{yum_output}", starttime) if yum_status != 0
 
   if facts['os']['release']['major'].to_i > 5
     # Capture the yum job ID
