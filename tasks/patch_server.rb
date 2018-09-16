@@ -13,13 +13,13 @@ require 'syslog/logger'
 require 'time'
 require 'timeout'
 
-$stdout.sync = true
+#$stdout.sync = true
 
 facter = '/opt/puppetlabs/puppet/bin/facter'
 
 log = Syslog::Logger.new 'os_patching'
 starttime = Time.now.iso8601
-BUFFER_SIZE = 4096
+#BUFFER_SIZE = 4096
 
 # Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
