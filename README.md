@@ -264,3 +264,5 @@ Fork, develop, submit a pull request
     - [@albatrossflavor](https://twitter.com/albatrossflavor)
     - [http://albatrossflavour.com](http://albatrossflavour.com)
 - [Brett Gray](https://github.com/beergeek)
+- [Rob Nelson](https://github.com/rnelson0)
+- [Tommy McNeely](https://github.com/tjm)
