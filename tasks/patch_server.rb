@@ -31,7 +31,6 @@ end
 
 def run_with_timeout(command, timeout, tick)
   output = ''
-  status = 99
   begin
     # Start task in another thread, which spawns a process
     stdin, stderrout, thread = Open3.popen2e(command)
@@ -53,7 +52,6 @@ def run_with_timeout(command, timeout, tick)
         break
       end
     end
-    status = thread.value.exitstatus
     # Give Ruby time to clean up the other thread
     sleep 1
 
@@ -68,7 +66,7 @@ def run_with_timeout(command, timeout, tick)
     stderrout.close if stderrout
     status = thread.value.exitstatus
   end
-  return status,output
+  return status, output
 end
 
 # Default output function
@@ -292,11 +290,9 @@ if facts['os']['family'] == 'RedHat'
     yum_id.split("\n").each do |line|
       matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\-<> ]*\|\s*([\d:\- ]*)/)
       next unless matchdata
-      if matchdata[1]
-        job = matchdata[1]
-        yum_end = matchdata[2]
-        break
-      end
+      job = matchdata[1]
+      yum_end = matchdata[2]
+      break
     end
 
     # Fail if we didn't capture a job ID
@@ -306,7 +302,7 @@ if facts['os']['family'] == 'RedHat'
     err(1, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
     # Check that the first yum history entry was after the yum_start time we captured
-    parsed_end = Time.parse(yum_end + ":59").iso8601
+    parsed_end = Time.parse(yum_end + ':59').iso8601
     err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < starttime
 
     # Capture the yum return code
