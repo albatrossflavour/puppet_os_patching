@@ -281,7 +281,7 @@ if facts['os']['family'] == 'RedHat'
   yum_start = Time.now
   yum_end = ''
   yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
-  err(status, 'os_patching/yum', "yum upgrade returned non-zero #{yum_output}", starttime) if yum_output == 0
+  err(status, 'os_patching/yum', "yum upgrade returned non-zero #{yum_output}", starttime) if yum_output.zero?
 
   if facts['os']['release']['major'].to_i > 5
     # Capture the yum job ID
