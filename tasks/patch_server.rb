@@ -109,7 +109,7 @@ def err(code, kind, message, starttime)
   shortmsg = message.split("\n").first.chomp
   history(starttime, shortmsg, exitcode, '', '', '')
   log = Syslog::Logger.new 'os_patching'
-  log.error "ERROR : #{kind} : #{exitcode} : #{message}"
+  log.info "ERROR : #{kind} : #{exitcode} : #{message}"
   exit(exitcode.to_i)
 end
 
@@ -179,10 +179,10 @@ reboot_override = facts['os_patching']['reboot_override']
 if reboot_override == 'Invalid Entry'
   err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
 elsif reboot_override == true && reboot == false
-  log.error 'Reboot override set to true but task said no.  Will reboot'
+  log.info 'Reboot override set to true but task said no.  Will reboot'
   reboot = true
 elsif reboot_override == false && reboot == true
-  log.error 'Reboot override set to false but task said yes.  Will not reboot'
+  log.info 'Reboot override set to false but task said yes.  Will not reboot'
   reboot = false
 end
 
@@ -244,7 +244,7 @@ if blocker.to_s.chomp == 'true'
   # Patching is blocked, list the reasons and error
   # need to error as it SHOULDN'T ever happen if you
   # use the right workflow through tasks.
-  log.error 'Patching blocked, not continuing'
+  log.info 'Patching blocked, not continuing'
   block_reason = facts['os_patching']['blocker_reasons']
   err(100, 'os_patching/blocked', "Patching blocked #{block_reason}", starttime)
 end
@@ -282,7 +282,7 @@ if facts['os']['family'] == 'RedHat'
   yum_start = Time.now
   yum_end = ''
   yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
-  log.error "YUM_OUTPUT : #{yum_output}"
+  log.info "YUM_OUTPUT : #{yum_output}"
   err(status, 'os_patching/yum', "yum upgrade returned non-zero #{yum_output}", starttime) if yum_output != 0
 
   if facts['os']['release']['major'].to_i > 5
@@ -308,8 +308,8 @@ if facts['os']['family'] == 'RedHat'
     err(status, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
     # Check that the first yum history entry was after the yum_start time we captured
-    log.error "END : #{yum_end}"
-    log.error "START : #{yum_start}"
+    log.info "END : #{yum_end}"
+    log.info "START : #{yum_start}"
     err(status, 'os_patching/yum', 'Yum did not appear to run', starttime) if yum_end < yum_start
 
     # Capture the yum return code
@@ -367,7 +367,7 @@ elsif facts['os']['family'] == 'Debian'
   log.debug 'Patching complete'
 else
   # Only works on Redhat & Debian at the moment
-  log.error 'Unsupported OS - exiting'
+  log.info 'Unsupported OS - exiting'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
