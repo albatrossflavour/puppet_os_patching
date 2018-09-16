@@ -108,8 +108,8 @@ def err(code, kind, message, starttime)
   puts JSON.pretty_generate(json)
   shortmsg = message.split("\n").first.chomp
   history(starttime, shortmsg, exitcode, '', '', '')
-  log = Syslog::Logger.new 'os_patching'
-  log.info "ERROR : #{kind} : #{exitcode} : #{message}"
+  syslog = Syslog::Logger.new 'os_patching'
+  syslog.error "ERROR : #{kind} : #{exitcode} : #{message}"
   exit(exitcode.to_i)
 end
 
@@ -151,11 +151,11 @@ end
 params = JSON.parse(STDIN.read)
 
 # Cache fact data to speed things up
-log.info 'os_patching run started'
-log.debug 'Running os_patching fact refresh'
+log.error 'os_patching run started'
+log.error 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
-log.debug 'Gathering facts'
+log.error 'Gathering facts'
 full_facts, stderr, status = Open3.capture3(facter, '-p', '-j')
 err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
@@ -179,14 +179,14 @@ reboot_override = facts['os_patching']['reboot_override']
 if reboot_override == 'Invalid Entry'
   err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
 elsif reboot_override == true && reboot == false
-  log.info 'Reboot override set to true but task said no.  Will reboot'
+  log.error 'Reboot override set to true but task said no.  Will reboot'
   reboot = true
 elsif reboot_override == false && reboot == true
-  log.info 'Reboot override set to false but task said yes.  Will not reboot'
+  log.error 'Reboot override set to false but task said yes.  Will not reboot'
   reboot = false
 end
 
-log.debug "Reboot after patching set to #{reboot}"
+log.error "Reboot after patching set to #{reboot}"
 
 # Should we only apply security patches?
 security_only = ''
@@ -201,7 +201,7 @@ if params['security_only']
 else
   security_only = false
 end
-log.debug "Apply only security patches set to #{security_only}"
+log.error "Apply only security patches set to #{security_only}"
 
 # Have we had any yum parameter specified?
 yum_params = if params['yum_params']
@@ -244,7 +244,7 @@ if blocker.to_s.chomp == 'true'
   # Patching is blocked, list the reasons and error
   # need to error as it SHOULDN'T ever happen if you
   # use the right workflow through tasks.
-  log.info 'Patching blocked, not continuing'
+  log.error 'Patching blocked, not continuing'
   block_reason = facts['os_patching']['blocker_reasons']
   err(100, 'os_patching/blocked', "Patching blocked #{block_reason}", starttime)
 end
@@ -262,32 +262,32 @@ end
 # There are no updates available, exit cleanly rebooting if the override flag is set
 if updatecount.zero?
   if reboot_override == true
-    log.info 'Rebooting'
+    log.error 'Rebooting'
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
-    log.info 'No patches to apply, rebooting as requested'
+    log.error 'No patches to apply, rebooting as requested'
     p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
     Process.detach(p1)
   else
     output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
-    log.info 'No patches to apply, exiting'
+    log.error 'No patches to apply, exiting'
   end
   exit(0)
 end
 
 # Run the patching
 if facts['os']['family'] == 'RedHat'
-  log.debug 'Running yum upgrade'
-  log.debug "Timeout value set to : #{timeout}"
+  log.error 'Running yum upgrade'
+  log.error "Timeout value set to : #{timeout}"
   yum_start = Time.now
   yum_end = ''
   yum_output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
-  log.info "YUM_OUTPUT : #{yum_output}"
+  log.error "YUM_OUTPUT : #{yum_output}"
   err(status, 'os_patching/yum', "yum upgrade returned non-zero #{yum_output}", starttime) if yum_output != 0
 
   if facts['os']['release']['major'].to_i > 5
     # Capture the yum job ID
-    log.info 'Getting yum job ID'
+    log.error 'Getting yum job ID'
     job = ''
     yum_id, stderr, status = Open3.capture3('yum history')
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
@@ -308,13 +308,13 @@ if facts['os']['family'] == 'RedHat'
     err(status, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
     # Check that the first yum history entry was after the yum_start time we captured
-    log.info 'END : #{yum_end}' + yum_end
-    log.info 'START : #{yum_start}' + yum_start
+    log.error 'END : #{yum_end}' + yum_end
+    log.error 'START : #{yum_start}' + yum_start
     parsed_end = Time.parse(yum_end) 
     err(status, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < yum_start
 
     # Capture the yum return code
-    log.debug "Getting yum return code for job #{job}"
+    log.error "Getting yum return code for job #{job}"
     yum_status, stderr, status = Open3.capture3("yum history info #{job}")
     yum_return = ''
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
@@ -329,7 +329,7 @@ if facts['os']['family'] == 'RedHat'
 
     pkg_hash = {}
     # Pull out the updated package list from yum history
-    log.debug "Getting updated package list  for job #{job}"
+    log.error "Getting updated package list  for job #{job}"
     updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
     updated_packages.split("\n").each do |line|
@@ -344,45 +344,45 @@ if facts['os']['family'] == 'RedHat'
   end
 
   output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, yum_output, job, pinned_pkgs, starttime)
-  log.debug 'Patching complete'
+  log.error 'Patching complete'
 elsif facts['os']['family'] == 'Debian'
   # The security only workflow for Debain is a little complex, retiring it for now
   if security_only == true
-    log.debug 'Debian upgrades, security only not currently supported'
+    log.error 'Debian upgrades, security only not currently supported'
     err(101, 'os_patching/security_only', 'Security only not supported on Debian at this point', starttime)
   end
 
-  log.debug 'Getting package update list'
+  log.error 'Getting package update list'
   updated_packages, stderr, status = Open3.capture3("apt-get dist-upgrade -s #{dpkg_params} | awk '/^Inst/ {print $2}'")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
   pkg_array = updated_packages.split
 
   # Do the patching
-  log.debug 'Running apt update'
+  log.error 'Running apt update'
   deb_front = 'DEBIAN_FRONTEND=noninteractive'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
   apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
   output('Success', reboot, security_only, 'Patching complete', pkg_array, apt_std_out, '', pinned_pkgs, starttime)
-  log.debug 'Patching complete'
+  log.error 'Patching complete'
 else
   # Only works on Redhat & Debian at the moment
-  log.info 'Unsupported OS - exiting'
+  log.error 'Unsupported OS - exiting'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
 # Refresh the facts now that we've patched
-log.debug 'Running os_patching fact refresh'
+log.error 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
 needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
 if (reboot == true && needs_reboot == true) || reboot_override == true
-  log.info 'Rebooting'
+  log.error 'Rebooting'
   p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
   Process.detach(p1)
 end
-log.info 'os_patching run complete'
+log.error 'os_patching run complete'
 exit 0
