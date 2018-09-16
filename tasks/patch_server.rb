@@ -151,11 +151,11 @@ end
 params = JSON.parse(STDIN.read)
 
 # Cache fact data to speed things up
-log.error 'os_patching run started'
-log.error 'Running os_patching fact refresh'
+log.info 'os_patching run started'
+log.debug 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
-log.error 'Gathering facts'
+log.debug 'Gathering facts'
 full_facts, stderr, status = Open3.capture3(facter, '-p', '-j')
 err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
@@ -179,14 +179,14 @@ reboot_override = facts['os_patching']['reboot_override']
 if reboot_override == 'Invalid Entry'
   err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
 elsif reboot_override == true && reboot == false
-  log.error 'Reboot override set to true but task said no.  Will reboot'
+  log.info 'Reboot override set to true but task said no.  Will reboot'
   reboot = true
 elsif reboot_override == false && reboot == true
-  log.error 'Reboot override set to false but task said yes.  Will not reboot'
+  log.info 'Reboot override set to false but task said yes.  Will not reboot'
   reboot = false
 end
 
-log.error "Reboot after patching set to #{reboot}"
+log.info "Reboot after patching set to #{reboot}"
 
 # Should we only apply security patches?
 security_only = ''
@@ -201,7 +201,7 @@ if params['security_only']
 else
   security_only = false
 end
-log.error "Apply only security patches set to #{security_only}"
+log.info "Apply only security patches set to #{security_only}"
 
 # Have we had any yum parameter specified?
 yum_params = if params['yum_params']
@@ -277,15 +277,15 @@ end
 
 # Run the patching
 if facts['os']['family'] == 'RedHat'
-  log.error 'Running yum upgrade'
-  log.error "Timeout value set to : #{timeout}"
+  log.info 'Running yum upgrade'
+  log.debug "Timeout value set to : #{timeout}"
   yum_end = ''
   status, output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
   err(status, 'os_patching/yum', "yum upgrade returned non-zero (#{status}) : #{output}", starttime) if status != 0
 
   if facts['os']['release']['major'].to_i > 5
     # Capture the yum job ID
-    log.error 'Getting yum job ID'
+    log.info 'Getting yum job ID'
     job = ''
     yum_id, stderr, status = Open3.capture3('yum history')
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
@@ -307,12 +307,10 @@ if facts['os']['family'] == 'RedHat'
 
     # Check that the first yum history entry was after the yum_start time we captured
     parsed_end = Time.parse(yum_end + ":59").iso8601
-    log.error "Start #{starttime}"
-    log.error "End #{parsed_end}"
     err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < starttime
 
     # Capture the yum return code
-    log.error "Getting yum return code for job #{job}"
+    log.debug "Getting yum return code for job #{job}"
     yum_status, stderr, status = Open3.capture3("yum history info #{job}")
     yum_return = ''
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
@@ -327,7 +325,7 @@ if facts['os']['family'] == 'RedHat'
 
     pkg_hash = {}
     # Pull out the updated package list from yum history
-    log.error "Getting updated package list for job #{job}"
+    log.debug "Getting updated package list for job #{job}"
     updated_packages, stderr, status = Open3.capture3("yum history info #{job}")
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
     updated_packages.split("\n").each do |line|
@@ -342,7 +340,7 @@ if facts['os']['family'] == 'RedHat'
   end
 
   output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, output, job, pinned_pkgs, starttime)
-  log.error 'Patching complete'
+  log.info 'Patching complete'
 elsif facts['os']['family'] == 'Debian'
   # The security only workflow for Debain is a little complex, retiring it for now
   if security_only == true
@@ -350,20 +348,20 @@ elsif facts['os']['family'] == 'Debian'
     err(101, 'os_patching/security_only', 'Security only not supported on Debian at this point', starttime)
   end
 
-  log.error 'Getting package update list'
+  log.debug 'Getting package update list'
   updated_packages, stderr, status = Open3.capture3("apt-get dist-upgrade -s #{dpkg_params} | awk '/^Inst/ {print $2}'")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
   pkg_array = updated_packages.split
 
   # Do the patching
-  log.error 'Running apt update'
+  log.debug 'Running apt update'
   deb_front = 'DEBIAN_FRONTEND=noninteractive'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
   apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
   output('Success', reboot, security_only, 'Patching complete', pkg_array, apt_std_out, '', pinned_pkgs, starttime)
-  log.error 'Patching complete'
+  log.info 'Patching complete'
 else
   # Only works on Redhat & Debian at the moment
   log.error 'Unsupported OS - exiting'
@@ -371,16 +369,16 @@ else
 end
 
 # Refresh the facts now that we've patched
-log.error 'Running os_patching fact refresh'
+log.info 'Running os_patching fact refresh'
 _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
 needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
 if (reboot == true && needs_reboot == true) || reboot_override == true
-  log.error 'Rebooting'
+  log.info 'Rebooting'
   p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
   Process.detach(p1)
 end
-log.error 'os_patching run complete'
+log.info 'os_patching run complete'
 exit 0
