@@ -310,7 +310,8 @@ if facts['os']['family'] == 'RedHat'
     # Check that the first yum history entry was after the yum_start time we captured
     log.info "END : #{yum_end}"
     log.info "START : #{yum_start}"
-    err(status, 'os_patching/yum', 'Yum did not appear to run', starttime) if yum_end < yum_start
+    parsed_end = Time.parse(yum_end) 
+    err(status, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < yum_start
 
     # Capture the yum return code
     log.debug "Getting yum return code for job #{job}"
