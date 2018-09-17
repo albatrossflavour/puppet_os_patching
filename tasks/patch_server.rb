@@ -112,17 +112,17 @@ def err(code, kind, message, starttime)
 end
 
 # Figure out if we need to reboot
-def reboot_required(family, release, smart_reboot)
+def reboot_required(family, release)
   if family == 'RedHat' && File.file?('/usr/bin/needs-restarting')
     response = ''
-    if release.to_i > 6 && smart_reboot
+    if release.to_i > 6
       _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
       response = if status != 0
                    true
                  else
                    false
                  end
-    elsif release.to_i == 6 && smart_reboot
+    elsif release.to_i == 6
       # If needs restart returns processes on RHEL6, consider that the node
       # needs a reboot
       output, stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
@@ -138,9 +138,9 @@ def reboot_required(family, release, smart_reboot)
     response
   elsif family == 'Redhat'
     true
-  elsif family == 'Debian' && File.file?('/var/run/reboot-required') && smart_reboot
+  elsif family == 'Debian' && File.file?('/var/run/reboot-required')
     true
-  elsif family == 'Debian' && smart_reboot
+  elsif family == 'Debian'
     false
   elsif family == 'Debian'
     true
@@ -261,7 +261,7 @@ end
 
 # There are no updates available, exit cleanly rebooting if the override flag is set
 if updatecount.zero?
-  if reboot_override == true
+  if reboot_override == true || reboot_override == 'Always'
     log.error 'Rebooting'
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
@@ -372,7 +372,7 @@ _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_gene
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
-needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'], facts['os_patching']['smart_reboot'])
+needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
 if (reboot == true && needs_reboot == true) || reboot_override == true
   log.info 'Rebooting'
   p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
