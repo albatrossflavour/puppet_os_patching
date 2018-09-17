@@ -114,7 +114,7 @@ end
 # Figure out if we need to reboot
 def reboot_required(family, release, reboot)
   # Do the easy stuff first
-  if reboot == 'Always'
+  if reboot == 'Always' || reboot == 'If Patched'
     true
   elsif reboot == 'Never'
     false
@@ -143,13 +143,9 @@ def reboot_required(family, release, reboot)
       response = true
     end
     response
-  elsif family == 'Redhat' && reboot == 'If Patched'
-    true
   elsif family == 'Redhat'
     false
   elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'Smart'
-    true
-  elsif family == 'Debian' && reboot == 'If Required'
     true
   elsif family == 'Debian'
     false
@@ -397,6 +393,7 @@ err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
 needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'], reboot)
+log.info "reboot_required returning #{needs_reboot}"
 if needs_reboot == true
   log.info 'Rebooting'
   p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
