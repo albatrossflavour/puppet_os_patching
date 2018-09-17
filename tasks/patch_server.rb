@@ -114,12 +114,12 @@ end
 # Figure out if we need to reboot
 def reboot_required(family, release, reboot)
   # Do the easy stuff first
-  if reboot == 'Always' || reboot == 'Patched'
+  if reboot == 'always' || reboot == 'patched'
     true
-  elsif reboot == 'Never'
+  elsif reboot == 'never'
     false
   else
-    if family == 'RedHat' && File.file?('/usr/bin/needs-restarting') && reboot == 'Smart'
+    if family == 'RedHat' && File.file?('/usr/bin/needs-restarting') && reboot == 'smart'
       response = ''
       if release.to_i > 6
         _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
@@ -144,7 +144,7 @@ def reboot_required(family, release, reboot)
       response
     elsif family == 'Redhat'
       false
-    elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'Smart'
+    elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'smart'
       true
     elsif family == 'Debian'
       false
@@ -174,35 +174,35 @@ pinned_pkgs = facts['os_patching']['pinned_packages']
 reboot_override = facts['os_patching']['reboot_override']
 reboot_param = params['reboot']
 reboot = ''
-if reboot_override == 'Always'
-  reboot = 'Always'
-elsif ['Never', false].include?(reboot_override)
-  reboot = 'Never'
-elsif ['Patched', true].include?(reboot_override)
-  reboot = 'Patched'
-elsif reboot_override == 'Smart'
-  reboot = 'Smart'
-elsif reboot_override == 'Default'
+if reboot_override == 'always'
+  reboot = 'always'
+elsif ['never', false].include?(reboot_override)
+  reboot = 'never'
+elsif ['patched', true].include?(reboot_override)
+  reboot = 'patched'
+elsif reboot_override == 'smart'
+  reboot = 'smart'
+elsif reboot_override == 'default'
   if reboot_param
-    if reboot_param == 'Always'
-      reboot = 'Always'
-    elsif ['Never', false].include?(reboot_param)
-      reboot = 'Never'
-    elsif ['Patched', true].include?(reboot_param)
-      reboot = 'Patched'
-    elsif reboot_param == 'Smart'
-      reboot = 'Smart'
+    if reboot_param == 'always'
+      reboot = 'always'
+    elsif ['never', false].include?(reboot_param)
+      reboot = 'never'
+    elsif ['patched', true].include?(reboot_param)
+      reboot = 'patched'
+    elsif reboot_param == 'smart'
+      reboot = 'smart'
     else
       err('108', 'os_patching/params', 'Invalid parameter for reboot', starttime)
     end
   else
-    reboot = 'Never'
+    reboot = 'never'
   end
 else
   err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
 end
 
-if reboot_override != reboot_param && reboot_override != 'Default'
+if reboot_override != reboot_param && reboot_override != 'default'
   log.info "Reboot override set to #{reboot_override}, reboot parameter set to #{reboot_param}.  Using '#{reboot_override}'"
 end
 
@@ -281,7 +281,7 @@ end
 
 # There are no updates available, exit cleanly rebooting if the override flag is set
 if updatecount.zero?
-  if reboot == 'Always'
+  if reboot == 'always'
     log.error 'Rebooting'
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush

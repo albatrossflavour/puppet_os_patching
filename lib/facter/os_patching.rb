@@ -159,23 +159,23 @@ else
       if File.file?(rebootfile)
         rebootoverride = File.open(rebootfile, 'r').to_a
         data['reboot_override'] = case rebootoverride.last
-                                  when /^Always$/
-                                    'Always'
+                                  when /^always$/
+                                    'always'
                                   when /^[Tt]rue$/
-                                    'Always'
+                                    'always'
                                   when /^[Ff]alse$/
-                                    'Never'
-                                  when /^Never$/
-                                    'Never'
-                                  when /^Patched$/
-                                    'Patched'
-                                  when /^Smart$/
-                                    'Smart'
+                                    'never'
+                                  when /^never$/
+                                    'never'
+                                  when /^patched$/
+                                    'patched'
+                                  when /^smart$/
+                                    'smart'
                                   else
-                                    'Default'
+                                    'default'
                                   end
       else
-        data['reboot_override'] = 'Default'
+        data['reboot_override'] = 'default'
       end
       data
     end
