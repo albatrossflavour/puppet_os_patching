@@ -112,8 +112,15 @@ def err(code, kind, message, starttime)
 end
 
 # Figure out if we need to reboot
-def reboot_required(family, release)
-  if family == 'RedHat' && File.file?('/usr/bin/needs-restarting')
+def reboot_required(family, release, reboot)
+  # Do the easy stuff first
+  if reboot == 'Always'
+    true
+  elsif reboot == 'Never'
+    false
+  end
+
+  if family == 'RedHat' && File.file?('/usr/bin/needs-restarting') && reboot == 'Smart'
     response = ''
     if release.to_i > 6
       _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
@@ -136,14 +143,18 @@ def reboot_required(family, release)
       response = true
     end
     response
-  elsif family == 'Redhat'
+  elsif family == 'Redhat' && reboot == 'If Patched'
     true
-  elsif family == 'Debian' && File.file?('/var/run/reboot-required')
+  elsif family == 'Redhat'
+    false
+  elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'Smart'
+    true
+  elsif family == 'Debian' && reboot == 'If Required'
     true
   elsif family == 'Debian'
     false
-  elsif family == 'Debian'
-    true
+  else
+    false
   end
 end
 
@@ -161,29 +172,42 @@ err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
 pinned_pkgs = facts['os_patching']['pinned_packages']
 
-# Should we do a reboot?
-if params['reboot']
-  if params['reboot'] == true
-    reboot = true
-  elsif params['reboot'] == false
-    reboot = false
+# Let's figure out the reboot gordian knot
+#
+# If the override is set, it doesn't matter that anything else is set to at this point
+reboot_override = facts['os_patching']['reboot_override']
+reboot_param = params['reboot']
+reboot = ''
+if reboot_override == 'Always'
+  reboot = 'Always'
+elsif ['Never', false].include?(reboot_override)
+  reboot = 'Never'
+elsif ['If Patched', true].include?(reboot_override)
+  reboot = 'If Patched'
+elsif reboot_override == 'Smart'
+  reboot = 'Smart'
+elsif reboot_override == 'Default'
+  if reboot_param
+    if reboot_param == 'Always'
+      reboot = 'Always'
+    elsif ['Never', false].include?(reboot_param)
+      reboot = 'Never'
+    elsif ['If Patched', true].include?(reboot_param)
+      reboot = 'If Patched'
+    elsif reboot_param == 'Smart'
+      reboot = 'Smart'
+    else
+      err('108', 'os_patching/params', 'Invalid parameter for reboot', starttime)
+    end
   else
-    err('108', 'os_patching/params', 'Invalid boolean to reboot parameter', starttime)
+    reboot = 'Never'
   end
 else
-  reboot = false
+  err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
 end
 
-# Is the reboot_override fact set?
-reboot_override = facts['os_patching']['reboot_override']
-if reboot_override == 'Invalid Entry'
-  err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
-elsif reboot_override == true && reboot == false
-  log.info 'Reboot override set to true but task said no.  Will reboot'
-  reboot = true
-elsif reboot_override == false && reboot == true
-  log.info 'Reboot override set to false but task said yes.  Will not reboot'
-  reboot = false
+if reboot_override != reboot_param && reboot_override != 'Default'
+  log.info "Reboot override set to #{reboot_override}, reboot parameter set to #{reboot_param}.  Using '#{reboot_override}'"
 end
 
 log.info "Reboot after patching set to #{reboot}"
@@ -261,7 +285,7 @@ end
 
 # There are no updates available, exit cleanly rebooting if the override flag is set
 if updatecount.zero?
-  if reboot_override == true || reboot_override == 'Always'
+  if reboot == 'Always'
     log.error 'Rebooting'
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
@@ -355,7 +379,7 @@ elsif facts['os']['family'] == 'Debian'
   log.debug 'Running apt update'
   deb_front = 'DEBIAN_FRONTEND=noninteractive'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
-  apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
+  apt_std_out, stderr, status = Open3.capture3("#{deb_front} #{dpkg_params} -y #{deb_opts} dist-upgrade")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
   output('Success', reboot, security_only, 'Patching complete', pkg_array, apt_std_out, '', pinned_pkgs, starttime)
@@ -372,8 +396,8 @@ _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_gene
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
-needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
-if (reboot == true && needs_reboot == true) || reboot_override == true
+needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'], reboot)
+if needs_reboot == true
   log.info 'Rebooting'
   p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
   Process.detach(p1)
