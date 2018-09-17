@@ -10,7 +10,7 @@
       "type": "Optional[String]"
     },
     "reboot": {
-      "description": "Should the server reboot after patching has been applied? (Defaults to 'Smart')",
+      "description": "Should the server reboot after patching has been applied? (Defaults to 'Never')",
       "type": "Optional[Variant[Boolean, Enum['Alwayts', 'Never', 'If Patched', 'Smart']]]"
     },
     "timeout": {
