@@ -38,6 +38,7 @@ More advanced usage:
 class { 'os_patching':
   patch_window     => 'Week3',
   reboot_override  => true,
+  smart_reboot     => true,
   blackout_windows => { 'End of year change freeze':
     {
       'start': '2018-12-15T00:00:00+1000',
@@ -100,6 +101,7 @@ Most of the reporting is driven off the custom fact `os_patching_data`, for exam
   blocked_reasons => [],
   blackouts => {},
   patch_window = 'Week3',
+  smart_reboot = true,
   pinned_packages => [],
   last_run => {
     date => "2018-08-07T21:55:20+10:00",
@@ -143,6 +145,7 @@ This shows there are no updates which can be applied to this server and the serv
   },
   pinned_packages => [],
   patch_window = 'Week3',
+  smart_reboot = true,
   last_run => {
     date => "2018-08-07T21:55:20+10:00",
     message => "Patching complete",
@@ -170,6 +173,8 @@ The reboot_required flag is set to true, which means there have been changes to 
 The pinned packages entry lists any packages which have been specifically excluded from being patched, from [version lock](https://access.redhat.com/solutions/98873) on Red Hat or by [pinning](https://wiki.debian.org/AptPreferences) in Debian.
 
 Last run shows a summary of the information from the last `os_patching::patch_server` task.
+
+The `smart_reboot` fact is used by the patching task.  When it set to true, the task will try (on supported OS versions) to determine if a reboot is required (using, for example `needs-restarting` on RHEL).  When set to false, the task will default to assuming that a restart is required and will follow the selected options from the task.
 
 The fact `os_patching.patch_window` can be used to assign nodes to an arbitrary group.  The fact can be used as part of the query fed into the task to determine which nodes to patch:
 
@@ -240,6 +245,7 @@ This directory contains the various control files needed for the fact and task t
 * `/etc/os_patching/security_package_updates` : a list of all security_package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
 * `/etc/os_patching/run_history` : a summary of each run of the `os_patching::patch_server` task, populated by the task
 * `/etc/os_patching/reboot_override` : if present, overrides the `reboot=` parameter to the task
+* `/etc/os_patching/smart_reboot` : if present, sets the boolean value of the `smart_reboot=` fact, defaults to `true`
 * `/etc/os_patching/patch_window` : if present, sets the value for the fact `os_patching.patch_window`
 * `/etc/os_patching/reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
 * `/etc/os_patching/apps_to_restart` : a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.

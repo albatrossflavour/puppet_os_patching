@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.5.0
+
+- Enabled the `smart_reboot` fact.  When set to false, the task will **NOT** try to determine if a reboot is required after patching and will just follow the default reboot settings. 
+
 ## Release 0.4.1
 
 - Missed some metadata info updates in 0.4.0
