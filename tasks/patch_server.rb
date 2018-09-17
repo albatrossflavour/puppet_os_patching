@@ -114,7 +114,7 @@ end
 # Figure out if we need to reboot
 def reboot_required(family, release, reboot)
   # Do the easy stuff first
-  if reboot == 'Always' || reboot == 'If Patched'
+  if reboot == 'Always' || reboot == 'Patched'
     true
   elsif reboot == 'Never'
     false
@@ -178,8 +178,8 @@ if reboot_override == 'Always'
   reboot = 'Always'
 elsif ['Never', false].include?(reboot_override)
   reboot = 'Never'
-elsif ['If Patched', true].include?(reboot_override)
-  reboot = 'If Patched'
+elsif ['Patched', true].include?(reboot_override)
+  reboot = 'Patched'
 elsif reboot_override == 'Smart'
   reboot = 'Smart'
 elsif reboot_override == 'Default'
@@ -188,8 +188,8 @@ elsif reboot_override == 'Default'
       reboot = 'Always'
     elsif ['Never', false].include?(reboot_param)
       reboot = 'Never'
-    elsif ['If Patched', true].include?(reboot_param)
-      reboot = 'If Patched'
+    elsif ['Patched', true].include?(reboot_param)
+      reboot = 'Patched'
     elsif reboot_param == 'Smart'
       reboot = 'Smart'
     else

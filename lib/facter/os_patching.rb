@@ -167,8 +167,8 @@ else
                                     'Never'
                                   when /^Never$/
                                     'Never'
-                                  when /^If Patched$/
-                                    'If Patched'
+                                  when /^Patched$/
+                                    'Patched'
                                   when /^Smart$/
                                     'Smart'
                                   else

@@ -6,7 +6,7 @@
 # @param [String] patch_cron_user User name to run the cron job as (defaults to patch_data_owner)
 # @param [Boolean] install_delta_rpm Should the deltarpm package be installed on RedHat family nodes
 # lint:ignore:140chars
-# @param Variant[Boolean, Enum['Always', 'Never', 'If Patched', 'Smart', 'Default']] reboot_override Controls on a node level if a reboot should/should not be done after patching.
+# @param Variant[Boolean, Enum['Always', 'Never', 'Patched', 'Smart', 'Default']] reboot_override Controls on a node level if a reboot should/should not be done after patching.
 # lint:endignore
 #		This overrides the setting in the task
 # @param [Hash] blackout_windows A hash containing the patch blackout windows, which prevent patching.
@@ -58,7 +58,7 @@ class os_patching (
   String $patch_data_group           = 'root',
   String $patch_cron_user            = $patch_data_owner,
   Boolean $install_delta_rpm         = false,
-  Optional[Variant[Boolean, Enum['Always', 'Never', 'If Patched', 'Smart', 'Default']]] $reboot_override = 'Default',
+  Optional[Variant[Boolean, Enum['Always', 'Never', 'Patched', 'Smart', 'Default']]] $reboot_override = 'Default',
   Optional[Hash] $blackout_windows   = undef,
   $patch_window                      = undef,
   $patch_cron_hour                   = absent,

@@ -59,7 +59,7 @@ $ puppet task run os_patching::patch_server [dpkg_params=<value>] [reboot=<value
 PARAMETERS:
 - dpkg_params : Optional[String]
     Any additional parameters to include in the dpkg command
-- reboot : Optional[Variant[Boolean, Enum['Always', 'Never', 'If Patched', 'Smart']]]
+- reboot : Optional[Variant[Boolean, Enum['Always', 'Never', 'Patched', 'Smart']]]
     Should the server reboot after patching has been applied? (Defaults to "Never")
 - security_only : Optional[Boolean]
     Limit patches to those tagged as security related? (Defaults to false)
@@ -71,7 +71,7 @@ PARAMETERS:
 
 Example:
 ```bash
-$ puppet task run os_patching::patch_server --params='{"reboot": "If Patched", "security_only": false}' --query="inventory[certname] { facts.os_patching.patch_window = 'Week3' and facts.os_patching.blocked = false and facts.os_patching.package_update_count > 0}"
+$ puppet task run os_patching::patch_server --params='{"reboot": "Patched", "security_only": false}' --query="inventory[certname] { facts.os_patching.patch_window = 'Week3' and facts.os_patching.blocked = false and facts.os_patching.package_update_count > 0}"
 ```
 
 This will run a patching task against all nodes which have facts matching:
@@ -191,7 +191,7 @@ The reboot parameter is set in the `os_patching::patch_server` task.  It takes t
   * No matter what, **always** reboot the node during the task run, even if no patches are required
 * "Never" (or the legacy value `false`)
   * No matter what, **never** reboot the node during the task run, even if patches have been applied
-* "If Patched" (or the legacy value `true`)
+* "Patched" (or the legacy value `true`)
   * Reboot the node if patches have been applied
 * "Smart"
   * Use the OS supplied tools (e.g. `needs_restarting` on RHEL) to determine if a reboot is required, if it is reboot, otherwise do not.
@@ -204,7 +204,7 @@ These parameters set the default action for all nodes during the run of the task
 
 The reboot override fact is part of the `os_patching` fact set.  It is set through the os_patching manifest and has a default of "Default".
 
-If it is set to "Default" it will take whatever reboot actions are listed in the `os_patching::patch_server` task.  The other options it takes are the same as those for the reboot parameter (Always, Never, If Patched, Smart).
+If it is set to "Default" it will take whatever reboot actions are listed in the `os_patching::patch_server` task.  The other options it takes are the same as those for the reboot parameter (Always, Never, Patched, Smart).
 
 During the task run, any value other than "Default" will override the value for the `reboot` parameter.  For example, if the `reboot` parameter is set to "Never" but the `reboot_override` fact is set to "Always", the node will always reboot.  If the `reboot` parameter is set to "Never" but the `reboot_override` fact is set to "Default", the node will use the `reboot` parameter and not reboot.
 
