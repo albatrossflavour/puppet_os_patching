@@ -1,6 +1,5 @@
 # lint:ignore:autoloader_layout
 class sample_patching_profile (
-  $smart_reboot     = undef,
   $patch_window     = undef,
   $blackout_windows = undef,
   $reboot_override  = undef,
@@ -14,7 +13,6 @@ class sample_patching_profile (
 
   # Call the os_patching class to set everything up
   class { 'os_patching':
-    smart_reboot     => $smart_reboot,
     patch_window     => $patch_window,
     reboot_override  => $reboot_override,
     blackout_windows => $full_blackout_windows,

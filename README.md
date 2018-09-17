@@ -37,8 +37,6 @@ More advanced usage:
 ```puppet
 class { 'os_patching':
   patch_window     => 'Week3',
-  reboot_override  => true,
-  smart_reboot     => true,
   blackout_windows => { 'End of year change freeze':
     {
       'start': '2018-12-15T00:00:00+1000',
@@ -61,8 +59,8 @@ $ puppet task run os_patching::patch_server [dpkg_params=<value>] [reboot=<value
 PARAMETERS:
 - dpkg_params : Optional[String]
     Any additional parameters to include in the dpkg command
-- reboot : Optional[Boolean]
-    Should the server reboot after patching has been applied? (Defaults to false)
+- reboot : Optional[Variant[Boolean, Enum['Always', 'Never', 'If Patched', 'Smart']]]
+    Should the server reboot after patching has been applied? (Defaults to "Never")
 - security_only : Optional[Boolean]
     Limit patches to those tagged as security related? (Defaults to false)
 - timeout : Optional[Integer]
@@ -73,7 +71,7 @@ PARAMETERS:
 
 Example:
 ```bash
-$ puppet task run os_patching::patch_server --params='{"reboot": true, "security_only": false}' --query="inventory[certname] { facts.os_patching.patch_window = 'Week3' and facts.os_patching.blocked = false and facts.os_patching.package_update_count > 0}"
+$ puppet task run os_patching::patch_server --params='{"reboot": "If Patched", "security_only": false}' --query="inventory[certname] { facts.os_patching.patch_window = 'Week3' and facts.os_patching.blocked = false and facts.os_patching.package_update_count > 0}"
 ```
 
 This will run a patching task against all nodes which have facts matching:
@@ -101,7 +99,6 @@ Most of the reporting is driven off the custom fact `os_patching_data`, for exam
   blocked_reasons => [],
   blackouts => {},
   patch_window = 'Week3',
-  smart_reboot = true,
   pinned_packages => [],
   last_run => {
     date => "2018-08-07T21:55:20+10:00",
@@ -145,7 +142,6 @@ This shows there are no updates which can be applied to this server and the serv
   },
   pinned_packages => [],
   patch_window = 'Week3',
-  smart_reboot = true,
   last_run => {
     date => "2018-08-07T21:55:20+10:00",
     message => "Patching complete",
@@ -174,13 +170,47 @@ The pinned packages entry lists any packages which have been specifically exclud
 
 Last run shows a summary of the information from the last `os_patching::patch_server` task.
 
-The `smart_reboot` fact is used by the patching task.  When it set to true, the task will try (on supported OS versions) to determine if a reboot is required (using, for example `needs-restarting` on RHEL).  When set to false, the task will default to assuming that a restart is required and will follow the selected options from the task.
 
 The fact `os_patching.patch_window` can be used to assign nodes to an arbitrary group.  The fact can be used as part of the query fed into the task to determine which nodes to patch:
 
 ```bash
 $ puppet task run os_patching::patch_server --query="inventory[certname] {facts.os_patching.patch_window = 'Week3'}"
 ```
+
+### To reboot or not to reboot, that is the question...
+
+The logic for how to handle reboots is a little complex as it has to handle a wide range of scenarios and desired outcomes.
+
+There are two options which can be set that control how the reboot decision is made:
+
+#### The `reboot` parameter
+
+The reboot parameter is set in the `os_patching::patch_server` task.  It takes the following options:
+
+* "Always"
+  * No matter what, **always** reboot the node during the task run, even if no patches are required
+* "Never" (or the legacy value `false`)
+  * No matter what, **never** reboot the node during the task run, even if patches have been applied
+* "If Patched" (or the legacy value `true`)
+  * Reboot the node if patches have been applied
+* "Smart"
+  * Use the OS supplied tools (e.g. `needs_restarting` on RHEL) to determine if a reboot is required, if it is reboot, otherwise do not.
+
+The default value is "Never".
+
+These parameters set the default action for all nodes during the run of the task.  It is possible to override the behaviour on a node by using...
+
+#### The `reboot_override` fact
+
+The reboot override fact is part of the `os_patching` fact set.  It is set through the os_patching manifest and has a default of "Default".
+
+If it is set to "Default" it will take whatever reboot actions are listed in the `os_patching::patch_server` task.  The other options it takes are the same as those for the reboot parameter (Always, Never, If Patched, Smart).
+
+During the task run, any value other than "Default" will override the value for the `reboot` parameter.  For example, if the `reboot` parameter is set to "Never" but the `reboot_override` fact is set to "Always", the node will always reboot.  If the `reboot` parameter is set to "Never" but the `reboot_override` fact is set to "Default", the node will use the `reboot` parameter and not reboot.
+
+#### Why?
+
+By having a reboot mode set by the task parameter, it is possible to set the behaviour for all nodes in a patching run (I do 100's at once).  Having the override functionality provided by the fact, you can allow individual nodes included in the patching run excluded from the reboot behaviour.  Maybe there are a couple of nodes you know you need to patch but you can't reboot them immediately, you can set their reboot_override fact to "Never" and handle the reboot manually at another time.
 
 ### Task output
 
@@ -194,7 +224,7 @@ If there is nothing to be done, the task will report:
   "start_time" : "2018-08-08T07:52:28+10:00",
   "debug" : "",
   "end_time" : "2018-08-08T07:52:46+10:00",
-  "reboot" : false,
+  "reboot" : "Never",
   "packages_updated" : "",
   "job_id" : "",
   "message" : "No patches to apply"
@@ -211,7 +241,7 @@ If patching was executed, the task will report similar to below:
   "start_time" : "2018-08-07T21:55:20+10:00",
   "debug" : "TRIMMED DUE TO LENGTH FOR THIS EXAMPLE, WOULD NORMALLY CONTAIN FULL COMMAND OUTPUT",
   "end_time" : "2018-08-07T21:57:11+10:00",
-  "reboot" : false,
+  "reboot" : "Never",
   "packages_updated" : [ "NetworkManager-1:1.10.2-14.el7_5.x86_64", "NetworkManager-libnm-1:1.10.2-14.el7_5.x86_64", "NetworkManager-team-1:1.10.2-14.el7_5.x86_64", "NetworkManager-tui-1:1.10.2-14.el7_5.x86_64", "binutils-2.27-27.base.el7.x86_64", "centos-release-7-5.1804.el7.centos.2.x86_64", "git-1.8.3.1-13.el7.x86_64", "gnupg2-2.0.22-4.el7.x86_64", "kernel-tools-3.10.0-862.3.3.el7.x86_64", "kernel-tools-libs-3.10.0-862.3.3.el7.x86_64", "perl-Git-1.8.3.1-13.el7.noarch", "python-2.7.5-68.el7.x86_64", "python-libs-2.7.5-68.el7.x86_64", "python-perf-3.10.0-862.3.3.el7.centos.plus.x86_64", "selinux-policy-3.13.1-192.el7_5.3.noarch", "selinux-policy-targeted-3.13.1-192.el7_5.3.noarch", "sudo-1.8.19p2-13.el7.x86_64", "yum-plugin-fastestmirror-1.1.31-45.el7.noarch", "yum-utils-1.1.31-45.el7.noarch" ],
   "job_id" : "60",
   "message" : "Patching complete"
@@ -245,7 +275,6 @@ This directory contains the various control files needed for the fact and task t
 * `/etc/os_patching/security_package_updates` : a list of all security_package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
 * `/etc/os_patching/run_history` : a summary of each run of the `os_patching::patch_server` task, populated by the task
 * `/etc/os_patching/reboot_override` : if present, overrides the `reboot=` parameter to the task
-* `/etc/os_patching/smart_reboot` : if present, sets the boolean value of the `smart_reboot=` fact, defaults to `true`
 * `/etc/os_patching/patch_window` : if present, sets the value for the fact `os_patching.patch_window`
 * `/etc/os_patching/reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
 * `/etc/os_patching/apps_to_restart` : a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.

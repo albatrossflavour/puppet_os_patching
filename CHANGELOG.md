@@ -2,7 +2,7 @@
 
 ## Release 0.5.0
 
-- Enabled the `smart_reboot` fact.  When set to false, the task will **NOT** try to determine if a reboot is required after patching and will just follow the default reboot settings. 
+- Rewrite of the reboot logic for both the task and the `reboot_override` fact.  **SHOULD** be backward compatable with how things used to work but it's now much cleaner and clearer.
 
 ## Release 0.4.1
 
