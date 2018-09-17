@@ -56,7 +56,7 @@ class os_patching (
   String $patch_data_group           = 'root',
   String $patch_cron_user            = $patch_data_owner,
   Boolean $install_delta_rpm         = false,
-  Variant[Boolean, Enum['Always', 'Never', 'If Patched', 'Smart', 'Default']] $reboot_override = 'Default'
+  Optional[Variant[Boolean, Enum['Always', 'Never', 'If Patched', 'Smart', 'Default']]] $reboot_override = 'Default',
   Optional[Hash] $blackout_windows   = undef,
   $patch_window                      = undef,
   $patch_cron_hour                   = absent,
