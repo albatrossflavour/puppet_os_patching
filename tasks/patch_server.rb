@@ -285,12 +285,12 @@ if updatecount.zero?
     log.error 'Rebooting'
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
-    log.error 'No patches to apply, rebooting as requested'
+    log.info 'No patches to apply, rebooting as requested'
     p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
     Process.detach(p1)
   else
     output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
-    log.error 'No patches to apply, exiting'
+    log.info 'No patches to apply, exiting'
   end
   exit(0)
 end
@@ -310,6 +310,11 @@ if facts['os']['family'] == 'RedHat'
     yum_id, stderr, status = Open3.capture3('yum history')
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
     yum_id.split("\n").each do |line|
+      # Quite the regex.  This pulls out fields 1 & 3 from the first info line
+      # from `yum history`,  which look like this :
+      # ID     | Login user               | Date and time    | 8< SNIP >8
+      # ------------------------------------------------------ 8< SNIP >8
+      #     69 | System <unset>           | 2018-09-17 17:18 | 8< SNIP >8
       matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\-<> ]*\|\s*([\d:\- ]*)/)
       next unless matchdata
       job = matchdata[1]
@@ -323,7 +328,9 @@ if facts['os']['family'] == 'RedHat'
     # Fail if we didn't capture a job time
     err(1, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
-    # Check that the first yum history entry was after the yum_start time we captured
+    # Check that the first yum history entry was after the yum_start time 
+    # we captured.  Append ':59' to the date as yum history only gives the 
+    # minute and if yum bails, it will usually be pretty quick
     parsed_end = Time.parse(yum_end + ':59').iso8601
     err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < starttime
 
