@@ -112,8 +112,13 @@ def err(code, kind, message, starttime)
 end
 
 # Figure out if we need to reboot
-def reboot_required(family, release)
-  if family == 'RedHat' && File.file?('/usr/bin/needs-restarting')
+def reboot_required(family, release, reboot)
+  # Do the easy stuff first
+  if ['always', 'patched'].include?(reboot)
+    true
+  elsif reboot == 'never'
+    false
+  elsif family == 'RedHat' && File.file?('/usr/bin/needs-restarting') && reboot == 'smart'
     response = ''
     if release.to_i > 6
       _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
@@ -138,9 +143,11 @@ def reboot_required(family, release)
     response
   elsif family == 'Redhat'
     false
-  elsif family == 'Debian' && File.file?('/var/run/reboot-required')
+  elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'smart'
     true
   elsif family == 'Debian'
+    false
+  else
     false
   end
 end
@@ -159,29 +166,42 @@ err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
 pinned_pkgs = facts['os_patching']['pinned_packages']
 
-# Should we do a reboot?
-if params['reboot']
-  if params['reboot'] == true
-    reboot = true
-  elsif params['reboot'] == false
-    reboot = false
+# Let's figure out the reboot gordian knot
+#
+# If the override is set, it doesn't matter that anything else is set to at this point
+reboot_override = facts['os_patching']['reboot_override']
+reboot_param = params['reboot']
+reboot = ''
+if reboot_override == 'always'
+  reboot = 'always'
+elsif ['never', false].include?(reboot_override)
+  reboot = 'never'
+elsif ['patched', true].include?(reboot_override)
+  reboot = 'patched'
+elsif reboot_override == 'smart'
+  reboot = 'smart'
+elsif reboot_override == 'default'
+  if reboot_param
+    if reboot_param == 'always'
+      reboot = 'always'
+    elsif ['never', false].include?(reboot_param)
+      reboot = 'never'
+    elsif ['patched', true].include?(reboot_param)
+      reboot = 'patched'
+    elsif reboot_param == 'smart'
+      reboot = 'smart'
+    else
+      err('108', 'os_patching/params', 'Invalid parameter for reboot', starttime)
+    end
   else
-    err('108', 'os_patching/params', 'Invalid boolean to reboot parameter', starttime)
+    reboot = 'never'
   end
 else
-  reboot = false
+  err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
 end
 
-# Is the reboot_override fact set?
-reboot_override = facts['os_patching']['reboot_override']
-if reboot_override == 'Invalid Entry'
-  err(105, 'os_patching/reboot_override', 'Fact reboot_override invalid', starttime)
-elsif reboot_override == true && reboot == false
-  log.info 'Reboot override set to true but task said no.  Will reboot'
-  reboot = true
-elsif reboot_override == false && reboot == true
-  log.info 'Reboot override set to false but task said yes.  Will not reboot'
-  reboot = false
+if reboot_override != reboot_param && reboot_override != 'default'
+  log.info "Reboot override set to #{reboot_override}, reboot parameter set to #{reboot_param}.  Using '#{reboot_override}'"
 end
 
 log.info "Reboot after patching set to #{reboot}"
@@ -259,16 +279,16 @@ end
 
 # There are no updates available, exit cleanly rebooting if the override flag is set
 if updatecount.zero?
-  if reboot_override == true
+  if reboot == 'always'
     log.error 'Rebooting'
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
-    log.error 'No patches to apply, rebooting as requested'
+    log.info 'No patches to apply, rebooting as requested'
     p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
     Process.detach(p1)
   else
     output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
-    log.error 'No patches to apply, exiting'
+    log.info 'No patches to apply, exiting'
   end
   exit(0)
 end
@@ -288,6 +308,11 @@ if facts['os']['family'] == 'RedHat'
     yum_id, stderr, status = Open3.capture3('yum history')
     err(status, 'os_patching/yum', stderr, starttime) if status != 0
     yum_id.split("\n").each do |line|
+      # Quite the regex.  This pulls out fields 1 & 3 from the first info line
+      # from `yum history`,  which look like this :
+      # ID     | Login user               | Date and time    | 8< SNIP >8
+      # ------------------------------------------------------ 8< SNIP >8
+      #     69 | System <unset>           | 2018-09-17 17:18 | 8< SNIP >8
       matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\-<> ]*\|\s*([\d:\- ]*)/)
       next unless matchdata
       job = matchdata[1]
@@ -301,7 +326,9 @@ if facts['os']['family'] == 'RedHat'
     # Fail if we didn't capture a job time
     err(1, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
-    # Check that the first yum history entry was after the yum_start time we captured
+    # Check that the first yum history entry was after the yum_start time
+    # we captured.  Append ':59' to the date as yum history only gives the
+    # minute and if yum bails, it will usually be pretty quick
     parsed_end = Time.parse(yum_end + ':59').iso8601
     err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < starttime
 
@@ -353,7 +380,7 @@ elsif facts['os']['family'] == 'Debian'
   log.debug 'Running apt update'
   deb_front = 'DEBIAN_FRONTEND=noninteractive'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
-  apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
+  apt_std_out, stderr, status = Open3.capture3("#{deb_front} #{dpkg_params} -y #{deb_opts} dist-upgrade")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
   output('Success', reboot, security_only, 'Patching complete', pkg_array, apt_std_out, '', pinned_pkgs, starttime)
@@ -370,8 +397,9 @@ _fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_gene
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
-needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'])
-if (reboot == true && needs_reboot == true) || reboot_override == true
+needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'], reboot)
+log.info "reboot_required returning #{needs_reboot}"
+if needs_reboot == true
   log.info 'Rebooting'
   p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
   Process.detach(p1)
