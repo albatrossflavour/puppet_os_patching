@@ -114,43 +114,41 @@ end
 # Figure out if we need to reboot
 def reboot_required(family, release, reboot)
   # Do the easy stuff first
-  if reboot == 'always' || reboot == 'patched'
+  if ['always', 'patched'].include?(reboot)
     true
   elsif reboot == 'never'
     false
-  else
-    if family == 'RedHat' && File.file?('/usr/bin/needs-restarting') && reboot == 'smart'
-      response = ''
-      if release.to_i > 6
-        _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
-        response = if status != 0
-                     true
-                   else
-                     false
-                   end
-      elsif release.to_i == 6
-        # If needs restart returns processes on RHEL6, consider that the node
-        # needs a reboot
-        output, stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
-        response = if output.empty? && stderr.empty?
-                     false
-                   else
-                     true
-                   end
-      else
-        # Needs-restart doesn't exist before RHEL6
-        response = true
-      end
-      response
-    elsif family == 'Redhat'
-      false
-    elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'smart'
-      true
-    elsif family == 'Debian'
-      false
+  elsif family == 'RedHat' && File.file?('/usr/bin/needs-restarting') && reboot == 'smart'
+    response = ''
+    if release.to_i > 6
+      _output, _stderr, status = Open3.capture3('/usr/bin/needs-restarting -r')
+      response = if status != 0
+                   true
+                 else
+                   false
+                 end
+    elsif release.to_i == 6
+      # If needs restart returns processes on RHEL6, consider that the node
+      # needs a reboot
+      output, stderr, _status = Open3.capture3('/usr/bin/needs-restarting')
+      response = if output.empty? && stderr.empty?
+                   false
+                 else
+                   true
+                 end
     else
-      false
+      # Needs-restart doesn't exist before RHEL6
+      response = true
     end
+    response
+  elsif family == 'Redhat'
+    false
+  elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'smart'
+    true
+  elsif family == 'Debian'
+    false
+  else
+    false
   end
 end
 
@@ -328,8 +326,8 @@ if facts['os']['family'] == 'RedHat'
     # Fail if we didn't capture a job time
     err(1, 'os_patching/yum', 'yum job time not found', starttime) if yum_end.empty?
 
-    # Check that the first yum history entry was after the yum_start time 
-    # we captured.  Append ':59' to the date as yum history only gives the 
+    # Check that the first yum history entry was after the yum_start time
+    # we captured.  Append ':59' to the date as yum history only gives the
     # minute and if yum bails, it will usually be pretty quick
     parsed_end = Time.parse(yum_end + ':59').iso8601
     err(1, 'os_patching/yum', 'Yum did not appear to run', starttime) if parsed_end < starttime
