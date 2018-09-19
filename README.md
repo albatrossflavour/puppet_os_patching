@@ -71,7 +71,7 @@ PARAMETERS:
 
 Example:
 ```bash
-$ puppet task run os_patching::patch_server --params='{"reboot": "Patched", "security_only": false}' --query="inventory[certname] { facts.os_patching.patch_window = 'Week3' and facts.os_patching.blocked = false and facts.os_patching.package_update_count > 0}"
+$ puppet task run os_patching::patch_server --params='{"reboot": "patched", "security_only": false}' --query="inventory[certname] { facts.os_patching.patch_window = 'Week3' and facts.os_patching.blocked = false and facts.os_patching.package_update_count > 0}"
 ```
 
 This will run a patching task against all nodes which have facts matching:
