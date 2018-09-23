@@ -5,7 +5,9 @@
 # @param [String] patch_data_group Group name for the owner of the patch data
 # @param [String] patch_cron_user User name to run the cron job as (defaults to patch_data_owner)
 # @param [Boolean] install_delta_rpm Should the deltarpm package be installed on RedHat family nodes
-# @param [Boolean] reboot_override Controls on a node level if a reboot should/should not be done after patching.
+# lint:ignore:140chars
+# @param Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']] reboot_override Controls on a node level if a reboot should/should not be done after patching.
+# lint:endignore
 #		This overrides the setting in the task
 # @param [Hash] blackout_windows A hash containing the patch blackout windows, which prevent patching.
 #   The dates are in full ISO8601 format.
@@ -56,7 +58,7 @@ class os_patching (
   String $patch_data_group           = 'root',
   String $patch_cron_user            = $patch_data_owner,
   Boolean $install_delta_rpm         = false,
-  Optional[Boolean] $reboot_override = undef,
+  Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override = 'default',
   Optional[Hash] $blackout_windows   = undef,
   $patch_window                      = undef,
   $patch_cron_hour                   = absent,
@@ -155,11 +157,9 @@ class os_patching (
   $reboot_override_file = '/etc/os_patching/reboot_override'
   if ( $reboot_override != undef ) {
     case $reboot_override {
-      # lint:ignore:quoted_booleans
-      true:  { $reboot_boolean = 'true' }
-      false: { $reboot_boolean = 'false' }
-      default: { fail ('reboot_override must be a boolean')}
-      # lint:endignore
+      true:     { $reboot_override_value = 'always' }
+      false:    { $reboot_override_value = 'never' }
+      default:  { $reboot_override_value = $reboot_override }
     }
 
     file { $reboot_override_file:
@@ -167,7 +167,7 @@ class os_patching (
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
-      content => $reboot_boolean,
+      content => $reboot_override_value,
       require => File['/etc/os_patching'],
       notify  => Exec[$fact_upload],
     }

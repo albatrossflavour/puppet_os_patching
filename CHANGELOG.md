@@ -1,5 +1,10 @@
 # Changelog
 
+## Release 0.5.0
+
+- Rewrite of the reboot logic for both the task and the `reboot_override` fact.  **SHOULD** be backward compatable with how things used to work but it's now much cleaner and clearer.
+- Updated logging, documentation and comments
+
 ## Release 0.4.1
 
 - Missed some metadata info updates in 0.4.0

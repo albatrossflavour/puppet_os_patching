@@ -1,6 +1,6 @@
 {
   "name": "albatrossflavour-os_patching",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "author": "Tony Green",
   "summary": "Perform OS level patching through tasks and report on patch levels through facts",
   "license": "Apache-2.0",

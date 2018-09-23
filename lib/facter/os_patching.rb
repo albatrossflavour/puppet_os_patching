@@ -155,17 +155,27 @@ else
     # Reboot override
     chunk(:reboot_override) do
       rebootfile = os_patching_dir + '/reboot_override'
+      data = {}
       if File.file?(rebootfile)
         rebootoverride = File.open(rebootfile, 'r').to_a
-        data = {}
         data['reboot_override'] = case rebootoverride.last
+                                  when /^always$/
+                                    'always'
                                   when /^[Tt]rue$/
-                                    true
+                                    'always'
                                   when /^[Ff]alse$/
-                                    false
+                                    'never'
+                                  when /^never$/
+                                    'never'
+                                  when /^patched$/
+                                    'patched'
+                                  when /^smart$/
+                                    'smart'
                                   else
-                                    ''
+                                    'default'
                                   end
+      else
+        data['reboot_override'] = 'default'
       end
       data
     end
