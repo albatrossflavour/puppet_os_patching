@@ -75,13 +75,13 @@ class os_patching (
 
   if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
 
-  if ( $::osfamily == 'RedHat' && $manage_delta_rpm) {
+  if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
     package { 'deltarpm':
       ensure => $delta_rpm,
     }
   }
 
-  if ( $::osfamily == 'RedHat' && $manage_yum_plugin_security) {
+  if ( $::osfamily == 'RedHat' and $manage_yum_plugin_security) {
     package { 'yum-plugin-security':
       ensure => $yum_plugin_security,
     }
