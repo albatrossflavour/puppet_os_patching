@@ -6,6 +6,9 @@
 # @param [String] patch_cron_user User name to run the cron job as (defaults to patch_data_owner)
 # @param [Boolean] manage_delta_rpm Should the deltarpm package be managed by this module on RedHat family nodes
 # lint:ignore:140chars
+# @param Enum['installed', 'absent', 'purged', 'held', 'latest'] delta_rpm If managed, what should the delta_rpm package set to?
+# @param [Boolean] manage_yum_plugin_security Should the yum_plugin_security package be managed by this module on RedHat family nodes
+# @param Enum['installed', 'absent', 'purged', 'held', 'latest'] yum_plugin_security If managed, what should the yum_plugin_security package set to?
 # @param Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']] reboot_override Controls on a node level if a reboot should/should not be done after patching.
 # lint:endignore
 #		This overrides the setting in the task
