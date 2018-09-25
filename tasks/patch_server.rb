@@ -16,6 +16,7 @@ require 'timeout'
 $stdout.sync = true
 
 facter = '/opt/puppetlabs/puppet/bin/facter'
+fact_generation = '/usr/local/bin/os_patching_fact_generation.sh'
 
 log = Syslog::Logger.new 'os_patching'
 starttime = Time.now.iso8601
@@ -158,7 +159,15 @@ params = JSON.parse(STDIN.read)
 # Cache fact data to speed things up
 log.info 'os_patching run started'
 log.debug 'Running os_patching fact refresh'
-_fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+unless File.exist? fact_generation
+  err(
+    255,
+    "os_patching/#{fact_generation}",
+    "#{fact_generation} does not exist, declare os_patching and run Puppet first",
+    starttime,
+  )
+end
+_fact_out, stderr, status = Open3.capture3(fact_generation)
 err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
 log.debug 'Gathering facts'
 full_facts, stderr, status = Open3.capture3(facter, '-p', '-j')
@@ -393,7 +402,7 @@ end
 
 # Refresh the facts now that we've patched
 log.info 'Running os_patching fact refresh'
-_fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+_fact_out, stderr, status = Open3.capture3(fact_generation)
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
