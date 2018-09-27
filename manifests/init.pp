@@ -143,7 +143,6 @@ class os_patching (
     fail('The patch window can only contain alphanumerics, space, underscore and dash')
   }
 
-
   if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
 
   if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
