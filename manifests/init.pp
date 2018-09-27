@@ -4,8 +4,11 @@
 # @param [String] patch_data_owner User name for the owner of the patch data
 # @param [String] patch_data_group Group name for the owner of the patch data
 # @param [String] patch_cron_user User name to run the cron job as (defaults to patch_data_owner)
-# @param [Boolean] install_delta_rpm Should the deltarpm package be installed on RedHat family nodes
+# @param [Boolean] manage_delta_rpm Should the deltarpm package be managed by this module on RedHat family nodes
 # lint:ignore:140chars
+# @param Enum['installed', 'absent', 'purged', 'held', 'latest'] delta_rpm If managed, what should the delta_rpm package set to?
+# @param [Boolean] manage_yum_plugin_security Should the yum_plugin_security package be managed by this module on RedHat family nodes
+# @param Enum['installed', 'absent', 'purged', 'held', 'latest'] yum_plugin_security If managed, what should the yum_plugin_security package set to?
 # @param Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']] reboot_override Controls on a node level if a reboot should/should not be done after patching.
 # lint:endignore
 #		This overrides the setting in the task
@@ -54,27 +57,36 @@
 #   {"End of year change freeze": {"start": "2018-12-15T00:00:00+1000", "end": "2019-01-15T23:59:59+1000"}}
 #
 class os_patching (
-  String $patch_data_owner           = 'root',
-  String $patch_data_group           = 'root',
-  String $patch_cron_user            = $patch_data_owner,
-  Boolean $install_delta_rpm         = false,
+  String $patch_data_owner            = 'root',
+  String $patch_data_group            = 'root',
+  String $patch_cron_user             = $patch_data_owner,
+  Boolean $manage_delta_rpm           = false,
+  Boolean $manage_yum_plugin_security = false,
+  Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
+  Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override = 'default',
-  Optional[Hash] $blackout_windows   = undef,
-  $patch_window                      = undef,
-  $patch_cron_hour                   = absent,
-  $patch_cron_month                  = absent,
-  $patch_cron_monthday               = absent,
-  $patch_cron_weekday                = absent,
-  $patch_cron_min                    = fqdn_rand(59),
+  Optional[Hash] $blackout_windows = undef,
+  $patch_window                    = undef,
+  $patch_cron_hour                 = absent,
+  $patch_cron_month                = absent,
+  $patch_cron_monthday             = absent,
+  $patch_cron_weekday              = absent,
+  $patch_cron_min                  = fqdn_rand(59),
 ){
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
   $fact_upload ='/opt/puppetlabs/bin/puppet facts upload'
 
   if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
 
-  if ( $::osfamily == 'RedHat' ) {
+  if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
     package { 'deltarpm':
-      ensure => $install_delta_rpm,
+      ensure => $delta_rpm,
+    }
+  }
+
+  if ( $::osfamily == 'RedHat' and $manage_yum_plugin_security) {
+    package { 'yum-plugin-security':
+      ensure => $yum_plugin_security,
     }
   }
 
