@@ -32,7 +32,7 @@ case $(facter osfamily) in
   ;;
 esac
 
-DATADIR='$DATADIR'
+DATADIR='/etc/os_patching'
 UPDATEFILE="$DATADIR/package_updates"
 SECUPDATEFILE="$DATADIR/security_package_updates"
 
