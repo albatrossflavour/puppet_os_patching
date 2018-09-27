@@ -223,6 +223,7 @@ class os_patching (
   }
 
   exec { $fact_upload:
+    path        => $facts['path'],
     refreshonly => true,
   }
 }
