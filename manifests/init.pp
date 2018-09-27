@@ -74,7 +74,7 @@ class os_patching (
   $patch_cron_min                  = fqdn_rand(59),
 ){
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
-  $fact_upload ='/opt/puppetlabs/bin/puppet facts upload'
+  $fact_upload ='puppet facts upload'
 
   if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
 
@@ -105,12 +105,6 @@ class os_patching (
     group  => 'root',
     mode   => '0644',
     notify => Exec[$fact_cmd],
-  }
-
-  unless defined(Class['os_patching::block']) {
-    file { '/etc/os_patching/block.conf':
-      ensure => absent,
-    }
   }
 
   file { $fact_cmd:
@@ -149,7 +143,7 @@ class os_patching (
     require => File[$fact_cmd],
   }
 
-  $patch_window_file = '/etc/os_patching/patch_window'
+  $patch_window_file = '/var/cache/os_patching/patch_window'
   if ( $patch_window ) {
     if ($patch_window !~ /[A-Za-z0-9\-_ ]+/ ){
       fail ('The patch window can only contain alphanumerics, space, underscore and dash')
@@ -161,7 +155,7 @@ class os_patching (
       group   => 'root',
       mode    => '0644',
       content => $patch_window,
-      require => File['/etc/os_patching'],
+      require => File['/var/cache/os_patching'],
       notify  => Exec[$fact_upload],
     }
   } else {
@@ -171,7 +165,7 @@ class os_patching (
     }
   }
 
-  $reboot_override_file = '/etc/os_patching/reboot_override'
+  $reboot_override_file = '/var/cache/os_patching/reboot_override'
   if ( $reboot_override != undef ) {
     case $reboot_override {
       true:     { $reboot_override_value = 'always' }
@@ -185,7 +179,7 @@ class os_patching (
       group   => 'root',
       mode    => '0644',
       content => $reboot_override_value,
-      require => File['/etc/os_patching'],
+      require => File['/var/cache/os_patching'],
       notify  => Exec[$fact_upload],
     }
   } else {
@@ -195,7 +189,7 @@ class os_patching (
     }
   }
 
-  $blackout_window_file = '/etc/os_patching/blackout_windows'
+  $blackout_window_file = '/var/cache/os_patching/blackout_windows'
   if ( $blackout_windows ) {
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
@@ -218,7 +212,7 @@ class os_patching (
       group   => 'root',
       mode    => '0644',
       content => template("${module_name}/blackout_windows.erb"),
-      require => File['/etc/os_patching'],
+      require => File['/var/cache/os_patching'],
       notify  => Exec[$fact_upload],
     }
   } else {
