@@ -95,6 +95,11 @@ class os_patching (
   }
 
   file { '/etc/os_patching':
+    ensure => absent,
+    force  => true,
+  }
+
+  file { '/var/cache/os_patching':
     ensure => directory,
     owner  => 'root',
     group  => 'root',
