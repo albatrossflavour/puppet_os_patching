@@ -15,7 +15,7 @@ require 'timeout'
 
 $stdout.sync = true
 
-facter = '/opt/puppetlabs/puppet/bin/facter'
+facter = 'facter'
 fact_generation = '/usr/local/bin/os_patching_fact_generation.sh'
 
 log = Syslog::Logger.new 'os_patching'
