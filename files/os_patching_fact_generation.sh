@@ -3,7 +3,7 @@
 # Generate cache of patch data for consumption by Puppet custom facts.
 #
 
-PATH=/usr/bin:/usr/sbin:/bin:/usr/local/bin
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin
 
 LOCKFILE=/var/run/os_patching_fact_generation.lock
 
@@ -17,7 +17,7 @@ else
   echo "$$" > $LOCKFILE
 fi
 
-case $(/usr/local/bin/facter osfamily) in
+case $(facter osfamily) in
   RedHat)
     PKGS=$(yum -q check-update | awk '/^[[:alnum:]]/ {print $1}')
     SECPKGS=$(yum -q --security check-update | awk '/^[[:alnum:]]/ {print $1}')
@@ -32,13 +32,13 @@ case $(/usr/local/bin/facter osfamily) in
   ;;
 esac
 
-DATADIR='/etc/os_patching'
+DATADIR='$DATADIR'
 UPDATEFILE="$DATADIR/package_updates"
 SECUPDATEFILE="$DATADIR/security_package_updates"
 
 if [ ! -d "${DATADIR}" ]
 then
-  /usr/bin/logger -p error -t os_patching_fact_generation.sh "Can't find ${DATADIR}, exiting"
+  logger -p error -t os_patching_fact_generation.sh "Can't find ${DATADIR}, exiting"
   rm $LOCKFILE
   exit 1
 fi
@@ -62,32 +62,32 @@ then
       /usr/bin/needs-restarting -r 2>/dev/null 1>/dev/null
       if [ $? -gt 0 ]
       then
-        echo "true" > /etc/os_patching/reboot_required
+        echo "true" > $DATADIR/reboot_required
       else
-        echo "false" > /etc/os_patching/reboot_required
+        echo "false" > $DATADIR/reboot_required
       fi
-      /usr/bin/needs-restarting 2>/dev/null >/etc/os_patching/apps_to_restart
+      /usr/bin/needs-restarting 2>/dev/null >$DATADIR/apps_to_restart
     ;;
     6)
-      /usr/bin/needs-restarting 2>/dev/null 1>/etc/os_patching/apps_to_restart
+      /usr/bin/needs-restarting 2>/dev/null 1>$DATADIR/apps_to_restart
       if [ $? -gt 0 ]
       then
-        echo "true" > /etc/os_patching/reboot_required
+        echo "true" > $DATADIR/reboot_required
       else
-        APPS_TO_RESTART=$(wc -l /etc/os_patching/apps_to_restart | awk '{print $1}')
+        APPS_TO_RESTART=$(wc -l $DATADIR/apps_to_restart | awk '{print $1}')
         if [ $APPS_TO_RESTART -gt 0 ]
         then
-          echo "true" > /etc/os_patching/reboot_required
+          echo "true" > $DATADIR/reboot_required
         else
-          echo "false" > /etc/os_patching/reboot_required
+          echo "false" > $DATADIR/reboot_required
         fi
       fi
     ;;
   esac
 fi
 
-/opt/puppetlabs/bin/puppet facts upload 2>/dev/null 1>/dev/null
-/usr/bin/logger -p info -t os_patching_fact_generation.sh "patch data fact refreshed"
+puppet facts upload 2>/dev/null 1>/dev/null
+logger -p info -t os_patching_fact_generation.sh "patch data fact refreshed"
 
 rm $LOCKFILE
 exit 0
