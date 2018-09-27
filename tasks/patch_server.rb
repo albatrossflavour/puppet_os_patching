@@ -24,7 +24,7 @@ BUFFER_SIZE = 4096
 
 # Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
-  historyfile = '/etc/os_patching/run_history'
+  historyfile = '/var/cache/os_patching/run_history'
   open(historyfile, 'a') do |f|
     f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
   end

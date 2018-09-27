@@ -163,6 +163,11 @@ class os_patching (
   }
 
   file { '/etc/os_patching':
+    ensure => absent,
+    force  => true,
+  }
+
+  file { '/var/cache/os_patching':
     ensure => $ensure_dir,
     owner  => 'root',
     group  => 'root',
