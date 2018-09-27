@@ -1,27 +1,64 @@
 # @summary This manifest sets up a script and cron job to populate
 #   the `os_patching` fact.
 #
-# @param [String] patch_data_owner User name for the owner of the patch data
-# @param [String] patch_data_group Group name for the owner of the patch data
-# @param [String] patch_cron_user User name to run the cron job as (defaults to patch_data_owner)
-# @param [Boolean] manage_delta_rpm Should the deltarpm package be managed by this module on RedHat family nodes
-# lint:ignore:140chars
-# @param Enum['installed', 'absent', 'purged', 'held', 'latest'] delta_rpm If managed, what should the delta_rpm package set to?
-# @param [Boolean] manage_yum_plugin_security Should the yum_plugin_security package be managed by this module on RedHat family nodes
-# @param Enum['installed', 'absent', 'purged', 'held', 'latest'] yum_plugin_security If managed, what should the yum_plugin_security package set to?
-# @param Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']] reboot_override Controls on a node level if a reboot should/should not be done after patching.
-# lint:endignore
-#		This overrides the setting in the task
-# @param [Hash] blackout_windows A hash containing the patch blackout windows, which prevent patching.
+# @param patch_data_owner [String]
+#   User name for the owner of the patch data
+#
+# @param patch_data_group [String] 
+#   Group name for the owner of the patch data
+#
+# @param patch_cron_user [String]
+#   User name to run the cron job as (defaults to patch_data_owner)
+#
+# @param manage_delta_rpm [Boolean]
+#   Should the deltarpm package be managed by this module on RedHat family nodes
+#
+# @param delta_rpm Enum['installed', 'absent', 'purged', 'held', 'latest']
+#   If managed, what should the delta_rpm package set to?
+#
+# @parammanage_yum_plugin_security [Boolean]
+#   Should the yum_plugin_security package be managed by this module on RedHat family nodes
+#
+# @param yum_plugin_security Enum['installed', 'absent', 'purged', 'held', 'latest']
+#   If managed, what should the yum_plugin_security package set to?
+#
+# @param reboot_override Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]
+#   Controls on a node level if a reboot should/should not be done after patching.
+#   This overrides the setting in the task
+#
+# @param blackout_windows [Hash]
+#   A hash containing the patch blackout windows, which prevent patching.
 #   The dates are in full ISO8601 format.
-# @param [String] patch_window A freeform text entry used to allocate a node to a specific patch window (Optional)
-# @param [String] patch_cron_hour The hour(s) for the cron job to run (defaults to absent, which means '*' in cron)
-# @param [String] patch_cron_month The month(s) for the cron job to run (defaults to absent, which means '*' in cron)
-# @param [String] patch_cron_monthday The monthday(s) for the cron job to run (defaults to absent, which means '*' in cron)
-# @param [String] patch_cron_weekday The weekday(s) for the cron job to run (defaults to absent, which means '*' in cron)
-# @param [String] patch_cron_min The min(s) for the cron job to run (defaults to a random number between 0 and 59)
+#
+# @option blackout_windows [String] :name
+#   Name of the blackout window
+#
+# @option blackout_windows [String] :start
+#   Start of the blackout window (ISO8601 format)
+#
+# @option blackout_windows [String] :end
+#   End of the blackout window (ISO8601 format)
+#
+# @param patch_window [String]
+#   A freeform text entry used to allocate a node to a specific patch window (Optional)
+#
+# @param patch_cron_hour
+#   The hour(s) for the cron job to run (defaults to absent, which means '*' in cron)
+#
+# @param patch_cron_month
+#   The month(s) for the cron job to run (defaults to absent, which means '*' in cron)
+#
+# @param patch_cron_monthday
+#   The monthday(s) for the cron job to run (defaults to absent, which means '*' in cron)
+#
+# @param patch_cron_weekday
+#   The weekday(s) for the cron job to run (defaults to absent, which means '*' in cron)
+#
+# @param patch_cron_min
+#   The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 #
 # @example assign node to 'Week3' patching window, force a reboot and create a blackout window for the end of the year
+# ```puppet
 #   class { 'os_patching':
 #     patch_window     => 'Week3',
 #     reboot_override  => true,
@@ -32,8 +69,10 @@
 #       }
 #     },
 #   }
+# ```
 #
 # @example An example profile to setup patching, sourcing blackout windows from hiera
+# ```puppet
 #   class profiles::soe::patching (
 #     $patch_window     = undef,
 #     $blackout_windows = undef,
@@ -52,9 +91,12 @@
 #       blackout_windows => $full_blackout_windows,
 #     }
 #   }
+# ```
 #
 # @example JSON hash to specify a change freeze from 2018-12-15 to 2019-01-15
+#   ```json
 #   {"End of year change freeze": {"start": "2018-12-15T00:00:00+1000", "end": "2019-01-15T23:59:59+1000"}}
+#   ```
 #
 class os_patching (
   String $patch_data_owner            = 'root',
