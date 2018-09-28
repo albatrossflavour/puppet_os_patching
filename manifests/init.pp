@@ -8,18 +8,20 @@
 #   Group name for the owner of the patch data
 #
 # @param patch_cron_user [String]
-#   User name to run the cron job as (defaults to patch_data_owner)
+#   User who runs the cron job
 #
 # @param manage_delta_rpm [Boolean]
-#   Should the deltarpm package be managed by this module on RedHat family nodes
+#   Should the deltarpm package be managed by this module on RedHat family nodes?
+#   If `true`, use the parameter `delta_rpm` to determine how it should be manged
 #
-# @param delta_rpm Enum['installed', 'absent', 'purged', 'held', 'latest']
+# @param delta_rpm [Enum]
 #   If managed, what should the delta_rpm package set to?
 #
 # @parammanage_yum_plugin_security [Boolean]
-#   Should the yum_plugin_security package be managed by this module on RedHat family nodes
+#   Should the yum_plugin_security package be managed by this module on RedHat family nodes?
+#   If `true`, use the parameter `yum_plugin_security` to determine how it should be manged
 #
-# @param yum_plugin_security Enum['installed', 'absent', 'purged', 'held', 'latest']
+# @param yum_plugin_security [Enum]
 #   If managed, what should the yum_plugin_security package set to?
 #
 # @param reboot_override Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]
@@ -30,7 +32,7 @@
 #   A hash containing the patch blackout windows, which prevent patching.
 #   The dates are in full ISO8601 format.
 #
-# @option blackout_windows [String] :name
+# @option blackout_windows [String] :title
 #   Name of the blackout window
 #
 # @option blackout_windows [String] :start
@@ -58,6 +60,7 @@
 #   The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 #
 # @example assign node to 'Week3' patching window, force a reboot and create a blackout window for the end of the year
+#
 # ```puppet
 #   class { 'os_patching':
 #     patch_window     => 'Week3',
@@ -72,6 +75,7 @@
 # ```
 #
 # @example An example profile to setup patching, sourcing blackout windows from hiera
+#
 # ```puppet
 #   class profiles::soe::patching (
 #     $patch_window     = undef,
@@ -94,6 +98,7 @@
 # ```
 #
 # @example JSON hash to specify a change freeze from 2018-12-15 to 2019-01-15
+#
 #   ```json
 #   {"End of year change freeze": {"start": "2018-12-15T00:00:00+1000", "end": "2019-01-15T23:59:59+1000"}}
 #   ```
