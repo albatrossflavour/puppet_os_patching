@@ -1,45 +1,27 @@
+# .travis.yml
+#
+# To debug travis locally:
+# https://docs.travis-ci.com/user/common-build-problems/#Running-a-Container-Based-Docker-Image-Locally
 ---
 sudo: false
-dist: trusty
+
+# Don't process the PDK Gemfile - causes big problems!
+gemfile: .pdqtest/Gemfile
+
+bundler_args: --path .pdqtest
 language: ruby
+services:
+  - docker
 cache: bundler
 before_install:
-  - bundle -v
-  - rm -f Gemfile.lock
-  - gem update --system
-  - gem --version
-  - bundle -v
+  - wget https://apt.puppetlabs.com/puppet5-release-trusty.deb
+  - sudo dpkg -i puppet5-release-trusty.deb
+  - sudo apt-get update
+  - sudo apt install -y pdk
+
+# travis itself does the bundle isntall for us, so we are ready to run now
 script:
-  - 'bundle exec rake $CHECK'
-bundler_args: --without system_tests
+  - make setup
+  - make
 rvm:
   - 2.4.1
-env:
-  global:
-    - BEAKER_PUPPET_COLLECTION=puppet5 PUPPET_GEM_VERSION="~> 5.0"
-matrix:
-  fast_finish: true
-  include:
-    -
-      env: CHECK="syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop"
-    -
-      env: CHECK=parallel_spec
-    -
-      env: PUPPET_GEM_VERSION="~> 4.0" CHECK=parallel_spec
-      rvm: 2.1.9
-branches:
-  only:
-    - master
-    - development
-    - /^v\d/
-notifications:
-  email: true
-deploy:
-  provider: puppetforge
-  user: puppet
-  password:
-    secure: ""
-  on:
-    tags: true
-    all_branches: true
-    condition: "$DEPLOY_TO_FORGE = yes"

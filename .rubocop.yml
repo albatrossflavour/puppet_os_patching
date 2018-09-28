@@ -44,14 +44,12 @@ Style/FormatStringToken:
   Description: Following the main puppet project's style, prefer the simpler template
     tokens over annotated ones.
   EnforcedStyle: template
-Style/HashSyntax:
-  Enabled: false
 Style/Lambda:
   Description: Prefer the keyword for easier discoverability.
   EnforcedStyle: literal
 Style/RegexpLiteral:
   Description: Community preference. See https://github.com/voxpupuli/modulesync_config/issues/168
-  EnforcedStyle: mixed
+  EnforcedStyle: percent_r
 Style/TernaryParentheses:
   Description: Checks for use of parentheses around ternary conditions. Enforce parentheses
     on complex expressions for better readability, but seriously consider breaking
@@ -84,6 +82,8 @@ Style/StringMethods:
   Enabled: true
 Layout/EndOfLine:
   Enabled: false
+Layout/IndentHeredoc:
+  Enabled: false
 Metrics/AbcSize:
   Enabled: false
 Metrics/BlockLength:
@@ -115,6 +115,4 @@ Style/AsciiComments:
 Style/IfUnlessModifier:
   Enabled: false
 Style/SymbolProc:
-  Enabled: false
-Style/RedundantReturn:
   Enabled: false
