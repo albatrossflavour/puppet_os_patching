@@ -254,7 +254,7 @@ If patching was blocked, the task will report similar to below:
 Error: Task exited : 100
 Patching blocked
 ```
-A summary of the patch run is also written to `/etc/os_patching/run_history`, the last line of which is used by the `os_patching.last_run` fact.
+A summary of the patch run is also written to `/var/cache/os_patching/run_history`, the last line of which is used by the `os_patching.last_run` fact.
 
 ```bash
 2018-08-07T14:47:24+10:00|No patches to apply|Success|false|false|
@@ -266,20 +266,20 @@ A summary of the patch run is also written to `/etc/os_patching/run_history`, th
 2018-08-08T07:53:59+10:00|Patching blocked |100|||
 ```
 
-### `/etc/os_patching` directory
+### `/var/cache/os_patching` directory
 
 This directory contains the various control files needed for the fact and task to work correctly.  They are managed by the manifest.
 
-* `/etc/os_patching/blackout_windows` : contains name, start and end time for all blackout windows
-* `/etc/os_patching/package_updates` : a list of all package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
-* `/etc/os_patching/security_package_updates` : a list of all security_package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
-* `/etc/os_patching/run_history` : a summary of each run of the `os_patching::patch_server` task, populated by the task
-* `/etc/os_patching/reboot_override` : if present, overrides the `reboot=` parameter to the task
-* `/etc/os_patching/patch_window` : if present, sets the value for the fact `os_patching.patch_window`
-* `/etc/os_patching/reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
-* `/etc/os_patching/apps_to_restart` : a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.
+* `/var/cache/os_patching/blackout_windows` : contains name, start and end time for all blackout windows
+* `/var/cache/os_patching/package_updates` : a list of all package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
+* `/var/cache/os_patching/security_package_updates` : a list of all security_package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
+* `/var/cache/os_patching/run_history` : a summary of each run of the `os_patching::patch_server` task, populated by the task
+* `/var/cache/os_patching/reboot_override` : if present, overrides the `reboot=` parameter to the task
+* `/var/cache/os_patching/patch_window` : if present, sets the value for the fact `os_patching.patch_window`
+* `/var/cache/os_patching/reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
+* `/var/cache/os_patching/apps_to_restart` : a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.
 
-With the exception of the run_history file, all files in /etc/os_patching will be regenerated after a puppet run and a run of the os_patching_fact_generation.sh script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum and syslog.
+With the exception of the run_history file, all files in /var/cache/os_patching will be regenerated after a puppet run and a run of the os_patching_fact_generation.sh script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum and syslog.
 
 ## Limitations
 

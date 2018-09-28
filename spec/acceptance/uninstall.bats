@@ -1,6 +1,6 @@
 
-@test "/etc/os_patching removed" {
-    ! test -d /etc/os_patching
+@test "/var/cache/os_patching removed" {
+    ! test -d /var/cache/os_patching
 }
 
 @test "/usr/local/bin/os_patching_fact_generation.sh removed" {
@@ -16,9 +16,9 @@
 }
 
 @test "blackout_windows_file removed" {
-    ! test -f /etc/os_patching/blackout_windows
+    ! test -f /var/cache/os_patching/blackout_windows
 }
 
 @test "reboot_override file removed" {
-    ! test -f '/etc/os_patching/reboot_override'
+    ! test -f '/var/cache/os_patching/reboot_override'
 }

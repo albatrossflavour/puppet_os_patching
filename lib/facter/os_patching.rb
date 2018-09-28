@@ -14,9 +14,9 @@ else
     warnings = {}
 
     if Facter.value(:kernel) == 'Linux'
-      os_patching_dir = '/etc/os_patching'
+      os_patching_dir = '/var/cache/os_patching'
     elsif Facter.value(:kernel) == 'windows'
-      os_patching_dir = 'C:\ProgramData\PuppetLabs\puppet\cache'
+      os_patching_dir = 'C:\ProgramData\os_patching'
     end
 
     chunk(:updates) do
