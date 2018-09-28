@@ -158,10 +158,6 @@ class os_patching (
     }
   }
 
-  file { '/opt/puppetlabs/facter/facts.d/os_patching.yaml':
-    ensure => $ensure_file,
-  }
-
   file { '/etc/os_patching':
     ensure => $ensure_dir,
     owner  => 'root',
