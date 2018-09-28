@@ -58,11 +58,11 @@
 #
 # @param patch_cron_min
 #   The min(s) for the cron job to run (defaults to a random number between 0 and 59)
+#
 # @example assign node to 'Week3' patching window, force a reboot and create a blackout window for the end of the year
-#   ```puppet
 #   class { 'os_patching':
 #     patch_window     => 'Week3',
-#     reboot_override  => true,
+#     reboot_override  => 'always',
 #     blackout_windows => { 'End of year change freeze':
 #       {
 #         'start': '2018-12-15T00:00:00+1000',
@@ -70,10 +70,8 @@
 #       }
 #     },
 #   }
-#   ```
 #
 # @example An example profile to setup patching, sourcing blackout windows from hiera
-#   ```puppet
 #   class profiles::soe::patching (
 #     $patch_window     = undef,
 #     $blackout_windows = undef,
@@ -92,12 +90,9 @@
 #       blackout_windows => $full_blackout_windows,
 #     }
 #   }
-#   ```
 #
 # @example JSON hash to specify a change freeze from 2018-12-15 to 2019-01-15
-#   ```
 #   {"End of year change freeze": {"start": "2018-12-15T00:00:00+1000", "end": "2019-01-15T23:59:59+1000"}}
-#   ```
 #
 class os_patching (
   String $patch_data_owner            = 'root',
