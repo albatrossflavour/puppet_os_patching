@@ -28,10 +28,6 @@
 #   Controls on a node level if a reboot should/should not be done after patching.
 #   This overrides the setting in the task
 #
-# @param blackout_windows [Hash]
-#   A hash containing the patch blackout windows, which prevent patching.
-#   The dates are in full ISO8601 format.
-#
 # @option blackout_windows [String] :title
 #   Name of the blackout window
 #
@@ -59,14 +55,17 @@
 # @param patch_cron_min
 #   The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 #
+# @param [Enum] ensure
+#   `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
+#
 # @example assign node to 'Week3' patching window, force a reboot and create a blackout window for the end of the year
 #   class { 'os_patching':
 #     patch_window     => 'Week3',
 #     reboot_override  => 'always',
 #     blackout_windows => { 'End of year change freeze':
 #       {
-#         'start': '2018-12-15T00:00:00+1000',
-#         'end': '2019-01-15T23:59:59+1000',
+#         'start': '2018-12-15T00:00:00+10:00',
+#         'end': '2019-01-15T23:59:59+10:00',
 #       }
 #     },
 #   }
@@ -92,11 +91,15 @@
 #   }
 #
 # @example JSON hash to specify a change freeze from 2018-12-15 to 2019-01-15
-#   {"End of year change freeze": {"start": "2018-12-15T00:00:00+1000", "end": "2019-01-15T23:59:59+1000"}}
+#   {"End of year change freeze": {"start": "2018-12-15T00:00:00+10:00", "end": "2019-01-15T23:59:59+10:00"}}
 #
 # @example Run patching on the node `centos.example.com` using the smart reboot option
 #   puppet task run os_patching::patch_server --params '{"reboot": "smart"}' --nodes centos.example.com
 #
+# @example Remove from a managed system
+#   class { 'os_patching':
+#     ensure => absent,
+#   }
 class os_patching (
   String $patch_data_owner            = 'root',
   String $patch_data_group            = 'root',
@@ -106,16 +109,40 @@ class os_patching (
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override = 'default',
-  Optional[Hash] $blackout_windows = undef,
-  $patch_window                    = undef,
-  $patch_cron_hour                 = absent,
-  $patch_cron_month                = absent,
-  $patch_cron_monthday             = absent,
-  $patch_cron_weekday              = absent,
-  $patch_cron_min                  = fqdn_rand(59),
-){
+  Optional[Hash] $blackout_windows   = undef,
+  $patch_window                      = undef,
+  $patch_cron_hour                   = absent,
+  $patch_cron_month                  = absent,
+  $patch_cron_monthday               = absent,
+  $patch_cron_weekday                = absent,
+  $patch_cron_min                    = fqdn_rand(59),
+  Enum['present', 'absent'] $ensure  = 'present',
+) {
+
+  $fact_exec = $ensure ? {
+    'present' => 'os_patching::exec::fact',
+    default   => undef,
+  }
+
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
-  $fact_upload ='/opt/puppetlabs/bin/puppet facts upload'
+  $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
+  $fact_upload_exec = $ensure ? {
+    'present' => 'os_patching::exec::fact_upload',
+    default   => undef
+  }
+  $ensure_file = $ensure ? {
+    'present' => 'file',
+    default   => 'absent',
+  }
+  $ensure_dir = $ensure ? {
+    'present' => 'directory',
+    default   => 'absent',
+  }
+
+  if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
+    fail('The patch window can only contain alphanumerics, space, underscore and dash')
+  }
+
 
   if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
 
@@ -132,41 +159,39 @@ class os_patching (
   }
 
   file { '/opt/puppetlabs/facter/facts.d/os_patching.yaml':
-    ensure => absent,
+    ensure => $ensure_file,
   }
 
   file { '/etc/os_patching':
-    ensure => directory,
+    ensure => $ensure_dir,
     owner  => 'root',
     group  => 'root',
     mode   => '0644',
-    notify => Exec[$fact_cmd],
-  }
-
-  unless defined(Class['os_patching::block']) {
-    file { '/etc/os_patching/block.conf':
-      ensure => absent,
-    }
+    force  => true,
+    notify => Exec[$fact_exec],
   }
 
   file { $fact_cmd:
-    ensure => present,
+    ensure => $ensure_file,
     owner  => $patch_data_owner,
     group  => $patch_data_group,
     mode   => '0700',
     source => "puppet:///modules/${module_name}/os_patching_fact_generation.sh",
-    notify => Exec[$fact_cmd],
+    notify => Exec[$fact_exec],
   }
 
-  exec { $fact_cmd:
-    user        => $patch_data_owner,
-    group       => $patch_data_group,
-    refreshonly => true,
-    require     => File[$fact_cmd],
+  if $fact_exec {
+    exec { $fact_exec:
+      command     => $fact_cmd,
+      user        => $patch_data_owner,
+      group       => $patch_data_group,
+      refreshonly => true,
+      require     => File[$fact_cmd],
+    }
   }
 
   cron { 'Cache patching data':
-    ensure   => present,
+    ensure   => $ensure,
     command  => $fact_cmd,
     user     => $patch_cron_user,
     hour     => $patch_cron_hour,
@@ -178,61 +203,46 @@ class os_patching (
   }
 
   cron { 'Cache patching data at reboot':
-    ensure  => present,
+    ensure  => $ensure,
     command => $fact_cmd,
     user    => $patch_cron_user,
     special => 'reboot',
     require => File[$fact_cmd],
   }
 
-  $patch_window_file = '/etc/os_patching/patch_window'
-  if ( $patch_window ) {
-    if ($patch_window !~ /[A-Za-z0-9\-_ ]+/ ){
-      fail ('The patch window can only contain alphanumerics, space, underscore and dash')
-    }
-
-    file { $patch_window_file:
-      ensure  => file,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      content => $patch_window,
-      require => File['/etc/os_patching'],
-      notify  => Exec[$fact_upload],
-    }
-  } else {
-    file { $patch_window_file:
-      ensure => absent,
-      notify => Exec[$fact_upload],
-    }
+  $patch_window_ensure = ($ensure == 'present' and $patch_window ) ? {
+    true    => 'file',
+    default => 'absent'
+  }
+  file { '/etc/os_patching/patch_window':
+    ensure  => $patch_window_ensure,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    content => $patch_window,
+    notify  => Exec[$fact_upload_exec],
   }
 
-  $reboot_override_file = '/etc/os_patching/reboot_override'
-  if ( $reboot_override != undef ) {
-    case $reboot_override {
-      true:     { $reboot_override_value = 'always' }
-      false:    { $reboot_override_value = 'never' }
-      default:  { $reboot_override_value = $reboot_override }
-    }
-
-    file { $reboot_override_file:
-      ensure  => file,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      content => $reboot_override_value,
-      require => File['/etc/os_patching'],
-      notify  => Exec[$fact_upload],
-    }
-  } else {
-    file { $reboot_override_file:
-      ensure => absent,
-      notify => Exec[$fact_upload],
-    }
+  $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {
+    true    => 'file',
+    default => 'absent',
+  }
+  case $reboot_override {
+    true: { $reboot_override_value = 'always' }
+    false: { $reboot_override_value = 'never' }
+    default: { $reboot_override_value = $reboot_override }
+  }
+  file { '/etc/os_patching/reboot_override':
+    ensure  => $reboot_override_ensure,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    content => $reboot_override_value,
+    notify  => Exec[$fact_upload_exec],
   }
 
-  $blackout_window_file = '/etc/os_patching/blackout_windows'
-  if ( $blackout_windows ) {
+
+  if ($blackout_windows) {
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
       if ( $key !~ /^[A-Za-z0-9\-_ ]+$/ ){
@@ -248,23 +258,27 @@ class os_patching (
         fail ('Blackout end time must after the start time')
       }
     }
-    file { $blackout_window_file:
-      ensure  => file,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      content => template("${module_name}/blackout_windows.erb"),
-      require => File['/etc/os_patching'],
-      notify  => Exec[$fact_upload],
-    }
-  } else {
-    file { $blackout_window_file:
-      ensure => absent,
-      notify => Exec[$fact_upload],
-    }
+  }
+  $blackout_windows_ensure = ($ensure == 'present' and $blackout_windows) ? {
+    true    => 'file',
+    default => 'absent'
+  }
+  file { '/etc/os_patching/blackout_windows':
+    ensure  => $blackout_windows_ensure,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    content => epp("${module_name}/blackout_windows.epp", {
+      'blackout_windows' => pick($blackout_windows, {}),
+    }),
+    require => File['/etc/os_patching'],
+    notify  => Exec[$fact_upload_exec],
   }
 
-  exec { $fact_upload:
-    refreshonly => true,
+  if $fact_upload_exec {
+    exec { $fact_upload_exec:
+      command     => $fact_upload_cmd,
+      refreshonly => true,
+    }
   }
 }

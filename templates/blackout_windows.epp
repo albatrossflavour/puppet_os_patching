@@ -1,0 +1,6 @@
+<%- | Hash $blackout_windows | %>
+# This is a puppet managed file, do not edit manually
+<% $blackout_windows.each  |$key,$hash| { -%>
+<%= $key %>,<%= $hash['start'] %>,<%= $hash['end'] %>
+<% } %>
+

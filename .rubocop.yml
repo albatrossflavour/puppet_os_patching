@@ -44,8 +44,6 @@ Style/FormatStringToken:
   Description: Following the main puppet project's style, prefer the simpler template
     tokens over annotated ones.
   EnforcedStyle: template
-Style/HashSyntax:
-  Enabled: false
 Style/Lambda:
   Description: Prefer the keyword for easier discoverability.
   EnforcedStyle: literal
@@ -66,7 +64,7 @@ Style/TrailingCommaInLiteral:
     and re-ordering nicer.
   EnforcedStyleForMultiline: comma
 Style/SymbolArray:
-  Description: Using percent style obscures symbolic intent of array's contents.
+  Description: Using style obscures symbolic intent of array's contents.
   EnforcedStyle: brackets
 RSpec/MessageSpies:
   EnforcedStyle: receive
@@ -83,6 +81,8 @@ Style/MethodCalledOnDoEndBlock:
 Style/StringMethods:
   Enabled: true
 Layout/EndOfLine:
+  Enabled: false
+Layout/IndentHeredoc:
   Enabled: false
 Metrics/AbcSize:
   Enabled: false
@@ -115,6 +115,4 @@ Style/AsciiComments:
 Style/IfUnlessModifier:
   Enabled: false
 Style/SymbolProc:
-  Enabled: false
-Style/RedundantReturn:
   Enabled: false
