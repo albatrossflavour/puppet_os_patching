@@ -94,6 +94,9 @@
 # @example JSON hash to specify a change freeze from 2018-12-15 to 2019-01-15
 #   {"End of year change freeze": {"start": "2018-12-15T00:00:00+1000", "end": "2019-01-15T23:59:59+1000"}}
 #
+# @example Run patching on the node `centos.example.com` using the smart reboot option
+#   puppet task run os_patching::patch_server --params '{"reboot": "smart"}' --nodes centos.example.com
+#
 class os_patching (
   String $patch_data_owner            = 'root',
   String $patch_data_group            = 'root',
