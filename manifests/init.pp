@@ -218,7 +218,7 @@ class os_patching (
     true    => 'file',
     default => 'absent'
   }
-  file { '/etc/os_patching/patch_window':
+  file { '/var/cache/os_patching/patch_window':
     ensure  => $patch_window_ensure,
     owner   => 'root',
     group   => 'root',
@@ -236,7 +236,7 @@ class os_patching (
     false: { $reboot_override_value = 'never' }
     default: { $reboot_override_value = $reboot_override }
   }
-  file { '/etc/os_patching/reboot_override':
+  file { '/var/cache/os_patching/reboot_override':
     ensure  => $reboot_override_ensure,
     owner   => 'root',
     group   => 'root',
@@ -267,7 +267,7 @@ class os_patching (
     true    => 'file',
     default => 'absent'
   }
-  file { '/etc/os_patching/blackout_windows':
+  file { '/var/cache/os_patching/blackout_windows':
     ensure  => $blackout_windows_ensure,
     owner   => 'root',
     group   => 'root',
@@ -275,7 +275,7 @@ class os_patching (
     content => epp("${module_name}/blackout_windows.epp", {
       'blackout_windows' => pick($blackout_windows, {}),
     }),
-    require => File['/etc/os_patching'],
+    require => File['/var/cache/os_patching'],
     notify  => Exec[$fact_upload_exec],
   }
 
