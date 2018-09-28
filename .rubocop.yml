@@ -49,7 +49,7 @@ Style/Lambda:
   EnforcedStyle: literal
 Style/RegexpLiteral:
   Description: Community preference. See https://github.com/voxpupuli/modulesync_config/issues/168
-  EnforcedStyle: percent_r
+  EnforcedStyle: mixed
 Style/TernaryParentheses:
   Description: Checks for use of parentheses around ternary conditions. Enforce parentheses
     on complex expressions for better readability, but seriously consider breaking
@@ -64,7 +64,7 @@ Style/TrailingCommaInLiteral:
     and re-ordering nicer.
   EnforcedStyleForMultiline: comma
 Style/SymbolArray:
-  Description: Using percent style obscures symbolic intent of array's contents.
+  Description: Using style obscures symbolic intent of array's contents.
   EnforcedStyle: brackets
 RSpec/MessageSpies:
   EnforcedStyle: receive
