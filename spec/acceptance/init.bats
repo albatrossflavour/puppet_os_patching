@@ -1,7 +1,3 @@
-@test "/opt/puppetlabs/facter/facts.d/os_patching.yaml removed" {
-    test -f /opt/puppetlabs/facter/facts.d/os_patching.yaml
-}
-
 @test "/var/cache/os_patching removed" {
     test -d /var/cache/os_patching
 }
