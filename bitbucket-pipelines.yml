@@ -1,4 +1,8 @@
-image: ruby:2.3.5
+# *File originally created by PDQTest*
+# To run locally:
+# https://confluence.atlassian.com/bitbucket/debug-your-pipelines-locally-with-docker-838273569.html
+---
+image: ruby:2.4.1
 
 pipelines:
   default:
@@ -8,8 +12,13 @@ pipelines:
         script:
           - ruby --version
           - bundler --version
-          - bundle install
-          - make logical
+          - wget https://apt.puppetlabs.com/puppet5-release-trusty.deb
+          - dpkg -i puppet5-release-trusty.deb
+          - apt-get update
+          - apt install -y pdk
+          - sh .ci_custom.sh
+          - make pdqtestbundle
+          - cd .pdqtest && bundle exec pdqtest --inplace --inplace-enable all
 
 definitions:
   caches:

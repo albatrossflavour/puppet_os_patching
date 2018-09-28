@@ -1,5 +1,7 @@
 # .travis.yml
 #
+# *File originally created by PDQTest*
+#
 # To debug travis locally:
 # https://docs.travis-ci.com/user/common-build-problems/#Running-a-Container-Based-Docker-Image-Locally
 ---
@@ -19,8 +21,9 @@ before_install:
   - sudo apt-get update
   - sudo apt install -y pdk
 
-# travis itself does the bundle isntall for us, so we are ready to run now
+# travis itself does the bundle install for us, so we are ready to run now
 script:
+  - sh .ci_custom.sh
   - make setup
   - make
 rvm:

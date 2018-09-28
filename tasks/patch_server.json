@@ -24,6 +24,10 @@
     "clean_cache": {
       "description": "Should the yum/dpkg caches be cleaned at the start of the task? (Defaults to false)",
       "type": "Optional[Boolean]"
+    },
+    "debug": {
+      "description": "Print debugging information",
+      "type": "Optional[Boolean]"
     }
   },
   "puppet_task_version": 1,

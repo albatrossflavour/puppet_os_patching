@@ -13,8 +13,8 @@ file { '/tmp/os_patching/params.json':
   content => to_json($params),
 }
 
-exec { 'run the update script and make sure it fails':
-  command => 'bash -c \'cat /tmp/os_patching/params.json | /testcase/tasks/patch_server.rb  > /tmp/os_patching/output.txt ; true\'',
+exec { 'check task clears cache':
+  command => 'bash -c \'cat /tmp/os_patching/params.json | /testcase/tasks/clean_cache.rb  > /tmp/os_patching/output.txt ; true\'',
   path    => '/bin:/usr/bin',
-  creates => "/tmp/os_patching/output.txt",
+  creates => '/tmp/os_patching/output.txt',
 }

@@ -4,5 +4,9 @@
   "supports_noop": false,
   "description": "Clean patch caches (yum/dpkg) via a task",
   "parameters": {
+    "debug": {
+      "description": "Print debugging information",
+      "type": "Optional[Boolean]"
+    }
   }
 }

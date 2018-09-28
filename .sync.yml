@@ -1,0 +1,18 @@
+---
+".travis.yml":
+  unmanaged: true
+bitbucket-pipelines.yml:
+  unmanaged: true
+".gitignore":
+  paths:
+  - ".Puppetfile.pdqtest"
+  - refresh.ps1
+".gitattributes":
+  include:
+  - "*.epp eol=lf"
+  - "*.json eol=lf"
+  - "*.yaml eol=lf"
+  - "*.yml eol=lf"
+  - "*.md eol=lf"
+appveyor.yml:
+  unmanaged: true
