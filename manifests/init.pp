@@ -263,10 +263,10 @@ class os_patching (
       if ( $key !~ /^[A-Za-z0-9\-_ ]+$/ ){
         fail ('Blackout description can only contain alphanumerics, space, dash and underscore')
       }
-      if ( $value['start'] !~ /^[\d:T\-\\+]*$/ ){
+      if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}$/ ){
         fail ('Blackout start time must be in ISO 8601 format')
       }
-      if ( $value['end'] !~ /^[\d:T\-\\+]*$/ ){
+      if ( $value['end'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}$/ ){
         fail ('Blackout end time must be in ISO 8601 format')
       }
       if ( $value['start'] > $value['end'] ){

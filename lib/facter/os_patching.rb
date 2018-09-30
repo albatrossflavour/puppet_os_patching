@@ -75,20 +75,25 @@ else
       if File.file?(blackoutfile)
         blackouts = File.open(blackoutfile, 'r').read
         blackouts.each_line do |line|
-          matchdata = line.match(/^([\w ]*),([\d:T\-\\+]*),([\d:T\-\\+]*)$/)
-          next unless matchdata
-          arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
-          if matchdata[2] > matchdata[3]
-            arraydata[matchdata[1]]['start'] = 'Start date after end date'
-            arraydata[matchdata[1]]['end'] = 'Start date after end date'
-          else
-            arraydata[matchdata[1]]['start'] = matchdata[2]
-            arraydata[matchdata[1]]['end'] = matchdata[3]
-          end
+          next if line.empty?
+          next if line.include? '^#'
+          matchdata = line.match(/^([\w ]*),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2})$/)
+          if matchdata
+            arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
+            if matchdata[2] > matchdata[3]
+              arraydata[matchdata[1]]['start'] = 'Start date after end date'
+              arraydata[matchdata[1]]['end'] = 'Start date after end date'
+            else
+              arraydata[matchdata[1]]['start'] = matchdata[2]
+              arraydata[matchdata[1]]['end'] = matchdata[3]
+            end
 
-          if (matchdata[2]..matchdata[3]).cover?(now)
-            data['blocked'] = true
-            data['blocked_reasons'].push matchdata[1]
+            if (matchdata[2]..matchdata[3]).cover?(now)
+              data['blocked'] = true
+              data['blocked_reasons'].push matchdata[1]
+            end
+          else
+            warnings['blackouts'] = "Invalid blackout entry : #{line}"
           end
         end
       end
