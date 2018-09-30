@@ -97,6 +97,23 @@ User who runs the cron job
 
 Default value: $patch_data_owner
 
+##### `manage_yum_utils`
+
+Data type: `Boolean`
+
+Should the deltarpm package be managed by this module on RedHat family nodes?
+If `true`, use the parameter `yum_utils` to determine how it should be manged
+
+Default value: `false`
+
+##### `yum_utils`
+
+Data type: `Enum['installed', 'absent', 'purged', 'held', 'latest']`
+
+If managed, what should the yum_utils package set to?
+
+Default value: 'installed'
+
 ##### `manage_delta_rpm`
 
 Data type: `Boolean`

@@ -10,6 +10,13 @@
 # @param patch_cron_user [String]
 #   User who runs the cron job
 #
+# @param manage_yum_utils [Boolean]
+#   Should the yum_utils package be managed by this module on RedHat family nodes?
+#   If `true`, use the parameter `yum_utils` to determine how it should be manged
+#
+# @param yum_utils [Enum]
+#   If managed, what should the yum_utils package set to?
+#
 # @param manage_delta_rpm [Boolean]
 #   Should the deltarpm package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `delta_rpm` to determine how it should be manged
@@ -104,8 +111,10 @@ class os_patching (
   String $patch_data_owner            = 'root',
   String $patch_data_group            = 'root',
   String $patch_cron_user             = $patch_data_owner,
+  Boolean $manage_yum_utils           = false,
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
+  Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override = 'default',
@@ -144,6 +153,12 @@ class os_patching (
   }
 
   if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
+
+  if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
+    package { 'yum_utils':
+      ensure => $yum_utils,
+    }
+  }
 
   if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
     package { 'deltarpm':
