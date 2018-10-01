@@ -155,7 +155,7 @@ class os_patching (
   if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
 
   if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
-    package { 'yum_utils':
+    package { 'yum-utils':
       ensure => $yum_utils,
     }
   }
