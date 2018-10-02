@@ -77,7 +77,7 @@ else
         blackouts.each_line do |line|
           next if line.empty?
           next if line.match(/^#|^$/)
-          matchdata = line.match(/^([\w ]*),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2})$/)
+          matchdata = line.match(/^([\w ]*),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2})$/)
           if matchdata
             arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
             if matchdata[2] > matchdata[3]
