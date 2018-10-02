@@ -66,7 +66,7 @@ then
       else
         echo "false" > $DATADIR/reboot_required
       fi
-      /usr/bin/needs-restarting 2>/dev/null >$DATADIR/apps_to_restart
+      /usr/bin/needs-restarting 2>/dev/null | sed 's/[[:space:]]*$//' >$DATADIR/apps_to_restart
     ;;
     6)
       /usr/bin/needs-restarting 2>/dev/null 1>$DATADIR/apps_to_restart

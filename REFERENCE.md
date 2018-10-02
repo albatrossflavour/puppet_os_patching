@@ -153,7 +153,7 @@ Default value: 'default'
 Data type: `Optional[Hash]`
 
 A hash containing the patch blackout windows, which prevent patching.
-The dates are in full ISO8601 format.
+The dates are in full ISO8601 format (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm).
 
 Options:
 

@@ -31,7 +31,7 @@ else
         updates = File.open(updatefile, 'r').read
         updates.each_line do |line|
           next unless line =~ /[A-Za-z0-9]+/
-          next if line.include? '^#'
+          next if line.match(/^#|^$/)
           line.sub! 'Title : ', ''
           updatelist.push line.chomp
         end
@@ -54,7 +54,7 @@ else
         secupdates = File.open(secupdatefile, 'r').read
         secupdates.each_line do |line|
           next if line.empty?
-          next if line.include? '^#'
+          next if line.match(/^#|^$/)
           secupdatelist.push line.chomp
         end
       else
@@ -75,20 +75,28 @@ else
       if File.file?(blackoutfile)
         blackouts = File.open(blackoutfile, 'r').read
         blackouts.each_line do |line|
-          matchdata = line.match(/^([\w ]*),([\d:T\-\\+]*),([\d:T\-\\+]*)$/)
-          next unless matchdata
-          arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
-          if matchdata[2] > matchdata[3]
-            arraydata[matchdata[1]]['start'] = 'Start date after end date'
-            arraydata[matchdata[1]]['end'] = 'Start date after end date'
-          else
-            arraydata[matchdata[1]]['start'] = matchdata[2]
-            arraydata[matchdata[1]]['end'] = matchdata[3]
-          end
+          next if line.empty?
+          next if line.match(/^#|^$/)
+          matchdata = line.match(/^([\w ]*),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2})$/)
+          if matchdata
+            arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
+            if matchdata[2] > matchdata[3]
+              arraydata[matchdata[1]]['start'] = 'Start date after end date'
+              arraydata[matchdata[1]]['end'] = 'Start date after end date'
+              warnings['blackouts'] = matchdata[0] + ' : Start data after end date'
+            else
+              arraydata[matchdata[1]]['start'] = matchdata[2]
+              arraydata[matchdata[1]]['end'] = matchdata[3]
+            end
 
-          if (matchdata[2]..matchdata[3]).cover?(now)
+            if (matchdata[2]..matchdata[3]).cover?(now)
+              data['blocked'] = true
+              data['blocked_reasons'].push matchdata[1]
+            end
+          else
+            warnings['blackouts'] = "Invalid blackout entry : #{line}"
             data['blocked'] = true
-            data['blocked_reasons'].push matchdata[1]
+            data['blocked_reasons'].push "Invalid blackout entry : #{line}"
           end
         end
       end
