@@ -24,7 +24,7 @@
 # @param delta_rpm [Enum]
 #   If managed, what should the delta_rpm package set to?
 #
-# @parammanage_yum_plugin_security [Boolean]
+# @param manage_yum_plugin_security [Boolean]
 #   Should the yum_plugin_security package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_plugin_security` to determine how it should be manged
 #

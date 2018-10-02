@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.6.1
+
+- Fix a couple of puppet strings issues
+
 ## Release 0.6.0
 
 - [PDQtest](https://github.com/declarativesystems/pdqtest)ing a-go-go, lots of acceptance testing
