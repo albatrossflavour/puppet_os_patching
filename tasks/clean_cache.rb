@@ -30,7 +30,6 @@ def output(returncode, message, debug, starttime)
     :end_time         => endtime,
   }
   puts JSON.pretty_generate(json)
-  history(starttime, message, returncode, reboot, security, job_id)
 end
 
 # Error output function
