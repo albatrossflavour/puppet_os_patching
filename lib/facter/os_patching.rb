@@ -96,7 +96,7 @@ else
           else
             warnings['blackouts'] = "Invalid blackout entry : #{line}"
             data['blocked'] = true
-            data['blocked_reasons'].push = "Invalid blackout entry : #{line}"
+            data['blocked_reasons'].push "Invalid blackout entry : #{line}"
           end
         end
       end
