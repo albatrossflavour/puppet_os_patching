@@ -15,7 +15,6 @@ require 'timeout'
 
 $stdout.sync = true
 
-facter = 'facter'
 fact_generation = '/usr/local/bin/os_patching_fact_generation.sh'
 
 log = Syslog::Logger.new 'os_patching'
@@ -158,7 +157,8 @@ params = nil
 begin
   raw = STDIN.read
   params = JSON.parse(raw)
-rescue JSON::ParserError => e
+#rescue JSON::ParserError => e
+rescue JSON::ParserError
   err(400,"os_patching/input", "Invalid JSON received: '#{raw}'", starttime)
 end
 
@@ -173,14 +173,37 @@ unless File.exist? fact_generation
     starttime,
   )
 end
-_fact_out, stderr, status = Open3.capture3(fact_generation)
-err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
+
+# Cache the facts
 log.debug 'Gathering facts'
 full_facts, stderr, status = Open3.capture3('/opt/puppetlabs/puppet/bin/puppet', 'facts')
-
 err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
+
+# Check we are on a supported platform
+unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian'
+  err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
+end
+
+# Get the pinned packages
 pinned_pkgs = facts['values']['os_patching']['pinned_packages']
+
+# Should we clean the cache prior to starting?
+if params['clean_cache'] && params['clean_cache'] == true
+  clean_cache = if facts['values']['os']['family'] == 'RedHat'
+                  'yum clean all'
+                elsif facts['values']['os']['family'] == 'Debian'
+                  'dpkg clean'
+                end
+  _fact_out, stderr, status = Open3.capture3(clean_cache)
+  err(status, 'os_patching/clean_cache', stderr, starttime) if status != 0
+  log.info 'Cache cleaned'
+end
+
+# Refresh the patching fact cache
+_fact_out, stderr, status = Open3.capture3(fact_generation)
+err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
+
 
 # Let's figure out the reboot gordian knot
 #
