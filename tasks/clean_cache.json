@@ -1,0 +1,6 @@
+{
+  "input_method": "stdin",
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Clean patch caches (yum/dpkg) via a task"
+}

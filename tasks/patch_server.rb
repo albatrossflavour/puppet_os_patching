@@ -15,7 +15,7 @@ require 'timeout'
 
 $stdout.sync = true
 
-facter = '/opt/puppetlabs/puppet/bin/facter'
+fact_generation = '/usr/local/bin/os_patching_fact_generation.sh'
 
 log = Syslog::Logger.new 'os_patching'
 starttime = Time.now.iso8601
@@ -23,7 +23,7 @@ BUFFER_SIZE = 4096
 
 # Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
-  historyfile = '/etc/os_patching/run_history'
+  historyfile = '/var/cache/os_patching/run_history'
   open(historyfile, 'a') do |f|
     f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
   end
@@ -152,24 +152,63 @@ def reboot_required(family, release, reboot)
   end
 end
 
-# Parse input
-params = JSON.parse(STDIN.read)
+# Parse input, get params in scope
+params = nil
+begin
+  raw = STDIN.read
+  params = JSON.parse(raw)
+#rescue JSON::ParserError => e
+rescue JSON::ParserError
+  err(400,"os_patching/input", "Invalid JSON received: '#{raw}'", starttime)
+end
 
 # Cache fact data to speed things up
 log.info 'os_patching run started'
 log.debug 'Running os_patching fact refresh'
-_fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
-err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
+unless File.exist? fact_generation
+  err(
+    255,
+    "os_patching/#{fact_generation}",
+    "#{fact_generation} does not exist, declare os_patching and run Puppet first",
+    starttime,
+  )
+end
+
+# Cache the facts
 log.debug 'Gathering facts'
-full_facts, stderr, status = Open3.capture3(facter, '-p', '-j')
+full_facts, stderr, status = Open3.capture3('/opt/puppetlabs/puppet/bin/puppet', 'facts')
 err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
-pinned_pkgs = facts['os_patching']['pinned_packages']
+
+# Check we are on a supported platform
+unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian'
+  err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
+end
+
+# Get the pinned packages
+pinned_pkgs = facts['values']['os_patching']['pinned_packages']
+
+# Should we clean the cache prior to starting?
+if params['clean_cache'] && params['clean_cache'] == true
+  clean_cache = if facts['values']['os']['family'] == 'RedHat'
+                  'yum clean all'
+                elsif facts['values']['os']['family'] == 'Debian'
+                  'dpkg clean'
+                end
+  _fact_out, stderr, status = Open3.capture3(clean_cache)
+  err(status, 'os_patching/clean_cache', stderr, starttime) if status != 0
+  log.info 'Cache cleaned'
+end
+
+# Refresh the patching fact cache
+_fact_out, stderr, status = Open3.capture3(fact_generation)
+err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
+
 
 # Let's figure out the reboot gordian knot
 #
 # If the override is set, it doesn't matter that anything else is set to at this point
-reboot_override = facts['os_patching']['reboot_override']
+reboot_override = facts['values']['os_patching']['reboot_override']
 reboot_param = params['reboot']
 reboot = ''
 if reboot_override == 'always'
@@ -257,23 +296,23 @@ else
 end
 
 # Is the patching blocker flag set?
-blocker = facts['os_patching']['blocked']
+blocker = facts['values']['os_patching']['blocked']
 if blocker.to_s.chomp == 'true'
   # Patching is blocked, list the reasons and error
   # need to error as it SHOULDN'T ever happen if you
   # use the right workflow through tasks.
   log.error 'Patching blocked, not continuing'
-  block_reason = facts['os_patching']['blocker_reasons']
+  block_reason = facts['values']['os_patching']['blocker_reasons']
   err(100, 'os_patching/blocked', "Patching blocked #{block_reason}", starttime)
 end
 
 # Should we look at security or all patches to determine if we need to patch?
 # (requires RedHat subscription or Debian based distro... for now)
 if security_only == true
-  updatecount = facts['os_patching']['security_package_update_count']
+  updatecount = facts['values']['os_patching']['security_package_update_count']
   securityflag = '--security'
 else
-  updatecount = facts['os_patching']['package_update_count']
+  updatecount = facts['values']['os_patching']['package_update_count']
   securityflag = ''
 end
 
@@ -294,14 +333,14 @@ if updatecount.zero?
 end
 
 # Run the patching
-if facts['os']['family'] == 'RedHat'
+if facts['values']['os']['family'] == 'RedHat'
   log.info 'Running yum upgrade'
   log.debug "Timeout value set to : #{timeout}"
   yum_end = ''
   status, output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
   err(status, 'os_patching/yum', "yum upgrade returned non-zero (#{status}) : #{output}", starttime) if status != 0
 
-  if facts['os']['release']['major'].to_i > 5
+  if facts['values']['os']['release']['major'].to_i > 5
     # Capture the yum job ID
     log.info 'Getting yum job ID'
     job = ''
@@ -364,7 +403,7 @@ if facts['os']['family'] == 'RedHat'
 
   output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, output, job, pinned_pkgs, starttime)
   log.info 'Patching complete'
-elsif facts['os']['family'] == 'Debian'
+elsif facts['values']['os']['family'] == 'Debian'
   # The security only workflow for Debain is a little complex, retiring it for now
   if security_only == true
     log.error 'Debian upgrades, security only not currently supported'
@@ -380,7 +419,7 @@ elsif facts['os']['family'] == 'Debian'
   log.debug 'Running apt update'
   deb_front = 'DEBIAN_FRONTEND=noninteractive'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
-  apt_std_out, stderr, status = Open3.capture3("#{deb_front} #{dpkg_params} -y #{deb_opts} dist-upgrade")
+  apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
   output('Success', reboot, security_only, 'Patching complete', pkg_array, apt_std_out, '', pinned_pkgs, starttime)
@@ -393,11 +432,11 @@ end
 
 # Refresh the facts now that we've patched
 log.info 'Running os_patching fact refresh'
-_fact_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
+_fact_out, stderr, status = Open3.capture3(fact_generation)
 err(status, 'os_patching/fact', stderr, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
-needs_reboot = reboot_required(facts['os']['family'], facts['os']['release']['major'], reboot)
+needs_reboot = reboot_required(facts['values']['os']['family'], facts['values']['os']['release']['major'], reboot)
 log.info "reboot_required returning #{needs_reboot}"
 if needs_reboot == true
   log.info 'Rebooting'

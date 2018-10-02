@@ -1,5 +1,21 @@
 # Changelog
 
+## Release 0.6.0
+
+- [PDQtest](https://github.com/declarativesystems/pdqtest)ing a-go-go, lots of acceptance testing
+- Moved default UNIX cache directory to `/var/cache/os_patching`.  Should be transparent other than losing the history file.  History information still available from syslog and/or package commands
+- Improved reporting and error checking
+- Fixed documentation issues
+- Switch to epp template for blackout windows
+- New `clean_cache` task to flush the OS package cache on RedHat/Debian
+- New `clean_cache` parameter to the os_patching task
+- Did I mention the acceptance tests?
+- New paramters for the `reboot` parameter
+- Unify the arguments between the task parameter `reboot` and the `reboot_override` fact - see the documentation for more details
+- Improve the way we handle managing RPMs we depend on (see `manage_*` in the manifest)
+- Also, acceptance testing
+- Move to new PDK template
+
 ## Release 0.5.0
 
 - Rewrite of the reboot logic for both the task and the `reboot_override` fact.  **SHOULD** be backward compatable with how things used to work but it's now much cleaner and clearer.
