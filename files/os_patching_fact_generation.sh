@@ -86,6 +86,16 @@ then
   esac
 fi
 
+if [ $(facter osfamily) == 'Debian' ]
+then
+  if [ -f '/var/run/reboot-required' ]
+  then
+    echo "true" > $DATADIR/reboot_required
+  else
+    echo "false" > $DATADIR/reboot_required
+  fi
+fi
+
 puppet facts upload 2>/dev/null 1>/dev/null
 logger -p info -t os_patching_fact_generation.sh "patch data fact refreshed"
 
