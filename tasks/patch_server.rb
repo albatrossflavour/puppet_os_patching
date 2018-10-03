@@ -193,7 +193,7 @@ if params['clean_cache'] && params['clean_cache'] == true
   clean_cache = if facts['values']['os']['family'] == 'RedHat'
                   'yum clean all'
                 elsif facts['values']['os']['family'] == 'Debian'
-                  'dpkg clean'
+                  'apt-get clean'
                 end
   _fact_out, stderr, status = Open3.capture3(clean_cache)
   err(status, 'os_patching/clean_cache', stderr, starttime) if status != 0
