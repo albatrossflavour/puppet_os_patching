@@ -404,25 +404,25 @@ if facts['values']['os']['family'] == 'RedHat'
   output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, output, job, pinned_pkgs, starttime)
   log.info 'Patching complete'
 elsif facts['values']['os']['family'] == 'Debian'
-  # The security only workflow for Debain is a little complex, retiring it for now
+  # Are we doing security only patching?
+  apt_mode = ''
+  pkg_list = []
   if security_only == true
-    log.error 'Debian upgrades, security only not currently supported'
-    err(101, 'os_patching/security_only', 'Security only not supported on Debian at this point', starttime)
+    pkg_list = facts['values']['os_patching']['security_package_updates']
+    apt_mode = "install " + pkg_list.join(" ")
+  else
+    pkg_list = facts['values']['os_patching']['package_updates']
+    apt_mode = 'dist-upgrade'
   end
 
-  log.debug 'Getting package update list'
-  updated_packages, stderr, status = Open3.capture3("apt-get dist-upgrade -s #{dpkg_params} | awk '/^Inst/ {print $2}'")
-  err(status, 'os_patching/apt', stderr, starttime) if status != 0
-  pkg_array = updated_packages.split
-
   # Do the patching
-  log.debug 'Running apt update'
+  log.debug "Running apt #{apt_mode}"
   deb_front = 'DEBIAN_FRONTEND=noninteractive'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
-  apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
+  apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} #{apt_mode}")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
 
-  output('Success', reboot, security_only, 'Patching complete', pkg_array, apt_std_out, '', pinned_pkgs, starttime)
+  output('Success', reboot, security_only, 'Patching complete', pkg_list, apt_std_out, '', pinned_pkgs, starttime)
   log.info 'Patching complete'
 else
   # Only works on Redhat & Debian at the moment

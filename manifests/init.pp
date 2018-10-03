@@ -14,24 +14,24 @@
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
 #
-# @param yum_utils [Enum]
+# @param yum_utils
 #   If managed, what should the yum_utils package set to?
 #
 # @param manage_delta_rpm [Boolean]
 #   Should the deltarpm package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `delta_rpm` to determine how it should be manged
 #
-# @param delta_rpm [Enum]
+# @param delta_rpm
 #   If managed, what should the delta_rpm package set to?
 #
 # @param manage_yum_plugin_security [Boolean]
 #   Should the yum_plugin_security package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_plugin_security` to determine how it should be manged
 #
-# @param yum_plugin_security [Enum]
+# @param yum_plugin_security
 #   If managed, what should the yum_plugin_security package set to?
 #
-# @param reboot_override [Variant]
+# @param reboot_override
 #   Controls on a node level if a reboot should/should not be done after patching.
 #   This overrides the setting in the task
 #
@@ -62,7 +62,7 @@
 # @param patch_cron_min
 #   The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 #
-# @param [Enum] ensure
+# @param ensure
 #   `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
 #
 # @example assign node to 'Week3' patching window, force a reboot and create a blackout window for the end of the year
