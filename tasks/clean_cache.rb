@@ -69,7 +69,7 @@ end
 clean_cache = if facts['values']['os']['family'] == 'RedHat'
                 'yum clean all'
               elsif facts['values']['os']['family'] == 'Debian'
-                'dpkg clean'
+                'apt-get clean'
               end
 
 # Clean that cache!
