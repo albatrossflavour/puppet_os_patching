@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.6.2
+
+- Reenable security only patching on debian based systems
+
 ## Release 0.6.1
 
 - Fix a couple of puppet strings issues

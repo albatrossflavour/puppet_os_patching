@@ -285,8 +285,6 @@ With the exception of the run_history file, all files in /var/cache/os_patching 
 
 This module is for PE2018+ with agents capable of running tasks.  It is currently limited to the Red Hat and Debian based operating systems (CentOS, Ubuntu, Debian, RedHat etc).  Windows (WSUS) functionality is being actively worked on.
 
-Debian based systems currently do not allow `security_only` patch tasks to be set to `true`, a fix for this is being worked on.
-
 RedHat 5 based systems have support but lack a lot of the yum functionality added in 6, so things like the upgraded package list and job ID will be missing.
 
 ## Development
