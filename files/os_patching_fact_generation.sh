@@ -86,7 +86,7 @@ then
   esac
 fi
 
-if [ $(facter osfamily) == 'Debian' ]
+if [ $(facter osfamily) = 'Debian' ]
 then
   if [ -f '/var/run/reboot-required' ]
   then
