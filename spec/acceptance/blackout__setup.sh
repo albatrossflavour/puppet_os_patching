@@ -1,4 +1,3 @@
-set -x
 sh /testcase/spec/acceptance/setup.sh
 puppet apply /testcase/examples/init.pp
 start=$(date --iso-8601=seconds | sed 's/\([[:digit:]]\)\([[:digit:]]\{2\}\)$/\1:\2/')
