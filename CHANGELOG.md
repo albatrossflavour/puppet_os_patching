@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.6.3 (2018-10-03)
+
+- Fix debian nodes not showing the reboot_required fact if one is required
+
 ## Release 0.6.2 (2018-10-03)
 
 - Reenable security only patching on debian based systems
