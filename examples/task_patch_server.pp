@@ -36,7 +36,7 @@ file { '/tmp/os_patching/params.json':
 }
 
 exec { 'check task updates system with params':
-  command => 'bash -c \'cat /tmp/os_patching/params.json | /testcase/tasks/patch_server.rb  > /tmp/os_patching/output.txt ; true\'',
+  command => 'bash -c \'cat /tmp/os_patching/params.json | /testcase/tasks/patch_server.rb  > /tmp/os_patching/output.txt 2>&1 \'',
   path    => '/bin:/usr/bin',
   creates => '/tmp/os_patching/output.txt',
 }

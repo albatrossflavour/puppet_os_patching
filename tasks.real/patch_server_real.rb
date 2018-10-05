@@ -9,35 +9,25 @@ require 'facter'
 require 'logger'
 require 'pp'
 
-
-is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-if is_windows
-  puts 'Cannot run os_patching::patch_server on Windows'
-  exit 1
-end
 $stdout.sync = true
 starttime = Time.now.iso8601
 
-fact_generation = '/usr/local/bin/os_patching_fact_generation.sh'
+# Parse input, get params in scope, configure logging
+params = OsPatching::OsPatching.get_params(starttime)
+log = OsPatching::OsPatching.get_logger(params)
 
-# Cache the facts
-
+# Update the current fact values for packages that need updating, etc
+OsPatching::OsPatching.refresh_facts(starttime)
+# ...parse the result
 facts = {
   values: {
     os: Facter.value(:os),
     os_patching: OsPatching::OsPatching.fact,
   }
 }
-
-# Parse input, get params in scope
-params = OsPatching::OsPatching.get_params(starttime)
-log = OsPatching::OsPatching.get_logger(params)
 log.debug("Facts: #{facts.pretty_inspect}")
 
-
-BUFFER_SIZE = 4096
-
-
+OsPatching::OsPatching.supported_platform(starttime, facts[:values][:os]['family'])
 
 # Figure out if we need to reboot
 def reboot_required(family, release, reboot)
@@ -80,45 +70,17 @@ def reboot_required(family, release, reboot)
   end
 end
 
-
-# Cache fact data to speed things up
-log.info 'os_patching run started'
-log.debug "Running os_patching fact refresh with params: #{params}"
-unless File.exist? fact_generation
-  OsPatching::OsPatching.err(
-    255,
-    "os_patching/#{fact_generation}",
-    "#{fact_generation} does not exist, declare os_patching and run Puppet first",
-    starttime,
-  )
-end
-
-
-
-# Check we are on a supported platform
-unless facts[:values][:os]['family'] == 'RedHat' || facts[:values][:os]['family'] == 'Debian'
-  OsPatching::OsPatching.err(200, 'os_patching/unsupported_os', "Unsupported OS family: #{facts[:values][:os]['family']}", starttime)
-end
-
 # Get the pinned packages
 pinned_pkgs = facts[:values][:os_patching]['pinned_packages']
 
 # Should we clean the cache prior to starting?
 if params['clean_cache'] && params['clean_cache'] == true
-  clean_cache = if facts[:values][:os]['family'] == 'RedHat'
-                  'yum clean all'
-                elsif facts[:values][:os]['family'] == 'Debian'
-                  'dpkg clean'
-                end
-  status, _fact_out = OsPatching::OsPatching.run_with_timeout(clean_cache)
-  OsPatching::OsPatching.err(status, 'os_patching/clean_cache', stderr, starttime) if status != 0
-  log.info 'Cache cleaned'
+  OsPatching::OsPatching.clean_cache(starttime, facts[:values][:os]['family'])
 end
 
-# Refresh the patching fact cache
-status, _fact_out = OsPatching::OsPatching.run_with_timeout(fact_generation)
-OsPatching::OsPatching.err(status, 'os_patching/fact_refresh', _fact_out, starttime) if status != 0
-
+# Refresh the patching fact cache and re-read os-patching facts
+OsPatching::OsPatching.refresh_facts(starttime)
+facts[:values][:os_patching] = OsPatching::OsPatching.fact
 
 # Let's figure out the reboot gordian knot
 #
@@ -239,7 +201,7 @@ if updatecount.zero?
     log.error 'Rebooting'
 
     OsPatching::OsPatching.output(
-      return: 'success',
+      return: 'Success',
       reboot: reboot,
       security: security_only,
       message: 'No patches to apply, reboot triggered',
@@ -256,7 +218,7 @@ if updatecount.zero?
     Process.detach(p1)
   else
     OsPatching::OsPatching.output(
-      return: 'success',
+      return: 'Success',
       reboot: reboot,
       security: security_only,
       message: 'No patches to apply',
@@ -353,31 +315,30 @@ if facts[:values][:os]['family'] == 'RedHat'
   )
   log.info 'Patching complete'
 elsif facts[:values][:os]['family'] == 'Debian'
-  # The security only workflow for Debain is a little complex, retiring it for now
+  # Are we doing security only patching?
+  apt_mode = ''
+  pkg_list = []
   if security_only == true
-    log.error 'Debian upgrades, security only not currently supported'
-    OsPatching::OsPatching.err(101, 'os_patching/security_only', 'Security only not supported on Debian at this point', starttime)
+    pkg_list = facts[:values][:os_patching]['security_package_updates']
+    apt_mode = "install " + pkg_list.join(" ")
+  else
+    pkg_list = facts[:values][:os_patching]['package_updates']
+    apt_mode = 'dist-upgrade'
   end
 
-  log.debug 'Getting package update list'
-  status, updated_packages = OsPatching::OsPatching.run_with_timeout("apt-get dist-upgrade -s #{dpkg_params} | awk '/^Inst/ {print $2}'")
-  OsPatching::OsPatching.err(status, 'os_patching/apt', updated_packages, starttime) if status != 0
-  pkg_array = updated_packages.split
-
   # Do the patching
-  log.debug 'Running apt update'
+  log.debug "Running apt #{apt_mode}"
   deb_front = 'DEBIAN_FRONTEND=noninteractive'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
-  status, apt_std_out = OsPatching::OsPatching.run_with_timeout("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} dist-upgrade")
-  OsPatching::OsPatching.err(status, 'os_patching/apt', apt_std_out, starttime) if status != 0
-
+  status, stderrout = OsPatching::OsPatching.run_with_timeout("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} #{apt_mode}")
+  OsPatching::OsPatching.err(status, 'os_patching/apt', stderrout, starttime) if status != 0
   OsPatching::OsPatching.output(
     return:  'Success',
     reboot: reboot,
     security: security_only,
     message: 'Patching complete',
-    packages_updated: pkg_array,
-    debug: apt_std_out,
+    packages_updated: pkg_list,
+    debug: stderrout,
     job_id: '',
     pinned_packages: pinned_pkgs,
     start_time: starttime,
@@ -390,8 +351,10 @@ else
 end
 
 # Refresh the facts now that we've patched
-log.info 'Running os_patching fact refresh'
-status, _fact_out = OsPatching::OsPatching.run_with_timeout(fact_generation)
+# Refresh the patching fact cache and re-read os-patching facts
+OsPatching::OsPatching.refresh_facts(starttime)
+facts[:values][:os_patching] = OsPatching::OsPatching.fact
+
 OsPatching::OsPatching.err(status, 'os_patching/fact', _fact_out, starttime) if status != 0
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true

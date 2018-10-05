@@ -14,7 +14,7 @@ file { '/tmp/os_patching/params.json':
 }
 
 exec { 'check task clears cache':
-  command => 'bash -c \'cat /tmp/os_patching/params.json | /testcase/tasks/clean_cache.rb  > /tmp/os_patching/output.txt ; true\'',
+  command => 'bash -c \'cat /tmp/os_patching/params.json | /testcase/tasks/clean_cache.rb  > /tmp/os_patching/output.txt 2>&1 \'',
   path    => '/bin:/usr/bin',
   creates => '/tmp/os_patching/output.txt',
 }

@@ -6,6 +6,7 @@ module OsPatching
   module OsPatching
     @@warnings = {}
     @@log = nil
+    BUFFER_SIZE = 4096
 
     def self.is_windows
       RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
@@ -22,7 +23,6 @@ module OsPatching
     end
 
     def self.chunk_updates
-      data = {}
       updatelist = []
       updatefile = File.join(os_patching_dir,'package_updates')
       if File.file?(updatefile)
@@ -33,20 +33,18 @@ module OsPatching
         updates = File.open(updatefile, 'r').read
         updates.each_line do |line|
           next unless line =~ /[A-Za-z0-9]+/
-          next if line.include? '^#'
+          next if line.match(/^#|^$/)
           line.sub! 'Title : ', ''
           updatelist.push line.chomp
         end
       else
-        @@warnings['update_file'] = 'Update file not found, update information invalid'
+        @@warnings['update_file'] = "Update file not found reading #{updatefile}, update information invalid"
       end
-      data['package_updates'] = updatelist
-      data['package_update_count'] = updatelist.count
-      data
+
+      updatelist
     end
 
     def self.chunk_secupdates
-      data = {}
       secupdatelist = []
       secupdatefile = File.join(os_patching_dir, '/security_package_updates')
       if File.file?(secupdatefile)
@@ -56,15 +54,14 @@ module OsPatching
         secupdates = File.open(secupdatefile, 'r').read
         secupdates.each_line do |line|
           next if line.empty?
-          next if line.include? '^#'
+          next if line.match(/^#|^$/)
           secupdatelist.push line.chomp
         end
       else
-        @@warnings['security_update_file'] = 'Security update file not found, update information invalid'
+        @@warnings['security_update_file'] = "Security update file not found at #{secupdatefile}, update information invalid"
       end
-      data['security_package_updates'] = secupdatelist
-      data['security_package_update_count'] = secupdatelist.count
-      data
+
+      secupdatelist
     end
 
     def self.chunk_blackouts
@@ -72,24 +69,32 @@ module OsPatching
       arraydata = {}
       data['blocked'] = false
       data['blocked_reasons'] = []
-      blackoutfile = File.join(os_patching_dir,'/blackout_windows')
+      blackoutfile = os_patching_dir + '/blackout_windows'
       if File.file?(blackoutfile)
         blackouts = File.open(blackoutfile, 'r').read
         blackouts.each_line do |line|
-          matchdata = line.match(/^([\w ]*),([\d:T\-\\+]*),([\d:T\-\\+]*)$/)
-          next unless matchdata
-          arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
-          if matchdata[2] > matchdata[3]
-            arraydata[matchdata[1]]['start'] = 'Start date after end date'
-            arraydata[matchdata[1]]['end'] = 'Start date after end date'
+          next if line.empty?
+          next if line.match(/^#|^$/)
+          matchdata = line.match(/^([\w ]*),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2})$/)
+          if matchdata
+            arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
+            if matchdata[2] > matchdata[3]
+              arraydata[matchdata[1]]['start'] = 'Start date after end date'
+              arraydata[matchdata[1]]['end'] = 'Start date after end date'
+              @@warnings['blackouts'] = matchdata[0] + ' : Start data after end date'
+            else
+              arraydata[matchdata[1]]['start'] = matchdata[2]
+              arraydata[matchdata[1]]['end'] = matchdata[3]
+            end
+
+            if (Time.parse(matchdata[2])..Time.parse(matchdata[3])).cover?(Time.now)
+              data['blocked'] = true
+              data['blocked_reasons'].push matchdata[1]
+            end
           else
-            arraydata[matchdata[1]]['start'] = matchdata[2]
-            arraydata[matchdata[1]]['end'] = matchdata[3]
-          end
-          now = Time.now.iso8601
-          if (matchdata[2]..matchdata[3]).cover?(now)
+            @@warnings['blackouts'] = "Invalid blackout entry : #{line}"
             data['blocked'] = true
-            data['blocked_reasons'].push matchdata[1]
+            data['blocked_reasons'].push "Invalid blackout entry : #{line}"
           end
         end
       end
@@ -239,7 +244,7 @@ module OsPatching
 
     # Error output function
     def self.err(code, kind, message, starttime)
-      endtime = Time.now.iso8601
+      get_logger.error "#{code} error mode"
       exitcode = code.to_s.split.last
       json = {
         _error: {
@@ -247,7 +252,7 @@ module OsPatching
           kind: kind,
           details: {exitcode: exitcode},
           start_time: starttime,
-          end_time: endtime,
+          end_time: Time.now.iso8601,
         },
       }
 
@@ -370,7 +375,7 @@ module OsPatching
     # the syslog logger to prevent erroring (eg if task invoked with invalid
     # JSON)
     def self.get_logger(params=nil)
-      if @@log == nil
+      if @@log.nil?
         if params && params.key?('debug')
           @@log = Logger.new(STDOUT)
           @@log.level = Logger::DEBUG
@@ -394,6 +399,45 @@ module OsPatching
       params
     end
 
+    def self.clean_cache(starttime, os_family)
+      clean_cache = if os_family == 'RedHat'
+                      'yum clean all'
+                    elsif os_family == 'Debian'
+                      'apt-get update'
+                    end
+
+      # Clean that cache!
+      status, stderrout = run_with_timeout(clean_cache)
+      err(status, 'os_patching/clean_cache', stderrout, starttime) if status != 0
+
+      [status, stderrout]
+    end
+
+    def self.refresh_facts(starttime)
+      fact_generation = '/usr/local/bin/os_patching_fact_generation.sh'
+      unless File.exist? fact_generation
+        err(
+          255,
+          "os_patching/#{fact_generation}",
+          "#{fact_generation} does not exist, declare os_patching and run Puppet first",
+          starttime,
+        )
+      end
+      status, _fact_out = run_with_timeout(fact_generation)
+      err(status, 'os_patching/fact_refresh', _fact_out, starttime) if status != 0
+    end
+
+    def self.supported_platform(starttime, os_family)
+      if is_windows
+        err(200, 'os_patching/unsupported_os', 'Cannot run os_patching::clean_cache on Windows', starttime)
+      end
+
+      # Check we are on a supported platform
+      unless os_family == 'RedHat' || os_family == 'Debian'
+        err(200, 'os_patching/unsupported_os', "Unsupported OS family: #{os_family}", starttime)
+      end
+    end
+
   end
 end
 #!/opt/puppetlabs/puppet/bin/ruby
@@ -407,42 +451,27 @@ require 'syslog/logger'
 require 'time'
 require 'timeout'
 
-
-if OsPatching::OsPatching.is_windows
-  puts 'Cannot run os_patching::clean_cache on Windows'
-  exit 1
-end
 $stdout.sync = true
 starttime = Time.now.iso8601
 
-BUFFER_SIZE = 4096
+
 
 # Cache the facts
 facts = {
-    :values => {
-        :os => Facter.value(:os),
-    }
+  values: {
+    os: Facter.value(:os),
+  }
 }
+
+
+OsPatching::OsPatching.supported_platform(starttime, facts[:values][:os]['family'])
 
 # params is used to activate debug logging
 params = OsPatching::OsPatching.get_params(starttime)
 log = OsPatching::OsPatching.get_logger(params)
 log.debug("facts: #{facts.pretty_print_inspect}")
 
-# Check we are on a supported platform
-unless facts[:values][:os]['family'] == 'RedHat' || facts[:values][:os]['family'] == 'Debian'
-  OsPatching::OsPatching.err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
-end
-
-clean_cache = if facts[:values][:os]['family'] == 'RedHat'
-                'yum clean all'
-              elsif facts[:values][:os]['family'] == 'Debian'
-                'apt-get update'
-              end
-
-# Clean that cache!
-status, stderrout = OsPatching::OsPatching.run_with_timeout(clean_cache)
-OsPatching::OsPatching.err(status, 'os_patching/clean_cache', stderrout, starttime) if status != 0
+status, stderrout = OsPatching::OsPatching.clean_cache(starttime, facts[:values][:os]['family'])
 OsPatching::OsPatching.output(
   return: status,
   message: 'Cache cleaned',

@@ -39,8 +39,8 @@ Conf update-manager-core (1:16.04.14 Ubuntu:16.04/xenial-updates [all])
 Conf python3-urllib3 (1.13.1-2ubuntu0.16.04.2 Ubuntu:16.04/xenial-updates [all])
 """
 
-if args.command == 'dist-upgrade':
-    print("apt dist-upgrade in progress")
+if args.command == 'dist-upgrade' or args.command == 'upgrade':
+    print("mock: apt-get %s would have run" % args.command)
     if args.s:
         print(mock_simulate)
     else:
@@ -50,7 +50,7 @@ if args.command == 'dist-upgrade':
             if args.a:
                 f.write("\n" + args.a)
 elif args.command == 'update':
-    print("apt-get update in progress")
+    print("mock: apt-get update would have run")
     with open("/tmp/os_patching/metadata_update.txt", 'w') as f:
         f.write("updated")
 else:

@@ -18,6 +18,13 @@ if [ -f /usr/bin/apt-get ] ; then
 fi
 ln -fs /testcase/spec/mock/apt-get.py /usr/bin/apt-get
 
+# Fake apt
+if [ -f /usr/bin/apt ] ; then
+    rm /usr/bin/apt
+fi
+ln -fs /testcase/spec/mock/apt-get.py /usr/bin/apt
+
+
 # Fake yum
 if [ -f /usr/bin/yum ] ; then
     rm /usr/bin/yum

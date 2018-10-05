@@ -42,8 +42,20 @@ Packages Altered:
 history info
 """
 
+yum_outdated = """
+NetworkManager.x86_64                        1:1.10.2-16.el7_5                      updates
+NetworkManager-libnm.x86_64                  1:1.10.2-16.el7_5                      updates
+NetworkManager-team.x86_64                   1:1.10.2-16.el7_5                      updates
+NetworkManager-tui.x86_64                    1:1.10.2-16.el7_5                      updates
+NetworkManager-wifi.x86_64                   1:1.10.2-16.el7_5                      updates
+acl.x86_64                                   2.2.51-14.el7                          base
+audit.x86_64                                 2.8.1-3.el7_5.1                        updates
+"""
+
 parser = argparse.ArgumentParser("Mock yum command")
 parser.add_argument('-y', action='store_true')
+parser.add_argument('-q', action='store_true')
+parser.add_argument('--security', action='store_true')
 parser.add_argument('--errorlevel')
 parser.add_argument('command',  metavar='COMMAND')
 parser.add_argument('info',  metavar='INFO', nargs='?')
@@ -64,6 +76,12 @@ elif args.command == 'clean':
     print("clean metadata")
     with open("/tmp/os_patching/metadata_update.txt", 'w') as f:
         f.write("updated")
+elif args.command == 'check-update':
+    if args.security:
+        # security updates only
+        print("security updates test -- todo")
+    else:
+        print(yum_outdated)
 else:
     print("incorrect yum invocation:")
     print(" ".join(sys.argv[1:]))
