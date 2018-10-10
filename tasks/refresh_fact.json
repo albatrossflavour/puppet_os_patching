@@ -1,0 +1,8 @@
+{
+  "input_method": "stdin",
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Force a refresh of the os_patching fact cache via a task",
+  "parameters": {
+  }
+}
