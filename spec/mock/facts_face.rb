@@ -1,6 +1,11 @@
+#!/opt/puppetlabs/puppet/bin/ruby
+
 #
 # MOCK VERSION of `puppet facts` command
 #
+
+# rubocop:disable Style/StringLiterals, Lint/UnusedBlockArgument, Layout/SpaceInsideHashLiteralBraces, Layout/IndentHash, Layout/MultilineHashBraceLayout
+
 require 'puppet/indirector/face'
 require 'puppet/node/facts'
 
@@ -86,7 +91,7 @@ Puppet::Indirector::Face.define(:facts, '0.0.1') do
 
       Puppet.notice("Not really uploading facts (JKS - LOL) - mock version!")
       # do not upload to non-existant puppet server
-      #Puppet::Node::Facts.indirection.save(facts)
+      # Puppet::Node::Facts.indirection.save(facts)
     end
   end
 end
