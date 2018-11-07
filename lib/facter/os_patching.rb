@@ -9,6 +9,7 @@ if Facter.value(:facterversion).split('.')[0].to_i < 2
   end
 else
   Facter.add('os_patching', :type => :aggregate) do
+    confine { Facter.value(:kernel) == 'windows' or Facter.value(:kernel) == 'Linux' }
     require 'time'
     now = Time.now.iso8601
     warnings = {}
