@@ -12,6 +12,7 @@ the `os_patching` fact.
 
 * [`clean_cache`](#clean_cache): Clean patch caches (yum/dpkg) via a task
 * [`patch_server`](#patch_server): Carry out OS patching on the server, optionally including a reboot and/or only applying security related updates
+* [`refresh_fact`](#refresh_fact): Force a refresh of the os_patching fact cache via a task
 
 ## Classes
 
@@ -289,4 +290,10 @@ Limit patches to those tagged as security related? (Defaults to false)
 Data type: `Optional[Boolean]`
 
 Should the yum/dpkg caches be cleaned at the start of the task? (Defaults to false)
+
+### refresh_fact
+
+Force a refresh of the os_patching fact cache via a task
+
+**Supports noop?** false
 

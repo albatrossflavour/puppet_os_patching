@@ -1,5 +1,11 @@
 # Changelog
 
+## Release 0.7.0 (2018-12-10)
+
+- New task to force the fact cache to refresh
+- Some filters for potentially dodgy yum output during fact caching
+- Confine the fact to only run on Windows and Linux
+
 ## Release 0.6.4 (2018-10-03)
 
 - Fix debian cache cleaning command
