@@ -43,6 +43,7 @@ DATADIR='/var/cache/os_patching'
 UPDATEFILE="$DATADIR/package_updates"
 SECUPDATEFILE="$DATADIR/security_package_updates"
 
+
 if [ ! -d "${DATADIR}" ]
 then
   logger -p error -t os_patching_fact_generation.sh "Can't find ${DATADIR}, exiting"
