@@ -25,7 +25,7 @@ case $(facter osfamily) in
     # Security: kernel-3.14.2-200.fc20.x86_64 is the currently running version
     # ---
     # We need to filter those out as they screw up the package listing
-    FILTER='egrep -v "^Security:"'
+    FILTER='egrep -v "^Security:" | egrep -v "is broken, or a bad duplicate"'
     PKGS=$(yum -q check-update 2>/dev/null| $FILTER | awk '/^[[:alnum:]]/ {print $1}')
     SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | awk '/^[[:alnum:]]/ {print $1}')
   ;;
