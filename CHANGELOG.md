@@ -1,5 +1,9 @@
 # Changelog
 
+## Release 0.7.1 (2018-12-10)
+
+- Bugfix on the filter code
+
 ## Release 0.7.0 (2018-12-10)
 
 - New task to force the fact cache to refresh

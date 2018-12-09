@@ -25,9 +25,9 @@ case $(facter osfamily) in
     # Security: kernel-3.14.2-200.fc20.x86_64 is the currently running version
     # ---
     # We need to filter those out as they screw up the package listing
-    FILTER='egrep -v "^Security:" | egrep -v "is broken, or a bad duplicate"'
-    PKGS=$(yum -q check-update 2>/dev/null| $FILTER | awk '/^[[:alnum:]]/ {print $1}')
-    SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | awk '/^[[:alnum:]]/ {print $1}')
+    FILTER='egrep -v "^Security:"'
+    PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken" | awk '/^[[:alnum:]]/ {print $1}')
+    SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken" | awk '/^[[:alnum:]]/ {print $1}')
   ;;
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
@@ -42,6 +42,7 @@ esac
 DATADIR='/var/cache/os_patching'
 UPDATEFILE="$DATADIR/package_updates"
 SECUPDATEFILE="$DATADIR/security_package_updates"
+
 
 if [ ! -d "${DATADIR}" ]
 then
