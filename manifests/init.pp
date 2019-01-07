@@ -296,7 +296,7 @@ class os_patching (
       command     => $fact_upload_cmd,
       path        => ['/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
-      subscribe   => [
+      subscribe   => File[
         $fact_cmd,
         '/var/cache/os_patching',
         '/var/cache/os_patching/patch_window',
