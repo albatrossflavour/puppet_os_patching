@@ -75,5 +75,5 @@ clean_cache = if facts['values']['os']['family'] == 'RedHat'
 # Clean that cache!
 clean_out, stderr, status = Open3.capture3(clean_cache)
 err(status, 'os_patching/clean_cache', stderr, starttime) if status != 0
-output(status,'Cache cleaned',clean_out,starttime)
+output(status, 'Cache cleaned', clean_out, starttime)
 log.info 'Cache cleaned'
