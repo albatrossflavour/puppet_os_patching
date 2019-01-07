@@ -55,9 +55,8 @@ def err(code, kind, message, starttime)
   exit(exitcode.to_i)
 end
 
-
 # Update the fact cache
 clean_out, stderr, status = Open3.capture3('/usr/local/bin/os_patching_fact_generation.sh')
 err(status, 'os_patching/fact_cache_update', stderr, starttime) if status != 0
-output(status,'Patching fact cache updated',clean_out,starttime)
+output(status, 'Patching fact cache updated', clean_out, starttime)
 log.info 'Patching fact cache updated'
