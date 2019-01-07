@@ -126,6 +126,14 @@ If managed, what should the yum_utils package set to?
 
 Default value: 'installed'
 
+##### `fact_upload`
+
+Data type: `Boolean`
+
+Should `puppet fact upload` be run after any changes to the fact cache files?
+
+Default value: `true`
+
 ##### `manage_delta_rpm`
 
 Data type: `Boolean`

@@ -5,10 +5,10 @@ require 'puppet/indirector/face'
 require 'puppet/node/facts'
 
 Puppet::Indirector::Face.define(:facts, '0.0.1') do
-  copyright "Puppet Inc.", 2011
-  license   _("Apache 2 license; see COPYING")
+  copyright 'Puppet Inc.', 2011
+  license   _('Apache 2 license; see COPYING')
 
-  summary _("Retrieve and store facts.")
+  summary _('Retrieve and store facts.')
   description <<-'EOT'
     This subcommand manages facts, which are collections of normalized system
     information used by Puppet. It can read facts directly from the local system
@@ -16,10 +16,10 @@ Puppet::Indirector::Face.define(:facts, '0.0.1') do
   EOT
 
   find = get_action(:find)
-  find.summary _("Retrieve a node's facts.")
-  find.arguments _("[<node_certname>]")
+  find.summary _('Retrieve a nodes facts.')
+  find.arguments _('[<node_certname>]')
   find.returns <<-'EOT'
-    A hash containing some metadata and (under the "values" key) the set
+    A hash containing some metadata and (under the 'values' key) the set
     of facts for the requested node. When used from the Ruby API: A
     Puppet::Node::Facts object.
 
@@ -40,12 +40,12 @@ Puppet::Indirector::Face.define(:facts, '0.0.1') do
   deactivate_action(:search)
 
   action(:upload) do
-    summary _("Upload local facts to the puppet master.")
+    summary _('Upload local facts to the puppet master.')
     description <<-'EOT'
       Reads facts from the local system using the `facter` terminus, then
       saves the returned facts using the rest terminus.
     EOT
-    returns "Nothing."
+    returns 'Nothing.'
     notes <<-'EOT'
       This action requires that the puppet master's `auth.conf` file
       allow `PUT` or `save` access to the `/puppet/v3/facts` API endpoint.
@@ -66,7 +66,9 @@ Puppet::Indirector::Face.define(:facts, '0.0.1') do
 
     render_as :json
 
+    # rubocop:disable Lint/UnusedBlockArgument
     when_invoked do |options|
+      # rubocop:enable Lint/UnusedBlockArgument
       # Use `agent` sections  settings for certificates, Puppet Server URL,
       # etc. instead of `user` section settings.
       Puppet.settings.preferred_run_mode = :agent
@@ -80,13 +82,15 @@ Puppet::Indirector::Face.define(:facts, '0.0.1') do
 
       Puppet::Node::Facts.indirection.terminus_class = :rest
       server = Puppet::Node::Facts::Rest.server
+      # rubocop:disable Layout/SpaceInsideHashLiteralBraces, Layout/MultilineHashBraceLayout, Layout/IndentHash
       Puppet.notice(_("Uploading facts for '%{node}' to: '%{server}'") % {
                     node: Puppet[:node_name_value],
                     server: server})
+      # rubocop:enable Layout/SpaceInsideHashLiteralBraces, Layout/MultilineHashBraceLayout, Layout/IndentHash
 
-      Puppet.notice("Not really uploading facts (JKS - LOL) - mock version!")
+      Puppet.notice('Not really uploading facts (JKS - LOL) - mock version!')
       # do not upload to non-existant puppet server
-      #Puppet::Node::Facts.indirection.save(facts)
+      # Puppet::Node::Facts.indirection.save(facts)
     end
   end
 end

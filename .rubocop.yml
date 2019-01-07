@@ -19,6 +19,10 @@ AllCops:
 Metrics/LineLength:
   Description: People have wide screens, use them.
   Max: 200
+GetText/DecorateString:
+  Description: We don't want to decorate test output.
+  Exclude:
+  - spec/*
 RSpec/BeforeAfterAll:
   Description: Beware of using after(:all) as it may cause state to leak between tests.
     A necessary evil in acceptance testing.
@@ -64,7 +68,7 @@ Style/TrailingCommaInLiteral:
     and re-ordering nicer.
   EnforcedStyleForMultiline: comma
 Style/SymbolArray:
-  Description: Using style obscures symbolic intent of array's contents.
+  Description: Using percent style obscures symbolic intent of array's contents.
   EnforcedStyle: brackets
 RSpec/MessageSpies:
   EnforcedStyle: receive
@@ -78,6 +82,8 @@ Style/CollectionMethods:
   Enabled: true
 Style/MethodCalledOnDoEndBlock:
   Enabled: true
+Style/HashSyntax:
+  Enabled: false
 Style/StringMethods:
   Enabled: true
 Layout/EndOfLine:

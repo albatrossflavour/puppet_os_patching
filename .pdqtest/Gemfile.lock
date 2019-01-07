@@ -82,6 +82,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86_64-darwin-18
 
 DEPENDENCIES
   pdqtest (~> 1.9.9beta5)
@@ -89,4 +90,4 @@ DEPENDENCIES
   puppet-strings
 
 BUNDLED WITH
-   1.16.1
+   1.16.2
