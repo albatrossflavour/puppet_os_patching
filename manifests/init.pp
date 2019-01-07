@@ -17,6 +17,9 @@
 # @param yum_utils
 #   If managed, what should the yum_utils package set to?
 #
+# @param fact_upload [Boolean]
+#   Should `puppet fact upload` be run after any changes to the fact cache files?
+#
 # @param manage_delta_rpm [Boolean]
 #   Should the deltarpm package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `delta_rpm` to determine how it should be manged
@@ -114,6 +117,7 @@ class os_patching (
   Boolean $manage_yum_utils           = false,
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
+  Boolean $fact_upload                = true,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -134,7 +138,9 @@ class os_patching (
   }
 
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
+
   $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
+
   $fact_upload_exec = $ensure ? {
     'present' => 'os_patching::exec::fact_upload',
     default   => undef
@@ -183,7 +189,6 @@ class os_patching (
     group  => 'root',
     mode   => '0644',
     force  => true,
-    notify => Exec[$fact_exec],
   }
 
   file { $fact_cmd:
@@ -192,7 +197,6 @@ class os_patching (
     group  => $patch_data_group,
     mode   => '0700',
     source => "puppet:///modules/${module_name}/os_patching_fact_generation.sh",
-    notify => Exec[$fact_exec],
   }
 
   if $fact_exec {
@@ -235,7 +239,6 @@ class os_patching (
     group   => 'root',
     mode    => '0644',
     content => $patch_window,
-    notify  => Exec[$fact_upload_exec],
   }
 
   $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {
@@ -253,7 +256,6 @@ class os_patching (
     group   => 'root',
     mode    => '0644',
     content => $reboot_override_value,
-    notify  => Exec[$fact_upload_exec],
   }
 
 
@@ -287,13 +289,20 @@ class os_patching (
       'blackout_windows' => pick($blackout_windows, {}),
     }),
     require => File['/var/cache/os_patching'],
-    notify  => Exec[$fact_upload_exec],
   }
 
-  if $fact_upload_exec {
+  if $fact_upload_exec and $fact_upload {
     exec { $fact_upload_exec:
       command     => $fact_upload_cmd,
+      path        => ['/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
+      subscribe   => File[
+        $fact_cmd,
+        '/var/cache/os_patching',
+        '/var/cache/os_patching/patch_window',
+        '/var/cache/os_patching/reboot_override',
+        '/var/cache/os_patching/blackout_windows',
+      ],
     }
   }
 }

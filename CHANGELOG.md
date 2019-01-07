@@ -1,5 +1,12 @@
 # Changelog
 
+## Release 0.8.0 (2019-01-08)
+
+- Added the `fact_upload` parameter to the os_patching class to control if facts are pushed up when the caches change.  [Required if you're running in masterless](https://github.com/albatrossflavour/puppet_os_patching/issues/106)
+- [Removed the requirement for stdlib 5](https://github.com/albatrossflavour/puppet_os_patching/issues/107)
+- Lots of updates for rubocop
+- Moved to new PDK version
+
 ## Release 0.7.1 (2018-12-10)
 
 - Bugfix on the filter code

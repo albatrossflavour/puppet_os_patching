@@ -2,6 +2,7 @@
 class { 'os_patching':
   patch_window     => 'Week3',
   reboot_override  => 'smart',
+  fact_upload      => false,
   blackout_windows => {
     'End of year change freeze' => {
       'start' => '2018-12-15T00:00:00+10:00',

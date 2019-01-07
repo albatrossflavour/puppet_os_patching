@@ -66,7 +66,7 @@ def run_with_timeout(command, timeout, tick)
     stderrout.close if stderrout
     status = thread.value.exitstatus
   end
-  return status, output
+  [status, output]
 end
 
 # Default output function
@@ -157,9 +157,9 @@ params = nil
 begin
   raw = STDIN.read
   params = JSON.parse(raw)
-#rescue JSON::ParserError => e
+# rescue JSON::ParserError => e
 rescue JSON::ParserError
-  err(400,"os_patching/input", "Invalid JSON received: '#{raw}'", starttime)
+  err(400, 'os_patching/input', "Invalid JSON received: '#{raw}'", starttime)
 end
 
 # Cache fact data to speed things up
@@ -203,7 +203,6 @@ end
 # Refresh the patching fact cache
 _fact_out, stderr, status = Open3.capture3(fact_generation)
 err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
-
 
 # Let's figure out the reboot gordian knot
 #
@@ -409,7 +408,7 @@ elsif facts['values']['os']['family'] == 'Debian'
   pkg_list = []
   if security_only == true
     pkg_list = facts['values']['os_patching']['security_package_updates']
-    apt_mode = "install " + pkg_list.join(" ")
+    apt_mode = 'install ' + pkg_list.join(' ')
   else
     pkg_list = facts['values']['os_patching']['package_updates']
     apt_mode = 'dist-upgrade'

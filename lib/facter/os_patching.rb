@@ -9,7 +9,7 @@ if Facter.value(:facterversion).split('.')[0].to_i < 2
   end
 else
   Facter.add('os_patching', :type => :aggregate) do
-    confine { Facter.value(:kernel) == 'windows' or Facter.value(:kernel) == 'Linux' }
+    confine { Facter.value(:kernel) == 'windows' || Facter.value(:kernel) == 'Linux' }
     require 'time'
     now = Time.now.iso8601
     warnings = {}
@@ -32,7 +32,7 @@ else
         updates = File.open(updatefile, 'r').read
         updates.each_line do |line|
           next unless line =~ /[A-Za-z0-9]+/
-          next if line.match(/^#|^$/)
+          next if line =~ /^#|^$/
           line.sub! 'Title : ', ''
           updatelist.push line.chomp
         end
@@ -55,7 +55,7 @@ else
         secupdates = File.open(secupdatefile, 'r').read
         secupdates.each_line do |line|
           next if line.empty?
-          next if line.match(/^#|^$/)
+          next if line =~ /^#|^$/
           secupdatelist.push line.chomp
         end
       else
@@ -77,9 +77,10 @@ else
         blackouts = File.open(blackoutfile, 'r').read
         blackouts.each_line do |line|
           next if line.empty?
-          next if line.match(/^#|^$/)
+          next if line =~ /^#|^$/
           matchdata = line.match(/^([\w ]*),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2})$/)
           if matchdata
+            # rubocop:disable Metrics/BlockNesting
             arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
             if matchdata[2] > matchdata[3]
               arraydata[matchdata[1]]['start'] = 'Start date after end date'
@@ -94,6 +95,7 @@ else
               data['blocked'] = true
               data['blocked_reasons'].push matchdata[1]
             end
+            # rubocop:enable Metrics/BlockNesting
           else
             warnings['blackouts'] = "Invalid blackout entry : #{line}"
             data['blocked'] = true
