@@ -114,6 +114,7 @@ class os_patching (
   Boolean $manage_yum_utils           = false,
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
+  Boolean $fact_upload                = true,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -134,7 +135,13 @@ class os_patching (
   }
 
   $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
-  $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
+
+  if $fact_upload {
+    $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
+  } else {
+    $fact_upload_cmd = 'true'
+  }
+
   $fact_upload_exec = $ensure ? {
     'present' => 'os_patching::exec::fact_upload',
     default   => undef
@@ -293,6 +300,7 @@ class os_patching (
   if $fact_upload_exec {
     exec { $fact_upload_exec:
       command     => $fact_upload_cmd,
+      path        => ['/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
     }
   }
