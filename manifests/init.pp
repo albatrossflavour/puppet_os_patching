@@ -197,6 +197,7 @@ class os_patching (
     group  => $patch_data_group,
     mode   => '0700',
     source => "puppet:///modules/${module_name}/os_patching_fact_generation.sh",
+    notify => Exec[$fact_exec],
   }
 
   if $fact_exec {
