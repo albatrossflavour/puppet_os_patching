@@ -41,6 +41,7 @@ branches:
   only:
     - master
     - /^v\d/
+    - litmus
 notifications:
   email: false
 deploy:
