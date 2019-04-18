@@ -18,10 +18,14 @@ test:
 	${MAKE} acceptance
 
 validate:
-	pdk validate
+	bundle exec rake metadata_lint
+	bundle exec rake syntax
+	bundle exec rake validate
+	bundle exec rake rubocop
+	bundle exec rake check:git_ignore
 
 unit:
-	pdk test unit
+	bundle exec rake spec
 
 acceptance:
 	${MAKE} test_puppet5
