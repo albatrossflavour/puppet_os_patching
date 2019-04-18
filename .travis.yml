@@ -15,17 +15,17 @@ before_install:
 bundler_args: --without system_tests
 rvm:
   - 2.5.3
-stages:
-  - test
 matrix:
   fast_finish: true
   include:
     -
       services: docker
       sudo: required
-      stage: test
       script:
-        - make test_puppet6
+        - bundle exec rake 'litmus:provision_list[travis_el]'
+        - bundle exec rake 'litmus:install_agent[puppet5]'
+        - bundle exec rake litmus:install_module
+        - bundle exec rake litmus:acceptance:parallel
 branches:
   only:
     - master
