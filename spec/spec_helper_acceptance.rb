@@ -12,7 +12,6 @@ if ENV['TARGET_HOST'].nil? || ENV['TARGET_HOST'] == 'localhost'
     set :backend, :exec
   end
 else
-  puts "TARGET_HOST #{ENV['TARGET_HOST']}"
   # load inventory
   inventory_hash = inventory_hash_from_inventory_file
   node_config = config_from_node(inventory_hash, ENV['TARGET_HOST'])
@@ -23,6 +22,7 @@ else
     options[:user] = node_config.dig('ssh', 'user') unless node_config.dig('ssh', 'user').nil?
     options[:port] = node_config.dig('ssh', 'port') unless node_config.dig('ssh', 'port').nil?
     options[:password] = node_config.dig('ssh', 'password') unless node_config.dig('ssh', 'password').nil?
+    options[:verify_host_key] = Net::SSH::Verifiers::Null.new unless node_config.dig('ssh', 'host-key-check').nil?
     host = if ENV['TARGET_HOST'].include?(':')
              ENV['TARGET_HOST'].split(':').first
            else
@@ -30,6 +30,7 @@ else
            end
     set :host,        options[:host_name] || host
     set :ssh_options, options
+    set :request_pty, true
   elsif target_in_group(inventory_hash, ENV['TARGET_HOST'], 'winrm_nodes')
     require 'winrm'
 
