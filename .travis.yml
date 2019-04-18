@@ -10,9 +10,9 @@ before_install:
   - gem update --system $RUBYGEMS_VERSION
   - gem --version
   - bundle -v
-  - bundle install
+  - bundle exec rake -T
 script:
-  - 'make'
+  - 'make test_puppet6'
 bundler_args: --without system_tests
 rvm:
   - 2.5.3
