@@ -47,6 +47,7 @@ describe 'os_patching module' do
       expect(file(cache_dir + '/blackout_windows')).not_to be_file
       expect(file(cache_dir + '/patch_window')).not_to be_file
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).to be_file
+      expect(file('/etc/os_patching')).not_to be_directory
     end
   end
 end
@@ -65,6 +66,7 @@ describe 'os_patching module with patching window' do
       expect(file(cache_dir + '/blackout_windows')).to contain (/End of year/)
       expect(file(cache_dir + '/patch_window')).not_to be_file
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).to be_file
+      expect(file('/etc/os_patching')).not_to be_directory
     end
   end
 end
@@ -83,6 +85,7 @@ describe 'os_patching module with patching window' do
       expect(file(cache_dir + '/patch_window')).to be_file
       expect(file(cache_dir + '/patch_window')).to contain (/Week1/)
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).to be_file
+      expect(file('/etc/os_patching')).not_to be_directory
     end
   end
 end
@@ -93,6 +96,7 @@ describe 'os_patching module purge' do
       apply_manifest_and_idempotent(pp_class_absent)
       expect(file(cache_dir)).not_to be_directory
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).not_to be_file
+      expect(file('/etc/os_patching')).not_to be_directory
     end
   end
 end
