@@ -1,5 +1,5 @@
 ---
-dist: trusty
+dist: bionic
 language: ruby
 services:
   - docker
@@ -11,7 +11,6 @@ before_install:
   - gem --version
   - bundle -v
   - bundle install
-  - gem install puppet_litmus
 script:
   - 'make'
 bundler_args: --without system_tests
