@@ -96,6 +96,9 @@ then
       fi
     ;;
   esac
+else
+  touch $DATADIR/apps_to_restart
+  touch $DATADIR/reboot_required
 fi
 
 if [ $(facter osfamily) = 'Debian' ] || [ $(facter osfamily) = 'Suse' ]
@@ -106,6 +109,7 @@ then
   else
     echo "false" > $DATADIR/reboot_required
   fi
+  touch $DATADIR/apps_to_restart
 fi
 
 puppet facts upload 2>/dev/null 1>/dev/null

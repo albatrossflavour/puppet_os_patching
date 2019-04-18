@@ -1,40 +1,48 @@
 all:
-	cd .pdqtest && pwd && bundle exec pdqtest all
-	$(MAKE) docs
+	${MAKE} test
 
-fast:
-	cd .pdqtest && pwd && bundle exec pdqtest fast
+install_centos:
+	bundle exec rake 'litmus:provision[docker, centos:6]'
+	bundle exec rake 'litmus:provision[docker, centos:7]'
+
+install_ubuntu:
+	bundle exec rake 'litmus:provision[docker, ubuntu:16.04]'
+	bundle exec rake 'litmus:provision[docker, ubuntu:18.04]'
+
+install_module:
+	bundle exec rake litmus:install_module
+
+test:
+	${MAKE} validate
+	${MAKE} unit
+	${MAKE} acceptance
+
+validate:
+	pdk validate
+
+unit:
+	pdk test unit
+
+acceptance:
+	${MAKE} test_puppet5
+	${MAKE} test_puppet6
+
+test_puppet6:
+	${MAKE} install_centos
+	${MAKE} install_ubuntu
+	bundle exec rake litmus:install_agent[puppet6]
+	${MAKE} install_module
+	bundle exec rake litmus:acceptance:parallel && ${MAKE} teardown
+
+test_puppet5:
+	${MAKE} install_centos
+	${MAKE} install_ubuntu
+	bundle exec rake litmus:install_agent[puppet5]
+	${MAKE} install_module
+	bundle exec rake litmus:acceptance:parallel && ${MAKE} teardown
+
+teardown:
+	bundle exec rake litmus:tear_down
 
 shell:
-	cd .pdqtest && pwd && bundle exec pdqtest --keep-container acceptance
-
-setup:
-	cd .pdqtest && pwd && bundle exec pdqtest setup
-
-shellnopuppet:
-	cd .pdqtest && pwd && bundle exec pdqtest shell
-
-logical:
-	cd .pdqtest && pwd && bundle exec pdqtest syntax
-	cd .pdqtest && pwd && bundle exec pdqtest rspec
-	$(MAKE) docs
-
-#nastyhack:
-#	# fix for - https://tickets.puppetlabs.com/browse/PDK-1192
-#	find vendor -iname '*.pp' -exec rm {} \;
-
-pdqtestbundle:
-	# Install all gems into _normal world_ bundle so we can use all of em
-	cd .pdqtest && pwd && bundle install
-
-docs:
-	cd .pdqtest && pwd && bundle exec "cd ..&& puppet strings"
-
-
-Gemfile.local:
-	echo "[🐌] Creating symlink and running pdk bundle..."
-	ln -s Gemfile.project Gemfile.local
-	$(MAKE) pdkbundle
-
-pdkbundle:
-	pdk bundle install
+	ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p 2225
