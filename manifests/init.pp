@@ -155,10 +155,10 @@ class os_patching (
   }
 
   if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
-    fail('The patch window can only contain alphanumerics, space, underscore and dash')
+    fail(translate('The patch window can only contain alphanumerics, space, underscore and dash'))
   }
 
-  if ( $facts['kernel'] != 'Linux' ) { fail('Unsupported OS') }
+  if ( $facts['kernel'] != 'Linux' ) { fail(translate('Unsupported OS')) }
 
   if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
     package { 'yum-utils':
@@ -264,16 +264,16 @@ class os_patching (
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
       if ( $key !~ /^[A-Za-z0-9\-_ ]+$/ ){
-        fail ('Blackout description can only contain alphanumerics, space, dash and underscore')
+        fail translate(('Blackout description can only contain alphanumerics, space, dash and underscore'))
       }
       if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail ('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)')
+        fail translate(('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)'))
       }
       if ( $value['end'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail ('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)')
+        fail translate(('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)'))
       }
       if ( $value['start'] > $value['end'] ){
-        fail ('Blackout end time must after the start time')
+        fail translate(('Blackout end time must after the start time'))
       }
     }
   }
