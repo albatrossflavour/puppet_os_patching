@@ -158,21 +158,21 @@ class os_patching (
     fail('The patch window can only contain alphanumerics, space, underscore and dash')
   }
 
-  if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
+  if ( $facts['kernel'] != 'Linux' ) { fail('Unsupported OS') }
 
-  if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
+  if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
     package { 'yum-utils':
       ensure => $yum_utils,
     }
   }
 
-  if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
+  if ( $facts['os']['family'] == 'RedHat' and $manage_delta_rpm) {
     package { 'deltarpm':
       ensure => $delta_rpm,
     }
   }
 
-  if ( $::osfamily == 'RedHat' and $manage_yum_plugin_security) {
+  if ( $facts['os']['family'] == 'RedHat' and $manage_yum_plugin_security) {
     package { 'yum-plugin-security':
       ensure => $yum_plugin_security,
     }

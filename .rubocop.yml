@@ -2,7 +2,7 @@
 require: rubocop-rspec
 AllCops:
   DisplayCopNames: true
-  TargetRubyVersion: '2.1'
+  TargetRubyVersion: '2.2'
   Include:
   - "./**/*.rb"
   Exclude:
@@ -11,6 +11,8 @@ AllCops:
   - "**/Gemfile"
   - "**/Rakefile"
   - pkg/**/*
+  - spec/classes/**/*
+  - spec/acceptance/**/*
   - spec/fixtures/**/*
   - vendor/**/*
   - "**/Puppetfile"
@@ -53,7 +55,7 @@ Style/Lambda:
   EnforcedStyle: literal
 Style/RegexpLiteral:
   Description: Community preference. See https://github.com/voxpupuli/modulesync_config/issues/168
-  EnforcedStyle: mixed
+  EnforcedStyle: slashes
 Style/TernaryParentheses:
   Description: Checks for use of parentheses around ternary conditions. Enforce parentheses
     on complex expressions for better readability, but seriously consider breaking
@@ -62,6 +64,14 @@ Style/TernaryParentheses:
 Style/TrailingCommaInArguments:
   Description: Prefer always trailing comma on multiline argument lists. This makes
     diffs, and re-ordering nicer.
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInArrayLiteral:
+  Description: Prefer always trailing comma on multiline literals. This makes diffs,
+    and re-ordering nicer.
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInHashLiteral:
+  Description: Prefer always trailing comma on multiline literals. This makes diffs,
+    and re-ordering nicer.
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInLiteral:
   Description: Prefer always trailing comma on multiline literals. This makes diffs,
@@ -82,8 +92,6 @@ Style/CollectionMethods:
   Enabled: true
 Style/MethodCalledOnDoEndBlock:
   Enabled: true
-Style/HashSyntax:
-  Enabled: false
 Style/StringMethods:
   Enabled: true
 Layout/EndOfLine:
@@ -121,4 +129,6 @@ Style/AsciiComments:
 Style/IfUnlessModifier:
   Enabled: false
 Style/SymbolProc:
+  Enabled: false
+Style/HashSyntax:
   Enabled: false
