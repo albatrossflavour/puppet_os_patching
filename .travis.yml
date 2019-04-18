@@ -81,6 +81,7 @@ branches:
     - master
     - /^v\d/
     - release
+    - litmus
 notifications:
   email: false
 deploy:
