@@ -2,12 +2,10 @@ all:
 	${MAKE} test
 
 install_centos:
-	bundle exec rake 'litmus:provision[docker, centos:6]'
-	bundle exec rake 'litmus:provision[docker, centos:7]'
+	bundle exec rake 'litmus:provision_list[travis_el]'
 
 install_ubuntu:
-	bundle exec rake 'litmus:provision[docker, ubuntu:16.04]'
-	bundle exec rake 'litmus:provision[docker, ubuntu:18.04]'
+	bundle exec rake 'litmus:provision_list[travis_deb]'
 
 install_module:
 	bundle exec rake litmus:install_module
