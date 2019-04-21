@@ -220,29 +220,29 @@ class os_patching (
       user        => $patch_data_owner,
       group       => $patch_data_group,
       refreshonly => true,
-      require     => File[$fact_cmd],
+      require     => File[$fact_path],
     }
   }
 
   if $facts['kernel'] == 'Linux' {
     cron { 'Cache patching data':
       ensure   => $ensure,
-      command  => $fact_cmd,
+      command  => $fact_path,
       user     => $patch_cron_user,
       hour     => $patch_cron_hour,
       minute   => $patch_cron_min,
       month    => $patch_cron_month,
       monthday => $patch_cron_monthday,
       weekday  => $patch_cron_weekday,
-      require  => File[$fact_cmd],
+      require  => File[$fact_path],
     }
 
     cron { 'Cache patching data at reboot':
       ensure  => $ensure,
-      command => $fact_cmd,
+      command => $fact_path,
       user    => $patch_cron_user,
       special => 'reboot',
-      require => File[$fact_cmd],
+      require => File[$fact_path],
     }
   }
 
