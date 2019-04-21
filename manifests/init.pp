@@ -139,9 +139,9 @@ class os_patching (
       $fact_dir = '/usr/local/bin'
       $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
       $fact_path = "${fact_dir}/${fact_cmd}"
-      $patch_data_owner = 'root',
-      $patch_data_group = 'root',
-      $patch_cron_user  = $patch_data_owner,
+      $patch_data_owner = 'root'
+      $patch_data_group = 'root'
+      $patch_cron_user  = $patch_data_owner
       File {
         owner => 'root',
         group => 'root',
