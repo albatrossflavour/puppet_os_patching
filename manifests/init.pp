@@ -1,15 +1,6 @@
 # @summary This manifest sets up a script and cron job to populate
 #   the `os_patching` fact.
 #
-# @param patch_data_owner [String]
-#   User name for the owner of the patch data
-#
-# @param patch_data_group [String]
-#   Group name for the owner of the patch data
-#
-# @param patch_cron_user [String]
-#   User who runs the cron job
-#
 # @param manage_yum_utils [Boolean]
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
@@ -111,9 +102,6 @@
 #     ensure => absent,
 #   }
 class os_patching (
-  String $patch_data_owner            = 'root',
-  String $patch_data_group            = 'root',
-  String $patch_cron_user             = $patch_data_owner,
   Boolean $manage_yum_utils           = false,
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
@@ -139,6 +127,8 @@ class os_patching (
       $fact_dir = $cache_dir
       $fact_upload_cmd = 'C:\Program Files\Puppet Labs\Puppet\bin\puppet facts upload'
       $fact_path = "${fact_dir}\${fact_cmd}"
+      $patch_data_owner = undef
+      $patch_data_group = undef
       File {
         owner => 'Administrator',
       }
@@ -149,6 +139,9 @@ class os_patching (
       $fact_dir = '/usr/local/bin'
       $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
       $fact_path = "${fact_dir}/${fact_cmd}"
+      $patch_data_owner = 'root',
+      $patch_data_group = 'root',
+      $patch_cron_user  = $patch_data_owner,
       File {
         owner => 'root',
         group => 'root',
@@ -207,8 +200,6 @@ class os_patching (
 
   file { $fact_path:
     ensure => $ensure_file,
-    owner  => $patch_data_owner,
-    group  => $patch_data_group,
     mode   => '0700',
     source => "puppet:///modules/${module_name}/${fact_cmd}",
     notify => Exec[$fact_exec],
