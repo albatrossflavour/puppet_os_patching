@@ -125,10 +125,11 @@ class os_patching (
       $cache_dir = 'C:\ProgramData\os_patching'
       $fact_cmd = 'os_patching_fact_generation.ps1'
       $fact_dir = $cache_dir
-      $fact_upload_cmd = 'C:\Program Files\Puppet Labs\Puppet\bin\puppet facts upload'
+      $fact_upload_cmd = 'puppet facts upload'
       $fact_path = "${fact_dir}/${fact_cmd}"
       $patch_data_owner = undef
       $patch_data_group = undef
+      $fact_path_prefix = 'powershell -executionpolicy remotesigned -file'
       File {
         owner => 'Administrator',
       }
@@ -142,6 +143,7 @@ class os_patching (
       $patch_data_owner = 'root'
       $patch_data_group = 'root'
       $patch_cron_user  = $patch_data_owner
+      $fact_path_prefix = ''
       File {
         owner => 'root',
         group => 'root',
@@ -207,7 +209,7 @@ class os_patching (
 
   if $fact_exec {
     exec { $fact_exec:
-      command     => $fact_path,
+      command     => "${fact_path_prefix} ${fact_path}",
       user        => $patch_data_owner,
       group       => $patch_data_group,
       refreshonly => true,
