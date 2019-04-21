@@ -139,9 +139,9 @@ class os_patching (
       $fact_dir = $cache_dir
       $fact_upload_cmd = 'C:\Program Files\Puppet Labs\Puppet\bin\puppet facts upload'
       $fact_path = "${fact_dir}\${fact_cmd}"
-      File [
+      File {
         owner => 'Administrator',
-      ]
+      }
     }
     'linux': {
       $cache_dir = '/var/cache/os_patching'
@@ -149,11 +149,11 @@ class os_patching (
       $fact_dir = '/usr/local/bin'
       $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
       $fact_path = "${fact_dir}/${fact_cmd}"
-      File [
+      File {
         owner => 'root',
         group => 'root',
         mode  => '0644',
-      ]
+      }
     }
     default: { fail(translate('Unsupported OS')) }
   }
