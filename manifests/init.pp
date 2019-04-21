@@ -4,7 +4,7 @@
 # @param patch_data_owner [String]
 #   User name for the owner of the patch data
 #
-# @param patch_data_group [String] 
+# @param patch_data_group [String]
 #   Group name for the owner of the patch data
 #
 # @param patch_cron_user [String]
@@ -132,23 +132,47 @@ class os_patching (
   Enum['present', 'absent'] $ensure  = 'present',
 ) {
 
+  case $facts['kernel'] {
+    'windows': {
+      $cache_dir = 'C:\ProgramData\os_patching'
+      $fact_cmd = 'os_patching_fact_generation.ps1'
+      $fact_dir = $cache_dir
+      $fact_upload_cmd = 'C:\Program Files\Puppet Labs\Puppet\bin\puppet facts upload'
+      $fact_path = "${fact_dir}\${fact_cmd}"
+      File [
+        owner => 'Administrator',
+      ]
+    }
+    'linux': {
+      $cache_dir = '/var/cache/os_patching'
+      $fact_cmd = 'os_patching_fact_generation.sh'
+      $fact_dir = '/usr/local/bin'
+      $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
+      $fact_path = "${fact_dir}/${fact_cmd}"
+      File [
+        owner => 'root',
+        group => 'root',
+        mode  => '0644',
+      ]
+    }
+    default: { fail(translate('Unsupported OS')) }
+  }
+
   $fact_exec = $ensure ? {
     'present' => 'os_patching::exec::fact',
     default   => undef,
   }
 
-  $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
-
-  $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
-
   $fact_upload_exec = $ensure ? {
     'present' => 'os_patching::exec::fact_upload',
     default   => undef
   }
+
   $ensure_file = $ensure ? {
     'present' => 'file',
     default   => 'absent',
   }
+
   $ensure_dir = $ensure ? {
     'present' => 'directory',
     default   => 'absent',
@@ -157,8 +181,6 @@ class os_patching (
   if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
     fail(translate('The patch window can only contain alphanumerics, space, underscore and dash'))
   }
-
-  if ( $facts['kernel'] != 'Linux' ) { fail(translate('Unsupported OS')) }
 
   if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
     package { 'yum-utils':
@@ -178,31 +200,23 @@ class os_patching (
     }
   }
 
-  file { '/etc/os_patching':
-    ensure => absent,
-    force  => true,
-  }
-
-  file { '/var/cache/os_patching':
+  file { $cache_dir:
     ensure => $ensure_dir,
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0644',
     force  => true,
   }
 
-  file { $fact_cmd:
+  file { $fact_path:
     ensure => $ensure_file,
     owner  => $patch_data_owner,
     group  => $patch_data_group,
     mode   => '0700',
-    source => "puppet:///modules/${module_name}/os_patching_fact_generation.sh",
+    source => "puppet:///modules/${module_name}/${fact_cmd}",
     notify => Exec[$fact_exec],
   }
 
   if $fact_exec {
     exec { $fact_exec:
-      command     => $fact_cmd,
+      command     => $fact_path,
       user        => $patch_data_owner,
       group       => $patch_data_group,
       refreshonly => true,
@@ -210,35 +224,35 @@ class os_patching (
     }
   }
 
-  cron { 'Cache patching data':
-    ensure   => $ensure,
-    command  => $fact_cmd,
-    user     => $patch_cron_user,
-    hour     => $patch_cron_hour,
-    minute   => $patch_cron_min,
-    month    => $patch_cron_month,
-    monthday => $patch_cron_monthday,
-    weekday  => $patch_cron_weekday,
-    require  => File[$fact_cmd],
-  }
+  if $facts['kernel'] == 'Linux' {
+    cron { 'Cache patching data':
+      ensure   => $ensure,
+      command  => $fact_cmd,
+      user     => $patch_cron_user,
+      hour     => $patch_cron_hour,
+      minute   => $patch_cron_min,
+      month    => $patch_cron_month,
+      monthday => $patch_cron_monthday,
+      weekday  => $patch_cron_weekday,
+      require  => File[$fact_cmd],
+    }
 
-  cron { 'Cache patching data at reboot':
-    ensure  => $ensure,
-    command => $fact_cmd,
-    user    => $patch_cron_user,
-    special => 'reboot',
-    require => File[$fact_cmd],
+    cron { 'Cache patching data at reboot':
+      ensure  => $ensure,
+      command => $fact_cmd,
+      user    => $patch_cron_user,
+      special => 'reboot',
+      require => File[$fact_cmd],
+    }
   }
 
   $patch_window_ensure = ($ensure == 'present' and $patch_window ) ? {
     true    => 'file',
     default => 'absent'
   }
-  file { '/var/cache/os_patching/patch_window':
+
+  file { "${cache_dir}/patch_window":
     ensure  => $patch_window_ensure,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
     content => $patch_window,
   }
 
@@ -246,16 +260,15 @@ class os_patching (
     true    => 'file',
     default => 'absent',
   }
+
   case $reboot_override {
     true: { $reboot_override_value = 'always' }
     false: { $reboot_override_value = 'never' }
     default: { $reboot_override_value = $reboot_override }
   }
-  file { '/var/cache/os_patching/reboot_override':
+
+  file { "${cache_dir}/reboot_override":
     ensure  => $reboot_override_ensure,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
     content => $reboot_override_value,
   }
 
@@ -281,15 +294,13 @@ class os_patching (
     true    => 'file',
     default => 'absent'
   }
-  file { '/var/cache/os_patching/blackout_windows':
+
+  file { "${cache_dir}/blackout_windows":
     ensure  => $blackout_windows_ensure,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
     content => epp("${module_name}/blackout_windows.epp", {
       'blackout_windows' => pick($blackout_windows, {}),
     }),
-    require => File['/var/cache/os_patching'],
+    require => File[$cache_dir],
   }
 
   if $fact_upload_exec and $fact_upload {
@@ -298,11 +309,11 @@ class os_patching (
       path        => ['/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
       subscribe   => File[
-        $fact_cmd,
-        '/var/cache/os_patching',
-        '/var/cache/os_patching/patch_window',
-        '/var/cache/os_patching/reboot_override',
-        '/var/cache/os_patching/blackout_windows',
+        $fact_path,
+        $cache_dir,
+        "${cache_dir}/patch_window",
+        "${cache_dir}/reboot_override",
+        "${cache_dir}/blackout_windows",
       ],
     }
   }
