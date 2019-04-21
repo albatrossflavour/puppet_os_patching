@@ -132,6 +132,7 @@ class os_patching (
       $fact_path_prefix = 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell -executionpolicy remotesigned -file'
       File {
         owner => 'Administrator',
+        mode  => '0644',
       }
     }
     'linux': {
