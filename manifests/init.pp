@@ -129,7 +129,7 @@ class os_patching (
       $fact_path = "${fact_dir}/${fact_cmd}"
       $patch_data_owner = undef
       $patch_data_group = undef
-      $fact_path_prefix = 'powershell -executionpolicy remotesigned -file'
+      $fact_path_prefix = 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell -executionpolicy remotesigned -file'
       File {
         owner => 'Administrator',
       }
