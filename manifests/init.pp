@@ -195,6 +195,13 @@ class os_patching (
     }
   }
 
+  if ( $facts['os']['family'] == 'Windows' and $manage_ps_windowsupdate) {
+    package { 'pswindowsupdate':
+      ensure   => 'installed',
+      provider => 'chocolatey',
+    }
+  }
+
   file { $cache_dir:
     ensure => $ensure_dir,
     force  => true,
