@@ -106,6 +106,7 @@ class os_patching (
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
+  Boolean $manage_ps_windowsupdate    = true,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -125,13 +126,14 @@ class os_patching (
       $cache_dir = 'C:\ProgramData\os_patching'
       $fact_cmd = 'os_patching_fact_generation.ps1'
       $fact_dir = $cache_dir
-      $fact_upload_cmd = 'puppet facts upload'
+      $fact_upload_cmd = 'C:\Program Files\Puppet Lab\puppet\bin\puppet facts upload'
       $fact_path = "${fact_dir}/${fact_cmd}"
       $patch_data_owner = undef
       $patch_data_group = undef
       $exec_provider = 'powershell'
-      #$fact_path_prefix = 'powershell -executionpolicy remotesigned -file'
-      $fact_path_prefix = undef
+      File {
+        mode => '0770',
+      }
     }
     'linux': {
       $cache_dir = '/var/cache/os_patching'
@@ -143,7 +145,6 @@ class os_patching (
       $patch_data_group = 'root'
       $patch_cron_user  = $patch_data_owner
       $exec_provider = undef
-      $fact_path_prefix = ''
       File {
         owner => 'root',
         group => 'root',
@@ -216,7 +217,7 @@ class os_patching (
 
   if $fact_exec {
     exec { $fact_exec:
-      command     => "${fact_path_prefix} ${fact_path}",
+      command     => $fact_path,
       user        => $patch_data_owner,
       group       => $patch_data_group,
       refreshonly => true,
