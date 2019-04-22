@@ -130,7 +130,8 @@ class os_patching (
       $patch_data_owner = undef
       $patch_data_group = undef
       $exec_provider = 'powershell'
-      $fact_path_prefix = 'powershell -executionpolicy remotesigned -file'
+      #$fact_path_prefix = 'powershell -executionpolicy remotesigned -file'
+      $fact_path_prefix = undef
     }
     'linux': {
       $cache_dir = '/var/cache/os_patching'
