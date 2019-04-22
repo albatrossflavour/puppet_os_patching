@@ -126,7 +126,7 @@ class os_patching (
       $cache_dir = 'C:\ProgramData\os_patching'
       $fact_cmd = 'os_patching_fact_generation.ps1'
       $fact_dir = $cache_dir
-      $fact_upload_cmd = 'C:/Program\ Files/Puppet\ Lab/puppet/bin/puppet facts upload'
+      $fact_upload_cmd = 'C:/Program Files/Puppet Labs/puppet/bin/puppet facts upload'
       $fact_path = "${fact_dir}/${fact_cmd}"
       $patch_data_owner = undef
       $patch_data_group = undef
