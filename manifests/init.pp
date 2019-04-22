@@ -129,6 +129,7 @@ class os_patching (
       $fact_path = "${fact_dir}/${fact_cmd}"
       $patch_data_owner = undef
       $patch_data_group = undef
+      $exec_provider = 'powershell'
       $fact_path_prefix = 'powershell -executionpolicy remotesigned -file'
     }
     'linux': {
@@ -140,6 +141,7 @@ class os_patching (
       $patch_data_owner = 'root'
       $patch_data_group = 'root'
       $patch_cron_user  = $patch_data_owner
+      $exec_provider = undef
       $fact_path_prefix = ''
       File {
         owner => 'root',
@@ -210,6 +212,7 @@ class os_patching (
       user        => $patch_data_owner,
       group       => $patch_data_group,
       refreshonly => true,
+      provider    => $exec_provider,
       require     => File[$fact_path],
     }
   }
