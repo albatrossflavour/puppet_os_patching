@@ -62,7 +62,7 @@ err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
 
 # Check we are on a supported platform
-unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian'
+unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian' || facts['values']['os']['family'] == 'Suse'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
@@ -70,6 +70,8 @@ clean_cache = if facts['values']['os']['family'] == 'RedHat'
                 'yum clean all'
               elsif facts['values']['os']['family'] == 'Debian'
                 'apt-get clean'
+              elsif facts['values']['os']['family'] == 'Suse'
+                'zypper cc --all'
               end
 
 # Clean that cache!

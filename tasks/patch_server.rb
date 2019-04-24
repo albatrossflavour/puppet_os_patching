@@ -141,12 +141,10 @@ def reboot_required(family, release, reboot)
       response = true
     end
     response
-  elsif family == 'Redhat'
-    false
   elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'smart'
     true
-  elsif family == 'Debian'
-    false
+  elsif family == 'Suse' && File.file?('/var/run/reboot-required') && reboot == 'smart'
+    true
   else
     false
   end
@@ -181,7 +179,7 @@ err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
 
 # Check we are on a supported platform
-unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian'
+unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian' || facts['values']['os']['family'] == 'Suse'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
@@ -194,6 +192,8 @@ if params['clean_cache'] && params['clean_cache'] == true
                   'yum clean all'
                 elsif facts['values']['os']['family'] == 'Debian'
                   'apt-get clean'
+                elsif facts['values']['os']['family'] == 'Suse'
+                  'zypper cc --all'
                 end
   _fact_out, stderr, status = Open3.capture3(clean_cache)
   err(status, 'os_patching/clean_cache', stderr, starttime) if status != 0
@@ -283,6 +283,17 @@ if dpkg_params =~ %r{[\$\|\/;`&]}
   err('110', 'os_patching/dpkg_params', 'Unsafe content in dpkg_params', starttime)
 end
 
+# Have we had any zypper parameters specified?
+zypper_params = if params['zypper_params']
+                  params['zypper_params']
+                else
+                  ''
+                end
+
+# Make sure we're not doing something unsafe
+if zypper_params =~ %r{[\$\|\/;`&]}
+  err('110', 'os_patching/zypper_params', 'Unsafe content in zypper_params', starttime)
+end
 # Set the timeout for the patch run
 if params['timeout']
   if params['timeout'] > 0
@@ -423,8 +434,29 @@ elsif facts['values']['os']['family'] == 'Debian'
 
   output('Success', reboot, security_only, 'Patching complete', pkg_list, apt_std_out, '', pinned_pkgs, starttime)
   log.info 'Patching complete'
+elsif facts['values']['os']['family'] == 'Suse'
+  zypper_required_params = '--non-interactive --no-abbrev --quiet'
+  zypper_cmd_params = '--auto-agree-with-licenses'
+  if facts['values']['os']['release']['major'].to_i > 11
+    zypper_cmd_params = "#{zypper_cmd_params} --replacefiles"
+  end
+  pkg_list = []
+  if security_only == true
+    pkg_list = facts['values']['os_patching']['security_package_updates']
+    log.info 'Running zypper patch'
+    status, output = run_with_timeout("zypper #{zypper_required_params} #{zypper_params} patch -g security #{zypper_cmd_params}", timeout, 2)
+    err(status, 'os_patching/zypper', "zypper patch returned non-zero (#{status}) : #{output}", starttime) if status != 0
+  else
+    pkg_list = facts['values']['os_patching']['package_updates']
+    log.info 'Running zypper update'
+    status, output = run_with_timeout("zypper #{zypper_required_params} #{zypper_params} update -t package #{zypper_cmd_params}", timeout, 2)
+    err(status, 'os_patching/zypper', "zypper update returned non-zero (#{status}) : #{output}", starttime) if status != 0
+  end
+  output('Success', reboot, security_only, 'Patching complete', pkg_list, output, '', pinned_pkgs, starttime)
+  log.info 'Patching complete'
+  log.debug "Timeout value set to : #{timeout}"
 else
-  # Only works on Redhat & Debian at the moment
+  # Only works on Redhat, Debian, and Suse at the moment
   log.error 'Unsupported OS - exiting'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
