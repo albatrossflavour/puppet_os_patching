@@ -129,10 +129,6 @@ describe 'os_patching' do
           'ensure' => 'absent',
         })}
       end
-
-      it { is_expected.to contain_file('/etc/os_patching').with({
-        'ensure' => 'absent',
-      })}
     end
   end
 end
