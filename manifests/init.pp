@@ -1,6 +1,15 @@
 # @summary This manifest sets up a script and cron job to populate
 #   the `os_patching` fact.
 #
+# @param patch_data_owner [String]
+#   User name for the owner of the patch data
+#
+# @param patch_data_group [String] 
+#   Group name for the owner of the patch data
+#
+# @param patch_cron_user [String]
+#   User who runs the cron job
+#
 # @param manage_yum_utils [Boolean]
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
@@ -102,11 +111,13 @@
 #     ensure => absent,
 #   }
 class os_patching (
+  String $patch_data_owner            = 'root',
+  String $patch_data_group            = 'root',
+  String $patch_cron_user             = $patch_data_owner,
   Boolean $manage_yum_utils           = false,
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
-  Boolean $manage_ps_windowsupdate    = true,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -121,140 +132,113 @@ class os_patching (
   Enum['present', 'absent'] $ensure  = 'present',
 ) {
 
-  case $facts['kernel'] {
-    'windows': {
-      $cache_dir = 'C:\ProgramData\os_patching'
-      $fact_cmd = 'os_patching_fact_generation.ps1'
-      $fact_dir = $cache_dir
-      $fact_upload_cmd = 'C:/Program Files/Puppet Labs/puppet/bin/puppet facts upload'
-      $fact_path = "${fact_dir}/${fact_cmd}"
-      $patch_data_owner = undef
-      $patch_data_group = undef
-      $exec_provider = 'powershell'
-      File {
-        mode => '0770',
-      }
-    }
-    'linux': {
-      $cache_dir = '/var/cache/os_patching'
-      $fact_cmd = 'os_patching_fact_generation.sh'
-      $fact_dir = '/usr/local/bin'
-      $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
-      $fact_path = "${fact_dir}/${fact_cmd}"
-      $patch_data_owner = 'root'
-      $patch_data_group = 'root'
-      $patch_cron_user  = $patch_data_owner
-      $exec_provider = undef
-      File {
-        owner => 'root',
-        group => 'root',
-        mode  => '0644',
-      }
-    }
-    default: { fail(translate('Unsupported OS')) }
-  }
-
   $fact_exec = $ensure ? {
     'present' => 'os_patching::exec::fact',
     default   => undef,
   }
 
+  $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
+
+  $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
+
   $fact_upload_exec = $ensure ? {
     'present' => 'os_patching::exec::fact_upload',
     default   => undef
   }
-
   $ensure_file = $ensure ? {
     'present' => 'file',
     default   => 'absent',
   }
-
   $ensure_dir = $ensure ? {
     'present' => 'directory',
     default   => 'absent',
   }
 
   if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
-    fail(translate('The patch window can only contain alphanumerics, space, underscore and dash'))
+    fail('The patch window can only contain alphanumerics, space, underscore and dash')
   }
 
-  if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
+  if ( $::kernel != 'Linux' ) { fail('Unsupported OS') }
+
+  if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
     package { 'yum-utils':
       ensure => $yum_utils,
     }
   }
 
-  if ( $facts['os']['family'] == 'RedHat' and $manage_delta_rpm) {
+  if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
     package { 'deltarpm':
       ensure => $delta_rpm,
     }
   }
 
-  if ( $facts['os']['family'] == 'RedHat' and $manage_yum_plugin_security) {
+  if ( $::osfamily == 'RedHat' and $manage_yum_plugin_security) {
     package { 'yum-plugin-security':
       ensure => $yum_plugin_security,
     }
   }
 
-  if ( $facts['os']['family'] == 'Windows' and $manage_ps_windowsupdate) {
-    package { 'pswindowsupdate':
-      ensure   => 'installed',
-      provider => 'chocolatey',
-    }
-  }
-
-  file { $cache_dir:
-    ensure => $ensure_dir,
+  file { '/etc/os_patching':
+    ensure => absent,
     force  => true,
   }
 
-  file { $fact_path:
+  file { '/var/cache/os_patching':
+    ensure => $ensure_dir,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
+    force  => true,
+  }
+
+  file { $fact_cmd:
     ensure => $ensure_file,
+    owner  => $patch_data_owner,
+    group  => $patch_data_group,
     mode   => '0700',
-    source => "puppet:///modules/${module_name}/${fact_cmd}",
+    source => "puppet:///modules/${module_name}/os_patching_fact_generation.sh",
     notify => Exec[$fact_exec],
   }
 
   if $fact_exec {
     exec { $fact_exec:
-      command     => $fact_path,
+      command     => $fact_cmd,
       user        => $patch_data_owner,
       group       => $patch_data_group,
       refreshonly => true,
-      provider    => $exec_provider,
-      require     => File[$fact_path],
+      require     => File[$fact_cmd],
     }
   }
 
-  if $facts['kernel'] == 'Linux' {
-    cron { 'Cache patching data':
-      ensure   => $ensure,
-      command  => $fact_path,
-      user     => $patch_cron_user,
-      hour     => $patch_cron_hour,
-      minute   => $patch_cron_min,
-      month    => $patch_cron_month,
-      monthday => $patch_cron_monthday,
-      weekday  => $patch_cron_weekday,
-      require  => File[$fact_path],
-    }
+  cron { 'Cache patching data':
+    ensure   => $ensure,
+    command  => $fact_cmd,
+    user     => $patch_cron_user,
+    hour     => $patch_cron_hour,
+    minute   => $patch_cron_min,
+    month    => $patch_cron_month,
+    monthday => $patch_cron_monthday,
+    weekday  => $patch_cron_weekday,
+    require  => File[$fact_cmd],
+  }
 
-    cron { 'Cache patching data at reboot':
-      ensure  => $ensure,
-      command => $fact_path,
-      user    => $patch_cron_user,
-      special => 'reboot',
-      require => File[$fact_path],
-    }
+  cron { 'Cache patching data at reboot':
+    ensure  => $ensure,
+    command => $fact_cmd,
+    user    => $patch_cron_user,
+    special => 'reboot',
+    require => File[$fact_cmd],
   }
 
   $patch_window_ensure = ($ensure == 'present' and $patch_window ) ? {
     true    => 'file',
     default => 'absent'
   }
-
-  file { "${cache_dir}/patch_window":
+  file { '/var/cache/os_patching/patch_window':
     ensure  => $patch_window_ensure,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
     content => $patch_window,
   }
 
@@ -262,15 +246,16 @@ class os_patching (
     true    => 'file',
     default => 'absent',
   }
-
   case $reboot_override {
     true: { $reboot_override_value = 'always' }
     false: { $reboot_override_value = 'never' }
     default: { $reboot_override_value = $reboot_override }
   }
-
-  file { "${cache_dir}/reboot_override":
+  file { '/var/cache/os_patching/reboot_override':
     ensure  => $reboot_override_ensure,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
     content => $reboot_override_value,
   }
 
@@ -279,16 +264,16 @@ class os_patching (
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
       if ( $key !~ /^[A-Za-z0-9\-_ ]+$/ ){
-        fail translate(('Blackout description can only contain alphanumerics, space, dash and underscore'))
+        fail ('Blackout description can only contain alphanumerics, space, dash and underscore')
       }
       if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail translate(('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)'))
+        fail ('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)')
       }
       if ( $value['end'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail translate(('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)'))
+        fail ('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)')
       }
       if ( $value['start'] > $value['end'] ){
-        fail translate(('Blackout end time must after the start time'))
+        fail ('Blackout end time must after the start time')
       }
     }
   }
@@ -296,13 +281,15 @@ class os_patching (
     true    => 'file',
     default => 'absent'
   }
-
-  file { "${cache_dir}/blackout_windows":
+  file { '/var/cache/os_patching/blackout_windows':
     ensure  => $blackout_windows_ensure,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
     content => epp("${module_name}/blackout_windows.epp", {
       'blackout_windows' => pick($blackout_windows, {}),
     }),
-    require => File[$cache_dir],
+    require => File['/var/cache/os_patching'],
   }
 
   if $fact_upload_exec and $fact_upload {
@@ -311,11 +298,11 @@ class os_patching (
       path        => ['/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
       subscribe   => File[
-        $fact_path,
-        $cache_dir,
-        "${cache_dir}/patch_window",
-        "${cache_dir}/reboot_override",
-        "${cache_dir}/blackout_windows",
+        $fact_cmd,
+        '/var/cache/os_patching',
+        '/var/cache/os_patching/patch_window',
+        '/var/cache/os_patching/reboot_override',
+        '/var/cache/os_patching/blackout_windows',
       ],
     }
   }
