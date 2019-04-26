@@ -1,0 +1,21 @@
+plan os_patching::patch_after_healthcheck (TargetSpec $nodes) {
+  # Run an initial health check to make sure the target nodes are ready
+
+  $health_checks = run_task('puppet_health_check::agent_health',
+                            $nodes,
+                            target_noop_state      => false,
+                            target_service_enabled => true,
+                            target_service_running => true,
+                            target_runinterval     => 1800,
+                            '_catch_errors'        => true,
+  )
+
+  $nodes_to_patch = $health_checks.filter | $items | { $items.value['state'] == 'clean' }
+  $nodes_skipped  = $health_checks.filter | $items | { $items.value['state'] != 'clean' }
+
+  $skipped_targets = $nodes_skipped.map | $value | { $value['certname'] }
+  $targets = $nodes_to_patch.map | $value | { $value['certname'] }
+
+  notice ("Skipping the following nodes due to health check failures : ${nodes_skipped}")
+  return run_task('os_patching::patch_server', $targets)
+}
