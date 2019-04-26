@@ -1,15 +1,24 @@
 # Change Log
 
-## [0.9.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.9.0) (2019-04-24)
-[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.8.0...0.9.0)
+## [0.10.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.10.0) (2019-04-26)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.9.0...0.10.0)
 
 **Implemented enhancements:**
 
-- os_patching can now patch Suse Linux (Thanks [JakeTRogers](https://github.com/JakeTRogers))
-- Switched acceptance testing over to [Litmus](https://github.com/puppetlabs/puppet_litmus/wiki/Overview-of-Litmus)
+- Create example bolt plan for patching [\#117](https://github.com/albatrossflavour/puppet_os_patching/issues/117)
 
 **Merged pull requests:**
 
+- Add example plan [\#118](https://github.com/albatrossflavour/puppet_os_patching/pull/118) ([albatrossflavour](https://github.com/albatrossflavour))
+- Resync development [\#116](https://github.com/albatrossflavour/puppet_os_patching/pull/116) ([albatrossflavour](https://github.com/albatrossflavour))
+
+## [0.9.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.9.0) (2019-04-26)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.8.0...0.9.0)
+
+**Merged pull requests:**
+
+- Merge Litmus and Suse to production [\#115](https://github.com/albatrossflavour/puppet_os_patching/pull/115) ([albatrossflavour](https://github.com/albatrossflavour))
+- Switch over to litmus tests [\#114](https://github.com/albatrossflavour/puppet_os_patching/pull/114) ([albatrossflavour](https://github.com/albatrossflavour))
 - Feature/sles [\#113](https://github.com/albatrossflavour/puppet_os_patching/pull/113) ([JakeTRogers](https://github.com/JakeTRogers))
 
 ## [0.8.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.8.0) (2019-01-24)
