@@ -1,5 +1,1 @@
---fail-on-warnings
---no-double_quoted_strings-check
---no-80chars-check
---no-variable_scope-check
---no-quoted_booleans-check
+--relative

@@ -1,6 +1,18 @@
 # Change Log
 
-## [0.8.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.8.0) (2019-01-25)
+## [0.9.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.9.0) (2019-04-24)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.8.0...0.9.0)
+
+**Implemented enhancements:**
+
+- os_patching can now patch Suse Linux (Thanks [JakeTRogers](https://github.com/JakeTRogers))
+- Switched acceptance testing over to [Litmus](https://github.com/puppetlabs/puppet_litmus/wiki/Overview-of-Litmus)
+
+**Merged pull requests:**
+
+- Feature/sles [\#113](https://github.com/albatrossflavour/puppet_os_patching/pull/113) ([JakeTRogers](https://github.com/JakeTRogers))
+
+## [0.8.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.8.0) (2019-01-24)
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.7.0...0.8.0)
 
 **Closed issues:**
@@ -10,6 +22,7 @@
 
 **Merged pull requests:**
 
+- Changelog update [\#111](https://github.com/albatrossflavour/puppet_os_patching/pull/111) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge to master [\#110](https://github.com/albatrossflavour/puppet_os_patching/pull/110) ([albatrossflavour](https://github.com/albatrossflavour))
 - Fact upload and stdlib fixes [\#109](https://github.com/albatrossflavour/puppet_os_patching/pull/109) ([albatrossflavour](https://github.com/albatrossflavour))
 - Feature/pdqtest [\#108](https://github.com/albatrossflavour/puppet_os_patching/pull/108) ([albatrossflavour](https://github.com/albatrossflavour))
