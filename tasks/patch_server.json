@@ -9,6 +9,10 @@
       "description": "Any additional parameters to include in the dpkg command",
       "type": "Optional[String]"
     },
+    "zypper_params": {
+      "description": "Any additional parameters to include in the zypper update command",
+      "type": "Optional[String]"
+    },
     "reboot": {
       "description": "Should the server reboot after patching has been applied? (Defaults to 'never')",
       "type": "Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart']]]"

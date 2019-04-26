@@ -2,7 +2,7 @@
 require: rubocop-rspec
 AllCops:
   DisplayCopNames: true
-  TargetRubyVersion: '2.1'
+  TargetRubyVersion: '2.2'
   Include:
   - "./**/*.rb"
   Exclude:
@@ -11,6 +11,8 @@ AllCops:
   - "**/Gemfile"
   - "**/Rakefile"
   - pkg/**/*
+  - spec/classes/**/*
+  - spec/acceptance/**/*
   - spec/fixtures/**/*
   - vendor/**/*
   - "**/Puppetfile"
@@ -19,10 +21,6 @@ AllCops:
 Metrics/LineLength:
   Description: People have wide screens, use them.
   Max: 200
-GetText/DecorateString:
-  Description: We don't want to decorate test output.
-  Exclude:
-  - spec/*
 RSpec/BeforeAfterAll:
   Description: Beware of using after(:all) as it may cause state to leak between tests.
     A necessary evil in acceptance testing.
@@ -53,7 +51,7 @@ Style/Lambda:
   EnforcedStyle: literal
 Style/RegexpLiteral:
   Description: Community preference. See https://github.com/voxpupuli/modulesync_config/issues/168
-  EnforcedStyle: mixed
+  EnforcedStyle: slashes
 Style/TernaryParentheses:
   Description: Checks for use of parentheses around ternary conditions. Enforce parentheses
     on complex expressions for better readability, but seriously consider breaking
@@ -82,8 +80,6 @@ Style/CollectionMethods:
   Enabled: true
 Style/MethodCalledOnDoEndBlock:
   Enabled: true
-Style/HashSyntax:
-  Enabled: false
 Style/StringMethods:
   Enabled: true
 Layout/EndOfLine:
@@ -121,4 +117,6 @@ Style/AsciiComments:
 Style/IfUnlessModifier:
   Enabled: false
 Style/SymbolProc:
+  Enabled: false
+Style/HashSyntax:
   Enabled: false

@@ -26,8 +26,12 @@ case $(facter osfamily) in
     # ---
     # We need to filter those out as they screw up the package listing
     FILTER='egrep -v "^Security:"'
-    PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken" | awk '/^[[:alnum:]]/ {print $1}')
-    SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken" | awk '/^[[:alnum:]]/ {print $1}')
+    PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
+    SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
+  ;;
+  Suse)
+    PKGS=$(zypper --non-interactive --no-abbrev --quiet lu | grep '|' | grep -v '\sRepository' | awk -F'|' '/^[[:alnum:]]/ {print $3}' | sed 's/^\s*\|\s*$//')
+    SECPKGS=$(zypper --non-interactive --no-abbrev --quiet lp -g security | grep '|' | grep -v '^Repository' | awk -F'|' '/^[[:alnum:]]/ {print $2}' | sed 's/^\s*\|\s*$//')
   ;;
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
@@ -92,9 +96,12 @@ then
       fi
     ;;
   esac
+else
+  touch $DATADIR/apps_to_restart
+  touch $DATADIR/reboot_required
 fi
 
-if [ $(facter osfamily) = 'Debian' ]
+if [ $(facter osfamily) = 'Debian' ] || [ $(facter osfamily) = 'Suse' ]
 then
   if [ -f '/var/run/reboot-required' ]
   then
@@ -102,6 +109,7 @@ then
   else
     echo "false" > $DATADIR/reboot_required
   fi
+  touch $DATADIR/apps_to_restart
 fi
 
 puppet facts upload 2>/dev/null 1>/dev/null

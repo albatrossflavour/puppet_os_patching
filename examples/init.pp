@@ -1,4 +1,3 @@
-# @PDQTest
 class { 'os_patching':
   patch_window     => 'Week3',
   reboot_override  => 'smart',
