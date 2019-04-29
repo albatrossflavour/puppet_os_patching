@@ -2,16 +2,32 @@
 
 <#
 .SYNOPSIS
-Refreshes update related facts, for the puppet module os_patching.
+Installs windows updates, or refreshes update related facts, for the puppet module os_patching.
+
 .DESCRIPTION
-Refreshes update related facts, for the puppet module os_patching. This script is intended to be run as part of the os_patching module, however it will also function standalone.
+Installs windows updates, or refreshes update related facts, for the puppet module os_patching. This script is intended to be run as part of the os_patching module, however it will also function standalone.
+
+The download and install APIs are not available over a remote PowerShell session (e.g. through Puppet Bolt). To overcome this, the script may launch the patching as a scheduled task running as local system.
+
 .PARAMETER RefreshFacts
 Refresh/re-generate puppet facts for this module.
+
+.PARAMETER ForceLocal
+Force running in local mode. This mode is intended for use when running in a local session, (e.g. running as a task with Puppet Enterprise over PCP). If neither this option or ForceSchedTask is specified, the script will check to see if it can run the patching code locally, if not, it will run as a scheduled task.
+
 .PARAMETER ForceSchedTask
 Force running in scheduled task mode. This indended for use in a remote session, (e.g. running as a task with Puppet Bolt over WinRM). If neither this option or ForceSchedTask is specified, the script will check to see if it can run the patching code locally, if not, it will run as a scheduled task.
+
+.PARAMETER SecurityOnly
+Switch, when set the script will only install updates with a category that includes Security Update.
+
 .PARAMETER UpdateCriteria
 Criteria used for update detection. This ultimately drives which updates will be installed. The detault is "IsInstalled=0 and IsHidden=0" which should be suitable in most cases, and relies on your upstream update approvals. Note that this is not validated, if the syntax is not validated the script will fail. See MSDN doco for valid syntax - https://docs.microsoft.com/en-us/windows/desktop/api/wuapi/nf-wuapi-iupdatesearcher-search.
+
+.PARAMETER MaxUpdates
+Install only the first X numbmer of updates (at most). Useful ror testing.
 #>
+
 
 # Note that due to the use of a scheduled job, and allowing for compatibility with older
 # versions of windows, we actually can't get the data returned from write-host back. This
@@ -35,13 +51,49 @@ Criteria used for update detection. This ultimately drives which updates will be
 # in a manipulateable block was found to be more consistent and reliable.
 
 
-[CmdletBinding(defaultparametersetname = "RefeshFacts")]
+[CmdletBinding(defaultparametersetname = "InstallUpdates")]
 param(
     # refresh fact mode
     [Parameter(ParameterSetName = "RefreshFacts")]
     [Switch]$RefreshFacts,
 
+    # force local method
+    [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
+    [Switch]$ForceLocal,
+
+    # force scheduled task method
+    [Parameter(ParameterSetName = "InstallUpdates-ForceSchedTask")]
+    [Switch]$ForceSchedTask,
+
+    # only install security updates
+    [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
+    [Parameter(ParameterSetName = "InstallUpdates-ForceSchedTask")]
+    [Parameter(ParameterSetName = "InstallUpdates")]
+    [Switch]$SecurityOnly,
+
+    # update criteria
+    [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
+    [Parameter(ParameterSetName = "InstallUpdates-ForceSchedTask")]
+    [Parameter(ParameterSetName = "RefreshFacts")]
     [String]$UpdateCriteria = "IsInstalled=0 and IsHidden=0",
+
+    [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
+    [Parameter(ParameterSetName = "InstallUpdates-ForceSchedTask")]
+    [Parameter(ParameterSetName = "InstallUpdates")]
+    [ValidateScript( {Test-Path -IsValid $_})]
+    [String]$ResultFile,
+
+    # timeout
+    [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
+    [Parameter(ParameterSetName = "InstallUpdates-ForceSchedTask")]
+    [Parameter(ParameterSetName = "InstallUpdates")]
+    [int32]$Timeout,
+
+    # only install the first x updates
+    [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
+    [Parameter(ParameterSetName = "InstallUpdates-ForceSchedTask")]
+    [Parameter(ParameterSetName = "InstallUpdates")]
+    [Int32]$MaxUpdates,
 
     # path to lock file
     [String]$LockFile = "$($env:programdata)\os_patching\os_patching_windows.lock",
@@ -50,12 +102,7 @@ param(
     [String]$LogDir = "$($env:programdata)\os_patching",
 
     # how long to retain log files
-    [Int32]$LogFileRetainDays = 30,
-
-    # set timeout value
-    [Int32]$Timeout = 30,
-
-    [Int32]$LogFileRetainDays = 30,
+    [Int32]$LogFileRetainDays = 30
 )
 
 # strict mode
@@ -169,6 +216,136 @@ function Invoke-AsCommand {
     Invoke-Command -ScriptBlock $scriptBlock -ArgumentList $scriptBlockParams
 }
 
+function Invoke-AsScheduledTask {
+    [CmdletBinding()]
+    param (
+        [string]$TaskName = "os_patching job",
+        [int32]$WaitMS = 500
+    )
+
+    Add-LogEntry "Running code as a scheduled task"
+
+    if (Get-ScheduledJob $TaskName -ErrorAction SilentlyContinue) {
+        Add-LogEntry -Output Verbose "Removing existing scheduled task first"
+        Try {
+            Unregister-ScheduledJob $TaskName -Force
+        }
+        Catch {
+            Throw "Unable to remove existing scheduled task, is another copy of this script still running?"
+        }
+    }
+
+    Add-LogEntry -Output Verbose "Registering scheduled task with a start trigger in 2 seconds time"
+
+    # define scheduled task trigger
+    $trigger = @{
+        Frequency = "Once" # (or Daily, Weekly, AtStartup, AtLogon)
+        At        = $(Get-Date).AddSeconds(10) # in 10 seconds time
+    }
+
+    Register-ScheduledJob -name $TaskName -ScriptBlock $scriptBlock -ArgumentList $scriptBlockParams -Trigger $trigger -InitializationScript $commonfunctions | Out-Null
+
+    # Task state reference: https://docs.microsoft.com/en-us/windows/desktop/taskschd/registeredtask-state
+    $taskStates = @{
+        0 = "Unknown"
+        1 = "Disabled"
+        2 = "Queued"
+        3 = "Ready"
+        4 = "Running"
+    }
+    # Links to task result codes:
+    #   https://docs.microsoft.com/en-us/windows/desktop/TaskSchd/task-scheduler-error-and-success-constants
+    #   http://www.pgts.com.au/cgi-bin/psql?blog=1803&ndx=b001 (with decimal codes)
+
+    Add-LogEntry -Output Verbose "Waiting for scheduled task to start"
+
+    $taskScheduler = New-Object -ComObject Schedule.Service
+    $taskScheduler.Connect("localhost")
+    $psTaskFolder = $taskScheduler.GetFolder("\Microsoft\Windows\PowerShell\ScheduledJobs")
+
+    $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
+
+    # wait up to one mintue for the task to start
+    # it can take some time especially on older versions of windows
+    while ($psTaskFolder.GetTask($TaskName).State -ne 4 -and $stopWatch.ElapsedMilliseconds -lt 60000) {
+        Add-LogEntry -Output Verbose "Task Status: $($taskStates[$psTaskFolder.GetTask($TaskName).State]) - Waiting another $($WaitMS)ms for scheduled task to start"
+        Start-Sleep -Milliseconds $WaitMS
+    }
+
+    Add-LogEntry -Output Verbose "Invoking wait-job to wait for job to finish and get job output."
+    Add-LogEntry -Output Verbose "A long pause here means the job is running and we're waiting for results."
+
+    # wait for scheduled task to finish
+    # technically we could get into an endless loop here - but the only way around it is to
+    # set some arbitary limit (e.g. 3 hours) for the maximum length of a task run and then forcefully
+    # terminate the job, which doesn't seem to be a good idea
+
+    $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
+
+    $job = $null
+    while ($null -eq $job) {
+        if ($stopWatch.ElapsedMilliseconds -gt 60000) {
+            throw "Error - scheduled task failed to start within 1 minute"
+        }
+
+        try {
+            $job = wait-job $TaskName
+        }
+        catch [System.Management.Automation.PSArgumentException] {
+            # wait-job can't see the job yet, this takes some time
+            # so wait a bit longer for wait-job to work!
+            Add-LogEntry -Output Verbose "  Waiting another $($WaitMS)ms for wait-job to pick up the job."
+            Start-Sleep -Milliseconds $WaitMS
+        }
+    }
+
+    # rumour has it that it can take a while for the job output to be available
+    # even after wait-job has finished. wait for 30 seconds here. Thanks for this
+    # idea ansible Windows update module!
+    $stopWatch = [System.Diagnostics.Stopwatch]::StartNew()
+
+    while ($null -eq $job.Output -and $stopWatch.ElapsedMilliseconds -lt 60000) {
+        Add-LogEntry -Output Verbose "Waiting another $($WaitMS)ms for job output to populate"
+        Start-Sleep -Milliseconds $WaitMS
+    }
+
+    Add-LogEntry "Deleting scheduled task"
+
+    $running_tasks = @($taskScheduler.GetRunningTasks(0) | Where-Object { $_.Name -eq $TaskName })
+    foreach ($task_to_stop in $running_tasks) {
+        Add-LogEntry -Output Verbose "Task still seems to be running, stopping it before unregistering it"
+        try {
+            $task_to_stop.Stop()
+        }
+        catch {
+            # sometimes the task will stop just before we call stop here
+            # catch error and make note of it in the log just in case it's something else
+            Add-LogEntry -Output Verbose "Error caught while stopping scheduled task. Continuing anyway: $($_.exception.ToString())"
+        }
+    }
+
+    Unregister-ScheduledJob $TaskName -Force
+
+    # write any verbose output
+    if ($null -ne $job.Verbose) {
+        Write-Verbose "Verbose output from scheduled task follows, this will not be in sync with any non-verbose output"
+        $job.Verbose | Write-Verbose
+    }
+
+    # return job output to pipeline
+    $job.Output # pipeline
+
+    # return any error output and exit in a controlled fashion
+    if ($job.error) {
+        # error output is already in log from scriptblock, no need to add logentry again
+        # dump it to the console just in case this is being run interactively
+        #Write-Error "Error returned from scriptblock: " -ErrorAction Continue
+        $job.Error | Write-Error
+
+        Remove-LockFile
+        exit 3
+    }
+}
 
 function Invoke-CleanLogFile {
     # clean up logs older than $LogFileRetainDays days old
@@ -451,13 +628,202 @@ $scriptBlock = {
         }
     }
 
+    function Invoke-UpdateRun {
+        # perform an update run
+        # inputs - update session
+        # outputs - update run results
+        [CmdletBinding()]
+        Param(
+            [Parameter(Mandatory = $true)]$UpdateSession
+        )
+
+        # search for (all) updates
+        $allUpdates = Get-UpdateSearch($UpdateSession)
+
+        # filter to security updates if switch parameter is set
+        if ($Params.SecurityOnly) {
+            Add-LogEntry "Only installing updates that include the security update classification"
+            $updatesToInstall = Get-SecurityUpdates -Updates $allUpdates
+        }
+        else {
+            $updatesToInstall = $allUpdates
+        }
+
+        # filter to maxupdates if required
+        if ($Params.MaxUpdates -gt 0) {
+            Add-LogEntry "Installing a maximum of $($Params.MaxUpdates) updates"
+            $updatesToInstall = $updatesToInstall | Select-Object -First $Params.MaxUpdates
+        }
+
+        # get update count
+        $updateCount = @($updatesToInstall).count # ensure it's an array so count property exists
+
+        if ($updateCount -gt 0) {
+            # we need to install updates
+
+            # download updates if needed. No output from this function
+            Invoke-DownloadUpdates -UpdateSession $UpdateSession -UpdatesToDownload $updatesToInstall
+
+            # Install Updates. Pass (return) output to the pipeline
+            Invoke-InstallUpdates -UpdateSession $UpdateSession -UpdatesToInstall $updatesToInstall
+        }
+        else {
+            Add-LogEntry "No updates required, no action taken"
+
+            # return null
+        }
+    }
+
+    function Invoke-DownloadUpdates {
+        # download updates if required
+        # inputs  - UpdateSession     - update session
+        #         - UpdatesToDownload - update collection (of updates to download)
+        # outputs - none
+        [CmdletBinding()]
+        Param(
+            [Parameter(Mandatory = $true)]$UpdateSession,
+            [Parameter(Mandatory = $true)]$UpdatesToDownload
+        )
+
+        # download updates if necessary, i.e. only those where IsDownloaded is false
+        $updatesNotDownloaded = $UpdatesToDownload | Where-Object {$_.IsDownloaded -eq $false}
+
+        if ($updatesNotDownloaded) {
+            # Create update collection...
+            $updateDownloadCollection = Get-WUUpdateCollection
+
+            # ...Add updates to it
+            foreach ($update in $updatesNotDownloaded) {
+                [void]$updateDownloadCollection.Add($update) # void stops output to console
+            }
+
+            Add-LogEntry "Downloading $(@($updateDownloadCollection).Count) updates that are not cached locally"
+
+            # Create update downloader
+            $updateDownloader = $updateSession.CreateUpdateDownloader()
+
+            # Set updates to download
+            $updateDownloader.Updates = $updateDownloadCollection
+
+            # and download 'em!
+            [void]$updateDownloader.Download()
+        }
+        else {
+            Add-LogEntry "All updates are already downloaded"
+        }
+    }
+
+    function Invoke-InstallUpdates {
+        # install updates
+        # inputs  - UpdateSession    - update session
+        #         - UpdatesToInstall - update collection (of updates to install)
+        # outputs - pscustomobject with install results
+        [CmdletBinding()]
+        Param(
+            [Parameter(Mandatory = $true)]$UpdateSession,
+            [Parameter(Mandatory = $true)]$UpdatesToInstall
+        )
+
+        # get update count
+        $updateCount = @($updatesToInstall).count # ensure it's an array so count property exists
+
+        Add-LogEntry "Installing $updateCount updates"
+
+        # create a counter var starting at 1
+        $counter = 1
+
+        # create blank array for result output
+        $updateInstallResults = @()
+
+        # create update collection object
+        $updateInstallCollection = Get-WUUpdateCollection
+
+        # create update installer object
+        $updateInstaller = $updateSession.CreateUpdateInstaller()
+
+        foreach ($update in $updatesToInstall) {
+
+            # check if we have time to install updates, e.g. at least 5 minutes left
+            #
+            # TODO: Be a bit smarter here, perhaps use SCCM's method of estimating 5 minutes
+            # per update and 30 minutes per cumulative update?
+            #
+            if ($null -ne $Params.endtime) {
+                if ([datetime]::now -gt $Params.endtime.AddMinutes(-5)) {
+                    Add-LogEntry "Skipping remaining updates due to insufficient time"
+                    Break
+                }
+            }
+
+            Add-LogEntry "Installing update $($counter)/$(@($updatesToInstall).Count): $($update.Title)"
+
+            # clear update collection...
+            $updateInstallCollection.Clear()
+
+            # ...Add the current update to it
+            [void]$updateInstallCollection.Add($update) # void stops output to console
+
+            # Add update collection to the installer
+            $updateInstaller.Updates = $updateInstallCollection
+
+            # Install updates and capture result
+            $updateInstallResult = $updateInstaller.Install()
+
+            # Convert ResultCode to something readable
+            $updateStatus = switch ($updateInstallResult.ResultCode) {
+                0 { "NotStarted" }
+                1 { "InProgress" }
+                2 { "Succeeded" }
+                3 { "SucceededWithErrors" }
+                4 { "Failed" }
+                5 { "Aborted" }
+                default {"unknown"}
+            }
+
+            # build object with result for this update and add to array
+            $updateInstallResults += [pscustomobject]@{
+                Title          = $update.Title
+                Status         = $updateStatus
+                HResult        = $updateInstallResult.HResult
+                RebootRequired = $updateInstallResult.RebootRequired
+            }
+
+            # increment counter
+            $counter++
+        }
+        # return results
+        $updateInstallResults
+    }
+
     Add-LogEntry -Output Verbose "os_patching_windows scriptblock: starting"
 
     #create update session
     $wuSession = Get-WUSession
 
-    # refresh facts mode
-    Invoke-RefreshPuppetFacts -UpdateSession $wuSession
+    if ($Params.RefreshFacts) {
+        # refresh facts mode
+        Invoke-RefreshPuppetFacts -UpdateSession $wuSession
+    }
+    else {
+        # invoke update run, convert results to CSV and send down the pipeline
+        $updateRunResults = Invoke-UpdateRun -UpdateSession $wuSession
+
+        # calculate filename for results file
+        $outputFilePath = Join-Path -Path $env:temp -ChildPath ("os_patching-results_{0:yyyy_MM_dd-HH_mm_ss}.json" -f (Get-Date))
+
+        if ($null -ne $updateRunResults) {
+            # output as JSON with ASCII encoding which plays nice with puppet etc
+            $updateRunResults | ConvertTo-Json | Out-File $outputFilePath -Encoding ascii
+
+            # we want this one in the pipeline no matter what, so that it's returned as output
+            # from the scheduled task method
+            Add-LogEntry "##Output File is $outputFilePath"
+        }
+        else {
+            # no results, so no output file
+            Add-LogEntry "##Output File is not applicable"
+        }
+    }
 
     Add-LogEntry -Output Verbose "os_patching_windows scriptblock: finished"
 
@@ -495,7 +861,6 @@ else {
     Add-LogEntry "No timeout value provided, script will run until all updates are installed"
 }
 
->>>>>>> 9f56121... using nathans fact file
 # check and/or create lock file
 $lockFileUsed = Save-LockFile
 
@@ -505,7 +870,9 @@ try {
     #build parameter PSCustomObject for passing to the scriptblock
     $scriptBlockParams = [PSCustomObject]@{
         RefreshFacts      = $RefreshFacts
+        SecurityOnly      = $SecurityOnly
         UpdateCriteria    = $UpdateCriteria
+        MaxUpdates      = $MaxUpdates
         EndTime           = $endTime
         DebugPreference   = $DebugPreference
         VerbosePreference = $VerbosePreference
@@ -516,7 +883,16 @@ try {
     # refresh facts is always in an invoke-command as the update search API works in a remote session
     if (-not $RefreshFacts) { $localSession = Get-WuApiAvailable } else { $localSession = $null }
 
-    Invoke-AsCommand
+    # run either in an invoke-command or a scheduled task based on the result above and provided command line parameters
+    # refresh facts is always in an invoke-command as the update search API works in a remote session
+    if ((($localSession -or $ForceLocal) -and -not $ForceSchedTask) -or $RefreshFacts) {
+        if ($ForceLocal) { Add-LogEntry -Output Warning "Forced running locally, this may fail if in a remote session" }
+        Invoke-AsCommand
+    }
+    else {
+        if ($ForceSchedTask) { Add-LogEntry -Output Warning "Forced running in a scheduled task, this may not be necessary if running in a local session" }
+        Invoke-AsScheduledTask
+    }
 
     # clean log files
     Invoke-CleanLogFile
