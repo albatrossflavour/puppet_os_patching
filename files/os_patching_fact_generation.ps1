@@ -53,9 +53,7 @@ param(
     [Int32]$LogFileRetainDays = 30,
 
     # set timeout value
-    [Int32]$Timeout = 30,
-
-    [Int32]$LogFileRetainDays = 30,
+    [Int32]$Timeout = 30
 )
 
 # strict mode
@@ -495,7 +493,6 @@ else {
     Add-LogEntry "No timeout value provided, script will run until all updates are installed"
 }
 
->>>>>>> 9f56121... using nathans fact file
 # check and/or create lock file
 $lockFileUsed = Save-LockFile
 
