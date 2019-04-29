@@ -340,12 +340,6 @@ class os_patching (
         }
       }
 
-      # Temp to remove
-      file { 'C:/programdata/os_patching/os_patching_windows.ps1':
-        ensure => absent,
-        before => Exec[$fact_exec],
-      }
-
       if $fact_exec {
         exec { $fact_exec:
           path        => 'C:/Windows/System32/WindowsPowerShell/v1.0',

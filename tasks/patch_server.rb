@@ -52,11 +52,11 @@ require 'json'
 require 'time'
 require 'timeout'
 
-$is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
 
-$stdout.sync = true
+stdout.sync = true
 
-if $is_windows
+if is_windows
   # windows
   # create windows event logger
   log = WinLog.new
@@ -82,7 +82,7 @@ BUFFER_SIZE = 4096
 
 # Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
-  historyfile = if $is_windows
+  historyfile = if is_windows
                   'C:/ProgramData/os_patching/run_history'
                 else
                   '/var/cache/os_patching/run_history'
@@ -219,7 +219,7 @@ def err(code, kind, message, starttime)
   shortmsg = messagesplitfirst.chomp
 
   history(starttime, shortmsg, exitcode, '', '', '')
-  log = if $is_windows
+  log = if is_windows
           WinLog.new
         else
           Syslog::Logger.new 'os_patching'
@@ -454,11 +454,11 @@ if updatecount.zero?
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
     log.info 'No patches to apply, rebooting as requested'
-    p1 = if $is_windows
-         spawn(shutdown_cmd)
-       else
-         fork { system(shutdown_cmd) }
-       end
+    p1 = if is_windows
+           spawn(shutdown_cmd)
+         else
+           fork { system(shutdown_cmd) }
+         end
     Process.detach(p1)
   else
     output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
@@ -655,7 +655,7 @@ needs_reboot = reboot_required(facts['values']['os']['family'], facts['values'][
 log.info "reboot_required returning #{needs_reboot}"
 if needs_reboot == true
   log.info 'Rebooting'
-  p1 = if $is_windows
+  p1 = if is_windows
          spawn(shutdown_cmd)
        else
          fork { system(shutdown_cmd) }
