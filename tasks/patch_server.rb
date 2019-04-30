@@ -62,7 +62,7 @@ if is_windows
   log = WinLog.new
   # set paths/commands for windows
   fact_generation_script = 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1'
-  fact_generation_cmd = "#{ENV['systemroot']}/system32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy RemoteSigned -file #{fact_generation_script} -RefreshFact"
+  fact_generation_cmd = "#{ENV['systemroot']}/system32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy RemoteSigned -file #{fact_generation_script}"
   puppet_cmd = "#{ENV['programfiles']}/Puppet Labs/Puppet/bin/puppet"
   shutdown_cmd = 'shutdown /r /t 60 /c "Rebooting due to the installation of updates by os_patching" /d p:2:17'
 else
@@ -645,10 +645,15 @@ else
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
-# Refresh the facts now that we've patched
-log.info 'Running os_patching fact refresh'
-_fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
-err(status, 'os_patching/fact', stderr, starttime) if status != 0
+# Refresh the facts now that we've patched for non-windows systems
+# windows scans can take an eternity after a patch run, prior to reboot
+# (30+ minutes in a lab on 2008 versions..) so best not to delay the whole patching process here
+# note that the fact refresh runs on system startup anyway - see puppet class
+if facts['values']['os']['family'] != 'windows'
+  log.info 'Running os_patching fact refresh'
+  _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
+  err(status, 'os_patching/fact', stderr, starttime) if status != 0
+end
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
 needs_reboot = reboot_required(facts['values']['os']['family'], facts['values']['os']['release']['major'], reboot)

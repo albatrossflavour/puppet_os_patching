@@ -4,7 +4,7 @@
 # @param patch_data_owner [String]
 #   User name for the owner of the patch data
 #
-# @param patch_data_group [String] 
+# @param patch_data_group [String]
 #   Group name for the owner of the patch data
 #
 # @param patch_cron_user [String]
@@ -343,7 +343,7 @@ class os_patching (
         exec { $fact_exec:
           path        => 'C:/Windows/System32/WindowsPowerShell/v1.0',
           refreshonly => true,
-          command     => "powershell -executionpolicy remotesigned -file ${fact_cmd} -RefreshFact",
+          command     => "powershell -executionpolicy remotesigned -file ${fact_cmd}",
         }
       }
 
