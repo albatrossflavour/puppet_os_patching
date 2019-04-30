@@ -257,7 +257,6 @@ class os_patching (
       'blackout_windows' => pick($blackout_windows, {}),
     }),
     require => File[$cache_dir],
-    notify  => Exec[$fact_upload_exec],
   }
 
   if $fact_upload_exec and $fact_upload {

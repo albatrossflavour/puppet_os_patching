@@ -6,7 +6,8 @@ pp_class_base = <<-PUPPETCODE
     class { 'cron':
       manage_service => false,
     }
-    class { os_patching:
+    class { 'os_patching':
+      fact_upload => false,
     }
 PUPPETCODE
 
@@ -14,8 +15,9 @@ pp_class_patch_window = <<-PUPPETCODE
     class { 'cron':
       manage_service => false,
     }
-    class { os_patching:
+    class { 'os_patching':
       patch_window => 'Week1'
+      fact_upload  => false,
     }
 PUPPETCODE
 
@@ -23,14 +25,16 @@ pp_class_blackout_window = <<-PUPPETCODE
     class { 'cron':
       manage_service => false,
     }
-    class { os_patching:
+    class { 'os_patching':
       blackout_windows => { 'End of year change freeze' => { 'start' => '2018-12-15T00:00:00+10:00', 'end' => '2019-01-15T23:59:59+10:00' }}
+      fact_upload => false,
     }
 PUPPETCODE
 
 pp_class_absent = <<-PUPPETCODE
-    class { os_patching:
-      ensure => absent
+    class { 'os_patching':
+      ensure      => absent
+      fact_upload => false,
     }
 PUPPETCODE
 

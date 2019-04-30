@@ -31,17 +31,27 @@ acceptance:
 
 test_puppet6:
 	${MAKE} install_centos
+	bundle exec rake litmus:install_agent[puppet6]
+	${MAKE} install_module
+	bundle exec rake litmus:acceptance:parallel
+	${MAKE} teardown
 	${MAKE} install_ubuntu
 	bundle exec rake litmus:install_agent[puppet6]
 	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel && ${MAKE} teardown
+	bundle exec rake litmus:acceptance:parallel
+	${MAKE} teardown
 
 test_puppet5:
 	${MAKE} install_centos
+	bundle exec rake litmus:install_agent[puppet5]
+	${MAKE} install_module
+	bundle exec rake litmus:acceptance:parallel
+	${MAKE} teardown
 	${MAKE} install_ubuntu
 	bundle exec rake litmus:install_agent[puppet5]
 	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel && ${MAKE} teardown
+	bundle exec rake litmus:acceptance:parallel
+	${MAKE} teardown
 
 teardown:
 	bundle exec rake litmus:tear_down
