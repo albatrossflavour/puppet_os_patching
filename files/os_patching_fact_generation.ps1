@@ -125,7 +125,7 @@ function Remove-LockFile {
 
 function Invoke-CleanLogFile {
     Param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $LogFileFilter
     )
     # clean up logs older than $LogFileRetainDays days old

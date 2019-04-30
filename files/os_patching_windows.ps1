@@ -86,7 +86,7 @@ param(
     [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
     [Parameter(ParameterSetName = "InstallUpdates-ForceSchedTask")]
     [Parameter(ParameterSetName = "InstallUpdates")]
-    [ValidateScript( {Test-Path -IsValid $_})]
+    [ValidateScript( { Test-Path -IsValid $_ })]
     [String]$ResultFile,
 
     # timeout
@@ -355,7 +355,7 @@ function Invoke-AsScheduledTask {
 
 function Invoke-CleanLogFile {
     Param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $LogFileFilter
     )
     # clean up logs older than $LogFileRetainDays days old
@@ -391,7 +391,7 @@ $commonfunctions = {
 
             [switch]$FileOnly
         )
-        begin {}
+        begin { }
         process {
             foreach ($entry in $logEntry) {
                 # if logging an error, we don't want multiple write-errors done
@@ -450,7 +450,7 @@ $commonfunctions = {
                 }
             }
         }
-        end {}
+        end { }
     }
 }
 
@@ -528,7 +528,7 @@ $scriptBlock = {
                 $rebootPending = $true
             }
         }
-        catch {}
+        catch { }
 
         if ($rebootPending) { Add-LogEntry "A reboot is required" }
 
@@ -578,7 +578,7 @@ $scriptBlock = {
         )
         # filter to security updates
         # add a filterable categories parameter, then filter only to updates that include the security classification
-        $secUpdates = $Updates | Add-Member -MemberType ScriptProperty -Name "CategoriesText" -value {$This.Categories | Select-Object -expandproperty Name} -PassThru | Where-Object {$_.CategoriesText -contains "Security Updates"}
+        $secUpdates = $Updates | Add-Member -MemberType ScriptProperty -Name "CategoriesText" -value { $This.Categories | Select-Object -expandproperty Name } -PassThru | Where-Object { $_.CategoriesText -contains "Security Updates" }
 
         # count them
         if ($secUpdates) {
@@ -651,7 +651,7 @@ $scriptBlock = {
         )
 
         # download updates if necessary, i.e. only those where IsDownloaded is false
-        $updatesNotDownloaded = $UpdatesToDownload | Where-Object {$_.IsDownloaded -eq $false}
+        $updatesNotDownloaded = $UpdatesToDownload | Where-Object { $_.IsDownloaded -eq $false }
 
         if ($updatesNotDownloaded) {
             # Create update collection...
@@ -742,7 +742,7 @@ $scriptBlock = {
                 3 { "SucceededWithErrors" }
                 4 { "Failed" }
                 5 { "Aborted" }
-                default {"unknown"}
+                default { "unknown" }
             }
 
             # build object with result for this update and add to array
@@ -830,7 +830,7 @@ try {
     $scriptBlockParams = [PSCustomObject]@{
         SecurityOnly      = $SecurityOnly
         UpdateCriteria    = $UpdateCriteria
-        MaxUpdates      = $MaxUpdates
+        MaxUpdates        = $MaxUpdates
         EndTime           = $endTime
         DebugPreference   = $DebugPreference
         VerbosePreference = $VerbosePreference
