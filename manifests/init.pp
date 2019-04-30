@@ -139,11 +139,11 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
-      $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
-      $cache_dir = '/var/cache/os_patching'
-      $fact_dir = '/usr/local/bin'
-      $fact_file = 'os_patching_fact_generation.sh'
-      $fact_mode = '0700'
+      $fact_upload_cmd     = '/opt/puppetlabs/bin/puppet facts upload'
+      $cache_dir           = '/var/cache/os_patching'
+      $fact_dir            = '/usr/local/bin'
+      $fact_file           = 'os_patching_fact_generation.sh'
+      $fact_mode           = '0700'
       File {
         owner => $patch_data_owner,
         group => $patch_data_group,
@@ -151,15 +151,16 @@ class os_patching (
       }
     }
     'windows': {
-      $fact_upload_cmd = '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload'
-      $cache_dir = 'C:/ProgramData/os_patching'
-      $fact_dir = $cache_dir
-      $fact_mode = '0770'
-      $fact_file = 'os_patching_fact_generation.ps1'
+      $fact_upload_cmd     = '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload'
+      $cache_dir           = 'C:/ProgramData/os_patching'
+      $fact_dir            = $cache_dir
+      $fact_file           = 'os_patching_fact_generation.ps1'
+      $fact_mode           = '0770'
     }
     default: { fail translate(('Unsupported OS')) }
   }
 
+  # calculate full path for fact command/script
   $fact_cmd = "${fact_dir}/${fact_file}"
 
   $fact_upload_exec = $ensure ? {
@@ -326,11 +327,12 @@ class os_patching (
       }
 
       scheduled_task { 'os_patching fact generation':
-        ensure  => $ensure,
-        enabled => true,
-        command => $fact_cmd,
-        user    => 'SYSTEM',
-        trigger => [
+        ensure    => $ensure,
+        enabled   => true,
+        command   => "${::system32}/WindowsPowerShell/v1.0/powershell.exe",
+        arguments => "-NonInteractive -ExecutionPolicy RemoteSigned -File ${fact_cmd}",
+        user      => 'SYSTEM',
+        trigger   => [
           {
             schedule         => daily,
             start_time       => "01:${patch_cron_min}",
@@ -340,7 +342,7 @@ class os_patching (
             schedule => 'boot',
           }
         ],
-        require => File[$fact_cmd],
+        require   => File[$fact_cmd],
       }
     }
     default: { fail translate(('Unsupported OS'))}
