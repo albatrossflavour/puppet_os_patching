@@ -1,16 +1,27 @@
 #Requires -Version 3.0
 
+#
+# Installs windows updates, for the puppet module os_patching.
+# Developed by Nathan Giuliani (nathojg@gmail.com) and Tony Green
+#
+# As the Windows Update Download and Install API commands are not available on a remote session (e.g. executing through WinRM using something like Bolt)
+# this script has most of its code in a scriptblock. This is either executed as a scheduled task (for remote/winrm/bolt sessions) or with invoke-command
+# for a local run, whitch includes using the PCP/PXP protocol with Puppet Enterprise.
+#
+# Changelog
+#
+# v0.9.0 - 2019/04/30
+#  - Initial release.
+#
+
 <#
 .SYNOPSIS
-Installs windows updates, or refreshes update related facts, for the puppet module os_patching.
+Installs windows updates, for the puppet module os_patching.
 
 .DESCRIPTION
-Installs windows updates, or refreshes update related facts, for the puppet module os_patching. This script is intended to be run as part of the os_patching module, however it will also function standalone.
+Installs windows updates, for the puppet module os_patching. This script is intended to be run as part of the os_patching module, however it will also function standalone.
 
 The download and install APIs are not available over a remote PowerShell session (e.g. through Puppet Bolt). To overcome this, the script may launch the patching as a scheduled task running as local system.
-
-.PARAMETER RefreshFacts
-Refresh/re-generate puppet facts for this module.
 
 .PARAMETER ForceLocal
 Force running in local mode. This mode is intended for use when running in a local session, (e.g. running as a task with Puppet Enterprise over PCP). If neither this option or ForceSchedTask is specified, the script will check to see if it can run the patching code locally, if not, it will run as a scheduled task.
@@ -53,10 +64,6 @@ Install only the first X numbmer of updates (at most). Useful ror testing.
 
 [CmdletBinding(defaultparametersetname = "InstallUpdates")]
 param(
-    # refresh fact mode
-    [Parameter(ParameterSetName = "RefreshFacts")]
-    [Switch]$RefreshFacts,
-
     # force local method
     [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
     [Switch]$ForceLocal,
@@ -74,7 +81,6 @@ param(
     # update criteria
     [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
     [Parameter(ParameterSetName = "InstallUpdates-ForceSchedTask")]
-    [Parameter(ParameterSetName = "RefreshFacts")]
     [String]$UpdateCriteria = "IsInstalled=0 and IsHidden=0",
 
     [Parameter(ParameterSetName = "InstallUpdates-Forcelocal")]
@@ -159,14 +165,14 @@ function Save-LockFile {
         else {
             # only one line in lock file
             # get process matching this PID
-            $process = Get-Process | Where-Object {$_.Id -eq $lockFileContent}
+            $process = Get-Process | Where-Object { $_.Id -eq $lockFileContent }
 
             # if process exists
             if ($process) {
                 # Check the path of the process matching PID in the lock file
                 if ($process.path -match "powershell.exe") {
                     # most likely is another copy of this script
-                    Throw "Lock file found, it appears PID $($process.id) is another copy of this script. Exiting."
+                    Throw "Lock file found, it appears PID $($process.id) is another copy of os_patching_fact_generation or os_patching_windows. Exiting."
                 }
             }
             else {
@@ -348,8 +354,12 @@ function Invoke-AsScheduledTask {
 }
 
 function Invoke-CleanLogFile {
+    Param (
+        [Parameter(Mandatory=$true)]
+        $LogFileFilter
+    )
     # clean up logs older than $LogFileRetainDays days old
-    Get-ChildItem $LogDir -Filter os_patching*.log | Where-Object {$_.CreationTime -lt ([datetime]::Now.AddDays(-$LogFileRetainDays))} | ForEach-Object {
+    Get-ChildItem $LogDir -Filter $LogFileFilter | Where-Object { $_.CreationTime -lt ([datetime]::Now.AddDays(-$LogFileRetainDays)) } | ForEach-Object {
         Add-LogEntry "Cleaning old log file $($_.BaseName)" -Output Verbose
         $_ | Remove-Item -Force -Confirm:$false
     }
@@ -524,51 +534,6 @@ $scriptBlock = {
 
         # return result
         $rebootPending
-    }
-
-    function Invoke-RefreshPuppetFacts {
-        # refreshes puppet facts used by os_patching module
-        # inputs - $UpdateSession - microsoft update session object
-        # outpts - none, saves puppet fact files only
-        [CmdletBinding()]
-        Param(
-            [Parameter(Mandatory = $true)]$UpdateSession
-        )
-        # refresh puppet facts
-
-        Add-LogEntry "Refreshing puppet facts"
-
-        $allUpdates = Get-UpdateSearch($UpdateSession)
-        # providing we got a result above, get a filtered list of security updates
-        if ($null -ne $allUpdates) {
-            $securityUpdates = Get-SecurityUpdates($allUpdates)
-        }
-        else {
-            $securityUpdates = $null
-        }
-
-        #paths to facts
-        $dataDir = 'C:\ProgramData\os_patching'
-        $updateFile = Join-Path -Path $dataDir -ChildPath 'package_updates'
-        $secUpdateFile = Join-Path -Path $dataDir -ChildPath 'security_package_updates'
-        $rebootReqdFile = Join-Path -Path $dataDir -ChildPath  'reboot_required'
-
-        # create os_patching data dir if required
-        if (-not (Test-Path $dataDir)) { [void](New-Item $dataDir -ItemType Directory) }
-
-        # output list of required updates
-        $allUpdates | Select-Object -ExpandProperty Title | Out-File $updateFile -Encoding ascii
-
-        # filter to security updates and output
-        $securityUpdates | Select-Object -ExpandProperty Title | Out-File $secUpdateFile -Encoding ascii
-
-        # get pending reboot details
-        Get-PendingReboot | Out-File $rebootReqdFile -Encoding ascii
-
-        # upload facts
-        Add-LogEntry "Uploading puppet facts"
-        $puppetCmd = Join-Path $env:ProgramFiles -ChildPath "Puppet Labs\Puppet\bin\puppet.bat"
-        & $puppetCmd facts upload --color=false
     }
 
     function Get-UpdateSearch {
@@ -800,29 +765,23 @@ $scriptBlock = {
     #create update session
     $wuSession = Get-WUSession
 
-    if ($Params.RefreshFacts) {
-        # refresh facts mode
-        Invoke-RefreshPuppetFacts -UpdateSession $wuSession
+    # invoke update run, convert results to CSV and send down the pipeline
+    $updateRunResults = Invoke-UpdateRun -UpdateSession $wuSession
+
+    # calculate filename for results file
+    $outputFilePath = Join-Path -Path $env:temp -ChildPath ("os_patching-results_{0:yyyy_MM_dd-HH_mm_ss}.json" -f (Get-Date))
+
+    if ($null -ne $updateRunResults) {
+        # output as JSON with ASCII encoding which plays nice with puppet etc
+        $updateRunResults | ConvertTo-Json | Out-File $outputFilePath -Encoding ascii
+
+        # we want this one in the pipeline no matter what, so that it's returned as output
+        # from the scheduled task method
+        Add-LogEntry "##Output File is $outputFilePath"
     }
     else {
-        # invoke update run, convert results to CSV and send down the pipeline
-        $updateRunResults = Invoke-UpdateRun -UpdateSession $wuSession
-
-        # calculate filename for results file
-        $outputFilePath = Join-Path -Path $env:temp -ChildPath ("os_patching-results_{0:yyyy_MM_dd-HH_mm_ss}.json" -f (Get-Date))
-
-        if ($null -ne $updateRunResults) {
-            # output as JSON with ASCII encoding which plays nice with puppet etc
-            $updateRunResults | ConvertTo-Json | Out-File $outputFilePath -Encoding ascii
-
-            # we want this one in the pipeline no matter what, so that it's returned as output
-            # from the scheduled task method
-            Add-LogEntry "##Output File is $outputFilePath"
-        }
-        else {
-            # no results, so no output file
-            Add-LogEntry "##Output File is not applicable"
-        }
+        # no results, so no output file
+        Add-LogEntry "##Output File is not applicable"
     }
 
     Add-LogEntry -Output Verbose "os_patching_windows scriptblock: finished"
@@ -862,14 +821,13 @@ else {
 }
 
 # check and/or create lock file
-$lockFileUsed = Save-LockFile
+Save-LockFile
 
 # put all code from here in a try block, so we can use finally to ensure the lock file is removed
 # even when the script is aborted with ctrl-c
 try {
     #build parameter PSCustomObject for passing to the scriptblock
     $scriptBlockParams = [PSCustomObject]@{
-        RefreshFacts      = $RefreshFacts
         SecurityOnly      = $SecurityOnly
         UpdateCriteria    = $UpdateCriteria
         MaxUpdates      = $MaxUpdates
@@ -879,13 +837,11 @@ try {
         LogFile           = $LogFile
     }
 
-    # if not refreshing fact, see if WU API is available (e.g. running in a local session)
-    # refresh facts is always in an invoke-command as the update search API works in a remote session
-    if (-not $RefreshFacts) { $localSession = Get-WuApiAvailable } else { $localSession = $null }
+    # see if WU API is available (e.g. running in a local session)
+    $localSession = Get-WuApiAvailable
 
     # run either in an invoke-command or a scheduled task based on the result above and provided command line parameters
-    # refresh facts is always in an invoke-command as the update search API works in a remote session
-    if ((($localSession -or $ForceLocal) -and -not $ForceSchedTask) -or $RefreshFacts) {
+    if (($localSession -or $ForceLocal) -and -not $ForceSchedTask) {
         if ($ForceLocal) { Add-LogEntry -Output Warning "Forced running locally, this may fail if in a remote session" }
         Invoke-AsCommand
     }
@@ -895,7 +851,7 @@ try {
     }
 
     # clean log files
-    Invoke-CleanLogFile
+    Invoke-CleanLogFile -LogFileFilter "os_patching*.log"
 }
 finally {
     # this code is always executed, even when an exception is trapped during main script execution
