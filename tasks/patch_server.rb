@@ -282,8 +282,9 @@ rescue JSON::ParserError
   err(400, 'os_patching/input', "Invalid JSON received: '#{raw}'", starttime)
 end
 
-# Cache fact data to speed things up
 log.info 'os_patching run started'
+
+# ensure node has been tagged with os_patching class by checking for fact generation script
 log.debug 'Running os_patching fact refresh'
 unless File.exist? fact_generation_script
   err(
@@ -322,9 +323,13 @@ if params['clean_cache'] && params['clean_cache'] == true
   log.info 'Cache cleaned'
 end
 
-# Refresh the patching fact cache
-_fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
-err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
+# Refresh the patching fact cache on non-windows systems
+# Windows scans can take a long time, and we do one at the start of the os_patching_windows script anyway.
+# No need to do yet another scan prior to this, it just wastes valuable time.
+if facts['values']['os']['family'] != 'windows'
+  _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
+  err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
+end
 
 # Let's figure out the reboot gordian knot
 #
@@ -646,10 +651,10 @@ else
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
-# Refresh the facts now that we've patched for non-windows systems
-# windows scans can take an eternity after a patch run, prior to reboot
-# (30+ minutes in a lab on 2008 versions..) so best not to delay the whole patching process here
-# note that the fact refresh runs on system startup anyway - see puppet class
+# Refresh the facts now that we've patched - for non-windows systems
+# Windows scans can take an eternity after a patch run prior to being reboot (30+ minutes in a lab on 2008 versions..)
+# Best not to delay the whole patching process here.
+# Note that the fact refresh (which includes a scan) runs on system startup anyway - see os_patching puppet class
 if facts['values']['os']['family'] != 'windows'
   log.info 'Running os_patching fact refresh'
   _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
