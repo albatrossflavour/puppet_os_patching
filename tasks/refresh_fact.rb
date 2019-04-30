@@ -61,7 +61,7 @@ if is_windows
   # create windows event logger
   log = WinLog.new
   # set paths/commands for windows
-  fact_generation_script = 'C:/ProgramData/os_patching/os_patching_windows.ps1'
+  fact_generation_script = 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1'
   fact_generation_cmd = "#{ENV['systemroot']}/system32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy RemoteSigned -file #{fact_generation_script}"
 else
   # not windows
