@@ -54,7 +54,7 @@ require 'timeout'
 
 is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
 
-stdout.sync = true
+$stdout.sync = true
 
 if is_windows
   # windows
