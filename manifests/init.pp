@@ -24,10 +24,6 @@
 #   Should the deltarpm package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `delta_rpm` to determine how it should be manged
 #
-# @param manage_wsus [Boolean]
-#   Should the wsus package be managed by this module on Windows nodes?
-#   If `true`, use the parameter `wsus_source` to determine where to get it from
-#
 # @param delta_rpm
 #   If managed, what should the delta_rpm package set to?
 #
@@ -71,9 +67,6 @@
 #
 # @param ensure
 #   `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
-#
-# @param wsus_source
-#   URL to download the WSUS source from (default to Microsoft's site)
 #
 # @example assign node to 'Week3' patching window, force a reboot and create a blackout window for the end of the year
 #   class { 'os_patching':
@@ -125,7 +118,6 @@ class os_patching (
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
-  Boolean $manage_wsus                = false,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -138,7 +130,6 @@ class os_patching (
   $patch_cron_weekday                = absent,
   $patch_cron_min                    = fqdn_rand(59),
   Enum['present', 'absent'] $ensure  = 'present',
-  $wsus_source                       = 'https://gallery.technet.microsoft.com/scriptcenter/2d191bcd-3308-4edd-9de2-88dff796b0bc/file/41459/47/PSWindowsUpdate.zip',
 ) {
 
   $fact_exec = $ensure ? {
@@ -325,19 +316,6 @@ class os_patching (
       }
     }
     'windows': {
-      if $manage_wsus and $ensure == 'present' {
-        include wsus_client
-        include ::archive
-
-        archive {'c:/PSWindowsUpdate.zip':
-          ensure       => present,
-          extract      => true,
-          extract_path => 'c:/windows/system32/WindowsPowerShell/v1.0/Modules',
-          source       => $wsus_source,
-          creates      => 'c:/windows/system32/WindowsPowerShell/v1.0/Modules/PSWindowsUpdate/Get-WUList.ps1',
-          cleanup      => true,
-        }
-      }
 
       if $fact_exec {
         exec { $fact_exec:
@@ -347,7 +325,7 @@ class os_patching (
         }
       }
 
-      scheduled_task { 'Run patch cache script':
+      scheduled_task { 'os_patching fact generation':
         ensure  => $ensure,
         enabled => true,
         command => $fact_cmd,
