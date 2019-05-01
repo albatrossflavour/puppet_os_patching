@@ -14,6 +14,7 @@ test:
 	${MAKE} validate
 	${MAKE} unit
 	${MAKE} acceptance
+	${MAKE} documentation
 
 validate:
 	bundle exec rake metadata_lint
@@ -52,6 +53,9 @@ test_puppet5:
 	${MAKE} install_module
 	bundle exec rake litmus:acceptance:parallel
 	${MAKE} teardown
+
+documentation:
+	bundle exec puppet strings generate --format=markdown
 
 teardown:
 	bundle exec rake litmus:tear_down
