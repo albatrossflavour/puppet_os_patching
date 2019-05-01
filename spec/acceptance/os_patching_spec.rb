@@ -40,7 +40,6 @@ PUPPETCODE
 describe 'os_patching module' do
   context 'base class' do
     it do
-      apply_manifest(pp_class_base)
       idempotent_apply(pp_class_base)
       expect(file(cache_dir)).to be_directory
       expect(file(cache_dir + '/security_package_updates')).to be_file
@@ -59,7 +58,6 @@ end
 describe 'os_patching module with patching window' do
   context 'base class' do
     it do
-      apply_manifest(pp_class_blackout_window)
       idempotent_apply(pp_class_blackout_window)
       expect(file(cache_dir)).to be_directory
       expect(file(cache_dir + '/security_package_updates')).to be_file
@@ -79,7 +77,6 @@ end
 describe 'os_patching module with patching window' do
   context 'base class' do
     it do
-      apply_manifest(pp_class_patch_window)
       idempotent_apply(pp_class_patch_window)
       expect(file(cache_dir)).to be_directory
       expect(file(cache_dir + '/security_package_updates')).to be_file
@@ -99,7 +96,6 @@ end
 describe 'os_patching module purge' do
   context 'base class' do
     it do
-      apply_manifest(pp_class_absent)
       idempotent_apply(pp_class_absent)
       expect(file(cache_dir)).not_to be_directory
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).not_to be_file
