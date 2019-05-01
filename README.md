@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/albatrossflavour/puppet_os_patching.svg?branch=master)](https://travis-ci.org/albatrossflavour/puppet_os_patching)
 # os_patching
 
-This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently patching restricted to Redhat, Suse and Debian derivatives, however reporting should work on Redhat, Suse, and Debian derivatives and Windows.
+This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently patching works on Linux (Redhat, Suse and Debian derivatives) and Windows
 
-Under the hood it uses the OS level tools to carry out the actual patching.
+Under the hood it uses the OS level tools to carry out the actual patching.  That does mean that you need to be sure that your nodes are ABLE to query for their updates (manage YUM, APT, WSUS etc).
 
 ## Description
 
@@ -298,3 +298,4 @@ Fork, develop, submit a pull request
 - [Rob Nelson](https://github.com/rnelson0)
 - [Tommy McNeely](https://github.com/tjm)
 - [Geoff Williams](https://github.com/GeoffWilliams)
+- [Nathan Giulaiani](https://github.com/nathangiuliani)
