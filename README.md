@@ -299,4 +299,4 @@ Fork, develop, submit a pull request
 - [Tommy McNeely](https://github.com/tjm)
 - [Geoff Williams](https://github.com/GeoffWilliams)
 - [Jake Rogers](https://github.com/JakeTRogers)
-- [Nathan Giulaiani](https://github.com/nathangiuliani)
+- [Nathan Giuliaiani](https://github.com/nathangiuliani)
