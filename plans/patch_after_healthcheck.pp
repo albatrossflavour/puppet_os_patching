@@ -1,3 +1,6 @@
+# @summary An example plan that uses the [puppet health check](https://forge.puppet.com/albatrossflavour/puppet_health_check)
+#   module to perform a pre-check on the nodes you're planning to patch.  If the nodes pass the
+#   check, they get patched
 plan os_patching::patch_after_healthcheck (TargetSpec $nodes) {
   # Run an initial health check to make sure the target nodes are ready
 

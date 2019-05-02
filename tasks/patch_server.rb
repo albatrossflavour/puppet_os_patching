@@ -1,29 +1,93 @@
 #!/opt/puppetlabs/puppet/bin/ruby
 
-require 'rbconfig'
-is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-if is_windows
-  puts 'Cannot run os_patching::patch_server on Windows'
-  exit 1
+# windows logging class
+class WinLog
+  def initialize
+    require 'win32/eventlog'
+
+    # log to send events to
+    windows_log = 'Application'
+
+    # source of event shown in event log
+    @event_source = 'os_patching'
+
+    # add event source if needed
+    # we probably should generate and register an mc file, but the events still show without it
+    Win32::EventLog.add_event_source(:source => windows_log, :key_name => @event_source)
+
+    # create logger
+    @logger = Win32::EventLog.new
+  end
+
+  # match SysLog::Logger event types
+
+  def debug(data)
+    @logger.report_event(:event_type => Win32::EventLog::INFO_TYPE, :data => "Debug: #{data}", :source => @event_source)
+  end
+
+  def error(data)
+    @logger.report_event(:event_type => Win32::EventLog::ERROR_TYPE, :data => data, :source => @event_source)
+  end
+
+  def fatal(data)
+    @logger.report_event(:event_type => Win32::EventLog::ERROR_TYPE, :data => "FATAL: #{data}", :source => @event_source)
+  end
+
+  def info(data)
+    @logger.report_event(:event_type => Win32::EventLog::INFO_TYPE, :data => data, :source => @event_source)
+  end
+
+  def unknown(data)
+    @logger.report_event(:event_type => Win32::EventLog::INFO_TYPE, :data => "Unknown: #{data}", :source => @event_source)
+  end
+
+  def warn(data)
+    @logger.report_event(:event_type => Win32::EventLog::WARN_TYPE, :data => data, :source => @event_source)
+  end
 end
 
+require 'rbconfig'
 require 'open3'
 require 'json'
-require 'syslog/logger'
 require 'time'
 require 'timeout'
 
+# constant so available in methods. global variables are naughty in ruby land!
+IS_WINDOWS = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+
 $stdout.sync = true
 
-fact_generation = '/usr/local/bin/os_patching_fact_generation.sh'
+if IS_WINDOWS
+  # windows
+  # create windows event logger
+  log = WinLog.new
+  # set paths/commands for windows
+  fact_generation_script = 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1'
+  fact_generation_cmd = "#{ENV['systemroot']}/system32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy RemoteSigned -file #{fact_generation_script}"
+  puppet_cmd = "#{ENV['programfiles']}/Puppet Labs/Puppet/bin/puppet"
+  shutdown_cmd = 'shutdown /r /t 60 /c "Rebooting due to the installation of updates by os_patching" /d p:2:17'
+else
+  # not windows
+  # create syslog logger
+  require 'syslog/logger'
+  log = Syslog::Logger.new 'os_patching'
+  # set paths/commands for linux
+  fact_generation_script = '/usr/local/bin/os_patching_fact_generation.sh'
+  fact_generation_cmd = fact_generation_script
+  puppet_cmd = '/opt/puppetlabs/puppet/bin/puppet'
+  shutdown_cmd = 'nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &'
+end
 
-log = Syslog::Logger.new 'os_patching'
 starttime = Time.now.iso8601
 BUFFER_SIZE = 4096
 
 # Function to write out the history file after patching
 def history(dts, message, code, reboot, security, job)
-  historyfile = '/var/cache/os_patching/run_history'
+  historyfile = if IS_WINDOWS
+                  'C:/ProgramData/os_patching/run_history'
+                else
+                  '/var/cache/os_patching/run_history'
+                end
   open(historyfile, 'a') do |f|
     f.puts "#{dts}|#{message}|#{code}|#{reboot}|#{security}|#{job}"
   end
@@ -69,6 +133,50 @@ def run_with_timeout(command, timeout, tick)
   [status, output]
 end
 
+# pending reboot detection function for windows
+def pending_reboot_win
+  # detect if a pending reboot is needed on windows
+  # inputs: none
+  # outputs: true or false based on whether a reboot is needed
+
+  require 'base64'
+
+  # multi-line string which is the PowerShell scriptblock to look up whether or not a pending reboot is needed
+  # may want to convert this to ruby in the future
+  # note all the escaped characters if attempting to edit this script block
+  # " (double quote) is "\ (double quote backslash)
+  # \ (backslash) is \\ (double backslash)
+  pending_reboot_win_cmd = %{
+      $ErrorActionPreference=\"stop\"
+      $rebootPending = $false
+      if (Get-ChildItem \"HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\RebootPending\" -EA Ignore) { $rebootPending = $true }
+      if (Get-Item \"HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\RebootRequired\" -EA Ignore) { $rebootPending = $true }
+      if (Get-ItemProperty \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\" -Name PendingFileRenameOperations -EA Ignore) { $rebootPending = $true }
+      try {
+          $util = [wmiclass]\"\\\\.\\root\\ccm\\clientsdk:CCM_ClientUtilities\"
+          $status = $util.DetermineIfRebootPending()
+          if (($null -ne $status) -and $status.RebootPending) {
+              $rebootPending = $true
+          }
+      }
+      catch {}
+      $rebootPending
+  }
+
+  # encode to base64 as this is the easist way to pass a readable multi-line scriptblock to PowerShell externally
+  encoded_cmd = Base64.strict_encode64(pending_reboot_win_cmd.encode('utf-16le'))
+
+  # execute it and capture the result. this will return true or false in a string
+  pending_reboot_stdout, _stderr, _status = Open3.capture3("powershell -NonInteractive -EncodedCommand #{encoded_cmd}")
+
+  # return result
+  if pending_reboot_stdout.split("\n").first.chomp == 'True'
+    true
+  else
+    false
+  end
+end
+
 # Default output function
 def output(returncode, reboot, security, message, packages_updated, debug, job_id, pinned_packages, starttime)
   endtime = Time.now.iso8601
@@ -97,17 +205,27 @@ def err(code, kind, message, starttime)
     {
       :msg        => "Task exited : #{exitcode}\n#{message}",
       :kind       => kind,
-      :details    => { :exitcode => exitcode },
-      :start_time => starttime,
-      :end_time   => endtime,
+      :details    => {
+        :exitcode => exitcode,
+        :start_time => starttime,
+        :end_time   => endtime,
+      },
     },
   }
 
   puts JSON.pretty_generate(json)
-  shortmsg = message.split("\n").first.chomp
+
+  messagesplitfirst = message.split("\n").first
+  messagesplitfirst ||= '' # set to empty string if nil
+  shortmsg = messagesplitfirst.chomp
+
   history(starttime, shortmsg, exitcode, '', '', '')
-  syslog = Syslog::Logger.new 'os_patching'
-  syslog.error "ERROR : #{kind} : #{exitcode} : #{message}"
+  log = if IS_WINDOWS
+          WinLog.new
+        else
+          Syslog::Logger.new 'os_patching'
+        end
+  log.error "ERROR : #{kind} : #{exitcode} : #{message}"
   exit(exitcode.to_i)
 end
 
@@ -141,9 +259,13 @@ def reboot_required(family, release, reboot)
       response = true
     end
     response
+  elsif family == 'Redhat'
+    false
   elsif family == 'Debian' && File.file?('/var/run/reboot-required') && reboot == 'smart'
     true
   elsif family == 'Suse' && File.file?('/var/run/reboot-required') && reboot == 'smart'
+    true
+  elsif family == 'windows' && reboot == 'smart' && pending_reboot_win == true
     true
   else
     false
@@ -160,26 +282,27 @@ rescue JSON::ParserError
   err(400, 'os_patching/input', "Invalid JSON received: '#{raw}'", starttime)
 end
 
-# Cache fact data to speed things up
 log.info 'os_patching run started'
+
+# ensure node has been tagged with os_patching class by checking for fact generation script
 log.debug 'Running os_patching fact refresh'
-unless File.exist? fact_generation
+unless File.exist? fact_generation_script
   err(
     255,
-    "os_patching/#{fact_generation}",
-    "#{fact_generation} does not exist, declare os_patching and run Puppet first",
+    "os_patching/#{fact_generation_script}",
+    "#{fact_generation_script} does not exist, declare os_patching and run Puppet first",
     starttime,
   )
 end
 
 # Cache the facts
 log.debug 'Gathering facts'
-full_facts, stderr, status = Open3.capture3('/opt/puppetlabs/puppet/bin/puppet', 'facts')
+full_facts, stderr, status = Open3.capture3(puppet_cmd, 'facts')
 err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
 
 # Check we are on a supported platform
-unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian' || facts['values']['os']['family'] == 'Suse'
+unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian' || facts['values']['os']['family'] == 'Suse' || facts['values']['os']['family'] == 'windows'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
@@ -200,9 +323,13 @@ if params['clean_cache'] && params['clean_cache'] == true
   log.info 'Cache cleaned'
 end
 
-# Refresh the patching fact cache
-_fact_out, stderr, status = Open3.capture3(fact_generation)
-err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
+# Refresh the patching fact cache on non-windows systems
+# Windows scans can take a long time, and we do one at the start of the os_patching_windows script anyway.
+# No need to do yet another scan prior to this, it just wastes valuable time.
+if facts['values']['os']['family'] != 'windows'
+  _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
+  err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
+end
 
 # Let's figure out the reboot gordian knot
 #
@@ -333,7 +460,11 @@ if updatecount.zero?
     output('Success', reboot, security_only, 'No patches to apply, reboot triggered', '', '', '', pinned_pkgs, starttime)
     $stdout.flush
     log.info 'No patches to apply, rebooting as requested'
-    p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
+    p1 = if IS_WINDOWS
+           spawn(shutdown_cmd)
+         else
+           fork { system(shutdown_cmd) }
+         end
     Process.detach(p1)
   else
     output('Success', reboot, security_only, 'No patches to apply', '', '', '', pinned_pkgs, starttime)
@@ -434,6 +565,65 @@ elsif facts['values']['os']['family'] == 'Debian'
 
   output('Success', reboot, security_only, 'Patching complete', pkg_list, apt_std_out, '', pinned_pkgs, starttime)
   log.info 'Patching complete'
+elsif facts['values']['os']['family'] == 'windows'
+  # we're on windows
+
+  # Are we doing security only patching?
+  security_arg = if security_only == true
+                   '-SecurityOnly'
+                 else
+                   ''
+                 end
+
+  # build patching command
+  powershell_cmd = "#{ENV['systemroot']}/system32/WindowsPowerShell/v1.0/powershell.exe -NonInteractive -ExecutionPolicy RemoteSigned -File"
+  win_patching_cmd = "#{powershell_cmd} #{params['_installdir']}/os_patching/files/os_patching_windows.ps1 #{security_arg} -Timeout #{timeout}"
+
+  log.info 'Running patching powershell script'
+
+  # run the windows patching script
+  win_std_out, stderr, status = Open3.capture3(win_patching_cmd)
+
+  # report an error if non-zero exit status
+  err(status, 'os_patching/win', stderr, starttime) if status != 0 || stderr != ''
+
+  # get output file location
+  output_file = ''
+  win_std_out.split("\n").each do |line|
+    matchdata = line.to_s.match(/^##output file is.*/im)
+    next unless matchdata
+    output_file = matchdata.to_s.sub(/^##output file is /i, '')
+    break
+  end
+
+  if output_file != 'not applicable'
+    # parse output file as json
+    output_data = JSON.parse(File.read(output_file))
+
+    # delete output file as it's no longer needed
+    File.delete(output_file)
+
+    # get update titles to return as result
+
+    if output_data.is_a?(Array)
+      # for multiple updates
+      update_titles = []
+      output_data.each do |item|
+        update_titles.push(item['Title'])
+      end
+    else
+      # for a single update... it happens!
+      update_titles = output_data['Title']
+    end
+
+  else
+    update_titles = ''
+  end
+
+  # output results
+  # def output(returncode, reboot, security, message, packages_updated, debug, job_id, pinned_packages, starttime)
+  output('Success', reboot, security_only, 'Patching complete', update_titles, win_std_out.split("\n"), '', '', starttime)
+
 elsif facts['values']['os']['family'] == 'Suse'
   zypper_required_params = '--non-interactive --no-abbrev --quiet'
   zypper_cmd_params = '--auto-agree-with-licenses'
@@ -456,22 +646,31 @@ elsif facts['values']['os']['family'] == 'Suse'
   log.info 'Patching complete'
   log.debug "Timeout value set to : #{timeout}"
 else
-  # Only works on Redhat, Debian, and Suse at the moment
+  # Only works on Redhat, Debian, Suse, and Windows at the moment
   log.error 'Unsupported OS - exiting'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
-# Refresh the facts now that we've patched
-log.info 'Running os_patching fact refresh'
-_fact_out, stderr, status = Open3.capture3(fact_generation)
-err(status, 'os_patching/fact', stderr, starttime) if status != 0
+# Refresh the facts now that we've patched - for non-windows systems
+# Windows scans can take an eternity after a patch run prior to being reboot (30+ minutes in a lab on 2008 versions..)
+# Best not to delay the whole patching process here.
+# Note that the fact refresh (which includes a scan) runs on system startup anyway - see os_patching puppet class
+if facts['values']['os']['family'] != 'windows'
+  log.info 'Running os_patching fact refresh'
+  _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
+  err(status, 'os_patching/fact', stderr, starttime) if status != 0
+end
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
 needs_reboot = reboot_required(facts['values']['os']['family'], facts['values']['os']['release']['major'], reboot)
 log.info "reboot_required returning #{needs_reboot}"
 if needs_reboot == true
   log.info 'Rebooting'
-  p1 = fork { system('nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &') }
+  p1 = if IS_WINDOWS
+         spawn(shutdown_cmd)
+       else
+         fork { system(shutdown_cmd) }
+       end
   Process.detach(p1)
 end
 log.info 'os_patching run complete'

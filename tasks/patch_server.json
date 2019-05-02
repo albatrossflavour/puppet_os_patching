@@ -30,6 +30,10 @@
       "type": "Optional[Boolean]"
     }
   },
+  "implementations": [
+    { "name": "patch_server.rb", "requirements": ["shell"]},
+    { "name": "patch_server.rb", "requirements": ["powershell"], "files": ["os_patching/files/os_patching_windows.ps1"]}
+  ],
   "puppet_task_version": 1,
   "supports_noop": false,
   "description": "Carry out OS patching on the server, optionally including a reboot and/or only applying security related updates"

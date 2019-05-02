@@ -14,6 +14,7 @@ test:
 	${MAKE} validate
 	${MAKE} unit
 	${MAKE} acceptance
+	${MAKE} documentation
 
 validate:
 	bundle exec rake metadata_lint
@@ -31,17 +32,30 @@ acceptance:
 
 test_puppet6:
 	${MAKE} install_centos
+	bundle exec rake litmus:install_agent[puppet6]
+	${MAKE} install_module
+	bundle exec rake litmus:acceptance:parallel
+	${MAKE} teardown
 	${MAKE} install_ubuntu
 	bundle exec rake litmus:install_agent[puppet6]
 	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel && ${MAKE} teardown
+	bundle exec rake litmus:acceptance:parallel
+	${MAKE} teardown
 
 test_puppet5:
 	${MAKE} install_centos
+	bundle exec rake litmus:install_agent[puppet5]
+	${MAKE} install_module
+	bundle exec rake litmus:acceptance:parallel
+	${MAKE} teardown
 	${MAKE} install_ubuntu
 	bundle exec rake litmus:install_agent[puppet5]
 	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel && ${MAKE} teardown
+	bundle exec rake litmus:acceptance:parallel
+	${MAKE} teardown
+
+documentation:
+	bundle exec puppet strings generate --format=markdown
 
 teardown:
 	bundle exec rake litmus:tear_down

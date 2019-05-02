@@ -15,3 +15,6 @@ fixtures:
     cron:
       repo: puppet-cron
       ref: 1.3.1
+    scheduled_task:
+      repo: puppetlabs-scheduled_task
+      ref: 1.0.1

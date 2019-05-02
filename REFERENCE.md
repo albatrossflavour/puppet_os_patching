@@ -14,6 +14,12 @@ the `os_patching` fact.
 * [`patch_server`](#patch_server): Carry out OS patching on the server, optionally including a reboot and/or only applying security related updates
 * [`refresh_fact`](#refresh_fact): Force a refresh of the os_patching fact cache via a task
 
+**Plans**
+
+* [`os_patching::patch_after_healthcheck`](#os_patchingpatch_after_healthcheck): An example plan that uses the [puppet health check](https://forge.puppet.com/albatrossflavour/puppet_health_check)
+module to perform a pre-check on the nodes you're planning to patch.  If the nodes pass the
+check, they get patched
+
 ## Classes
 
 ### os_patching
@@ -275,6 +281,12 @@ Data type: `Optional[String]`
 
 Any additional parameters to include in the dpkg command
 
+##### `zypper_params`
+
+Data type: `Optional[String]`
+
+Any additional parameters to include in the zypper update command
+
 ##### `reboot`
 
 Data type: `Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart']]]`
@@ -304,4 +316,22 @@ Should the yum/dpkg caches be cleaned at the start of the task? (Defaults to fal
 Force a refresh of the os_patching fact cache via a task
 
 **Supports noop?** false
+
+## Plans
+
+### os_patching::patch_after_healthcheck
+
+An example plan that uses the [puppet health check](https://forge.puppet.com/albatrossflavour/puppet_health_check)
+module to perform a pre-check on the nodes you're planning to patch.  If the nodes pass the
+check, they get patched
+
+#### Parameters
+
+The following parameters are available in the `os_patching::patch_after_healthcheck` plan.
+
+##### `nodes`
+
+Data type: `TargetSpec`
+
+
 

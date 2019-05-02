@@ -1,6 +1,6 @@
 {
   "name": "albatrossflavour-os_patching",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "author": "Tony Green",
   "summary": "Perform OS level patching through tasks and report on patch levels through facts",
   "license": "Apache-2.0",
@@ -19,6 +19,10 @@
     {
       "name": "puppet-cron",
       "version_requirement": ">= 1.3.1 < 5.0.0"
+    },
+    {
+      "name": "puppetlabs-scheduled_task",
+      "version_requirement": ">= 1.0.1 < 5.0.0"
     },
     {
       "name": "puppetlabs-cron_core",
@@ -67,6 +71,17 @@
       "operatingsystemrelease": [
         "16.04",
         "14.047"
+      ]
+    },
+    {
+      "operatingsystem": "windows",
+      "operatingsystemrelease": [
+        "2008",
+        "2008 R2",
+        "2012",
+        "2012 R2",
+        "2016",
+        "2019"
       ]
     },
     {

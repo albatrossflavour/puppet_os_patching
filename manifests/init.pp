@@ -4,7 +4,7 @@
 # @param patch_data_owner [String]
 #   User name for the owner of the patch data
 #
-# @param patch_data_group [String] 
+# @param patch_data_group [String]
 #   Group name for the owner of the patch data
 #
 # @param patch_cron_user [String]
@@ -137,108 +137,70 @@ class os_patching (
     default   => undef,
   }
 
-  $fact_cmd = '/usr/local/bin/os_patching_fact_generation.sh'
+  case $::kernel {
+    'Linux': {
+      $fact_upload_cmd     = '/opt/puppetlabs/bin/puppet facts upload'
+      $cache_dir           = '/var/cache/os_patching'
+      $fact_dir            = '/usr/local/bin'
+      $fact_file           = 'os_patching_fact_generation.sh'
+      $fact_mode           = '0700'
+      File {
+        owner => $patch_data_owner,
+        group => $patch_data_group,
+        mode  => '0644',
+      }
+    }
+    'windows': {
+      $fact_upload_cmd     = '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload'
+      $cache_dir           = 'C:/ProgramData/os_patching'
+      $fact_dir            = $cache_dir
+      $fact_file           = 'os_patching_fact_generation.ps1'
+      $fact_mode           = '0770'
+    }
+    default: { fail translate(('Unsupported OS')) }
+  }
 
-  $fact_upload_cmd = '/opt/puppetlabs/bin/puppet facts upload'
+  # calculate full path for fact command/script
+  $fact_cmd = "${fact_dir}/${fact_file}"
 
   $fact_upload_exec = $ensure ? {
     'present' => 'os_patching::exec::fact_upload',
     default   => undef
   }
+
   $ensure_file = $ensure ? {
     'present' => 'file',
     default   => 'absent',
   }
+
   $ensure_dir = $ensure ? {
     'present' => 'directory',
     default   => 'absent',
   }
 
   if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
-    fail(translate('The patch window can only contain alphanumerics, space, underscore and dash'))
+    fail translate(('The patch window can only contain alphanumerics, space, underscore and dash'))
   }
 
-  if ( $::kernel != 'Linux' ) { fail(translate('Unsupported OS')) }
-
-  if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
-    package { 'yum-utils':
-      ensure => $yum_utils,
-    }
-  }
-
-  if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
-    package { 'deltarpm':
-      ensure => $delta_rpm,
-    }
-  }
-
-  if ( $::osfamily == 'RedHat' and $manage_yum_plugin_security) {
-    package { 'yum-plugin-security':
-      ensure => $yum_plugin_security,
-    }
-  }
-
-  file { '/etc/os_patching':
-    ensure => absent,
-    force  => true,
-  }
-
-  file { '/var/cache/os_patching':
+  file { $cache_dir:
     ensure => $ensure_dir,
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0644',
     force  => true,
   }
 
   file { $fact_cmd:
     ensure => $ensure_file,
-    owner  => $patch_data_owner,
-    group  => $patch_data_group,
-    mode   => '0700',
-    source => "puppet:///modules/${module_name}/os_patching_fact_generation.sh",
+    mode   => $fact_mode,
+    source => "puppet:///modules/${module_name}/${fact_file}",
     notify => Exec[$fact_exec],
-  }
-
-  if $fact_exec {
-    exec { $fact_exec:
-      command     => $fact_cmd,
-      user        => $patch_data_owner,
-      group       => $patch_data_group,
-      refreshonly => true,
-      require     => File[$fact_cmd],
-    }
-  }
-
-  cron { 'Cache patching data':
-    ensure   => $ensure,
-    command  => $fact_cmd,
-    user     => $patch_cron_user,
-    hour     => $patch_cron_hour,
-    minute   => $patch_cron_min,
-    month    => $patch_cron_month,
-    monthday => $patch_cron_monthday,
-    weekday  => $patch_cron_weekday,
-    require  => File[$fact_cmd],
-  }
-
-  cron { 'Cache patching data at reboot':
-    ensure  => $ensure,
-    command => $fact_cmd,
-    user    => $patch_cron_user,
-    special => 'reboot',
-    require => File[$fact_cmd],
   }
 
   $patch_window_ensure = ($ensure == 'present' and $patch_window ) ? {
     true    => 'file',
     default => 'absent'
   }
-  file { '/var/cache/os_patching/patch_window':
+
+  file { "${cache_dir}/patch_window":
     ensure  => $patch_window_ensure,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
     content => $patch_window,
   }
 
@@ -246,19 +208,17 @@ class os_patching (
     true    => 'file',
     default => 'absent',
   }
+
   case $reboot_override {
     true: { $reboot_override_value = 'always' }
     false: { $reboot_override_value = 'never' }
     default: { $reboot_override_value = $reboot_override }
   }
-  file { '/var/cache/os_patching/reboot_override':
+
+  file { "${cache_dir}/reboot_override":
     ensure  => $reboot_override_ensure,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
     content => $reboot_override_value,
   }
-
 
   if ($blackout_windows) {
     # Validate the information in the blackout_windows hash
@@ -277,19 +237,18 @@ class os_patching (
       }
     }
   }
+
   $blackout_windows_ensure = ($ensure == 'present' and $blackout_windows) ? {
     true    => 'file',
     default => 'absent'
   }
-  file { '/var/cache/os_patching/blackout_windows':
+
+  file { "${cache_dir}/blackout_windows":
     ensure  => $blackout_windows_ensure,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
     content => epp("${module_name}/blackout_windows.epp", {
       'blackout_windows' => pick($blackout_windows, {}),
     }),
-    require => File['/var/cache/os_patching'],
+    require => File[$cache_dir],
   }
 
   if $fact_upload_exec and $fact_upload {
@@ -299,11 +258,93 @@ class os_patching (
       refreshonly => true,
       subscribe   => File[
         $fact_cmd,
-        '/var/cache/os_patching',
-        '/var/cache/os_patching/patch_window',
-        '/var/cache/os_patching/reboot_override',
-        '/var/cache/os_patching/blackout_windows',
+        $cache_dir,
+        "${cache_dir}/patch_window",
+        "${cache_dir}/reboot_override",
+        "${cache_dir}/blackout_windows",
       ],
     }
+  }
+
+  case $::kernel {
+    'Linux': {
+      if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
+        package { 'yum-utils':
+          ensure => $yum_utils,
+        }
+      }
+
+      if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
+        package { 'deltarpm':
+          ensure => $delta_rpm,
+        }
+      }
+
+      if ( $::osfamily == 'RedHat' and $manage_yum_plugin_security) {
+        package { 'yum-plugin-security':
+          ensure => $yum_plugin_security,
+        }
+      }
+
+      if $fact_exec {
+        exec { $fact_exec:
+          command     => $fact_cmd,
+          user        => $patch_data_owner,
+          group       => $patch_data_group,
+          refreshonly => true,
+          require     => File[$fact_cmd],
+        }
+      }
+
+      cron { 'Cache patching data':
+        ensure   => $ensure,
+        command  => $fact_cmd,
+        user     => $patch_cron_user,
+        hour     => $patch_cron_hour,
+        minute   => $patch_cron_min,
+        month    => $patch_cron_month,
+        monthday => $patch_cron_monthday,
+        weekday  => $patch_cron_weekday,
+        require  => File[$fact_cmd],
+      }
+
+      cron { 'Cache patching data at reboot':
+        ensure  => $ensure,
+        command => $fact_cmd,
+        user    => $patch_cron_user,
+        special => 'reboot',
+        require => File[$fact_cmd],
+      }
+    }
+    'windows': {
+
+      if $fact_exec {
+        exec { $fact_exec:
+          path        => 'C:/Windows/System32/WindowsPowerShell/v1.0',
+          refreshonly => true,
+          command     => "powershell -executionpolicy remotesigned -file ${fact_cmd}",
+        }
+      }
+
+      scheduled_task { 'os_patching fact generation':
+        ensure    => $ensure,
+        enabled   => true,
+        command   => "${::system32}/WindowsPowerShell/v1.0/powershell.exe",
+        arguments => "-NonInteractive -ExecutionPolicy RemoteSigned -File ${fact_cmd}",
+        user      => 'SYSTEM',
+        trigger   => [
+          {
+            schedule         => daily,
+            start_time       => "01:${patch_cron_min}",
+            minutes_interval => '60',
+          },
+          {
+            schedule => 'boot',
+          }
+        ],
+        require   => File[$fact_cmd],
+      }
+    }
+    default: { fail translate(('Unsupported OS'))}
   }
 }
