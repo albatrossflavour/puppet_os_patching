@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.11.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.0) (2019-05-02)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.10.0...0.11.0)
+
+**Implemented enhancements:**
+
+- Enable windows support for the manifests and facter [\#120](https://github.com/albatrossflavour/puppet_os_patching/issues/120)
+
 ## [0.10.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.10.0) (2019-04-26)
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.9.0...0.10.0)
 
@@ -9,6 +16,7 @@
 
 **Merged pull requests:**
 
+- Release to production [\#119](https://github.com/albatrossflavour/puppet_os_patching/pull/119) ([albatrossflavour](https://github.com/albatrossflavour))
 - Add example plan [\#118](https://github.com/albatrossflavour/puppet_os_patching/pull/118) ([albatrossflavour](https://github.com/albatrossflavour))
 - Resync development [\#116](https://github.com/albatrossflavour/puppet_os_patching/pull/116) ([albatrossflavour](https://github.com/albatrossflavour))
 

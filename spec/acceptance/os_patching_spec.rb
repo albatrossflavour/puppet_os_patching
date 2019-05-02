@@ -6,7 +6,8 @@ pp_class_base = <<-PUPPETCODE
     class { 'cron':
       manage_service => false,
     }
-    class { os_patching:
+    class { 'os_patching':
+      fact_upload => false,
     }
 PUPPETCODE
 
@@ -14,8 +15,9 @@ pp_class_patch_window = <<-PUPPETCODE
     class { 'cron':
       manage_service => false,
     }
-    class { os_patching:
-      patch_window => 'Week1'
+    class { 'os_patching':
+      patch_window => 'Week1',
+      fact_upload  => false,
     }
 PUPPETCODE
 
@@ -23,21 +25,22 @@ pp_class_blackout_window = <<-PUPPETCODE
     class { 'cron':
       manage_service => false,
     }
-    class { os_patching:
-      blackout_windows => { 'End of year change freeze' => { 'start' => '2018-12-15T00:00:00+10:00', 'end' => '2019-01-15T23:59:59+10:00' }}
+    class { 'os_patching':
+      blackout_windows => { 'End of year change freeze' => { 'start' => '2018-12-15T00:00:00+10:00', 'end' => '2019-01-15T23:59:59+10:00' }},
+      fact_upload => false,
     }
 PUPPETCODE
 
 pp_class_absent = <<-PUPPETCODE
-    class { os_patching:
-      ensure => absent
+    class { 'os_patching':
+      ensure      => absent,
     }
 PUPPETCODE
 
 describe 'os_patching module' do
   context 'base class' do
     it do
-      apply_manifest_and_idempotent(pp_class_base)
+      idempotent_apply(pp_class_base)
       expect(file(cache_dir)).to be_directory
       expect(file(cache_dir + '/security_package_updates')).to be_file
       expect(file(cache_dir + '/package_updates')).to be_file
@@ -55,7 +58,7 @@ end
 describe 'os_patching module with patching window' do
   context 'base class' do
     it do
-      apply_manifest_and_idempotent(pp_class_blackout_window)
+      idempotent_apply(pp_class_blackout_window)
       expect(file(cache_dir)).to be_directory
       expect(file(cache_dir + '/security_package_updates')).to be_file
       expect(file(cache_dir + '/package_updates')).to be_file
@@ -74,7 +77,7 @@ end
 describe 'os_patching module with patching window' do
   context 'base class' do
     it do
-      apply_manifest_and_idempotent(pp_class_patch_window)
+      idempotent_apply(pp_class_patch_window)
       expect(file(cache_dir)).to be_directory
       expect(file(cache_dir + '/security_package_updates')).to be_file
       expect(file(cache_dir + '/package_updates')).to be_file
@@ -93,7 +96,7 @@ end
 describe 'os_patching module purge' do
   context 'base class' do
     it do
-      apply_manifest_and_idempotent(pp_class_absent)
+      idempotent_apply(pp_class_absent)
       expect(file(cache_dir)).not_to be_directory
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).not_to be_file
       expect(file('/etc/os_patching')).not_to be_directory
