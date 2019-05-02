@@ -61,4 +61,4 @@ teardown:
 	bundle exec rake litmus:tear_down
 
 shell:
-	ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p 2225
+	ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p 2222
