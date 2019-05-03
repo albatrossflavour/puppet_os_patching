@@ -51,6 +51,8 @@ describe 'os_patching module' do
       expect(file(cache_dir + '/patch_window')).not_to be_file
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).to be_file
       run_bolt_task('os_patching::patch_server')
+      run_bolt_task('os_patching::clean_cache')
+      run_bolt_task('os_patching::refresh_fact')
     end
   end
 end
