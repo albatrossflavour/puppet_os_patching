@@ -26,7 +26,7 @@ pp_class_blackout_window = <<-PUPPETCODE
       manage_service => false,
     }
     class { 'os_patching':
-      blackout_windows => { 'End of year change freeze' => { 'start' => '2018-12-15T00:00:00+10:00', 'end' => '2019-01-15T23:59:59+10:00' }},
+      blackout_windows => { 'End of year change freeze' => { 'start' => '2018-12-15T00:00:00+10:00', 'end' => '2030-01-15T23:59:59+10:00' }},
       fact_upload => false,
     }
 PUPPETCODE
@@ -50,12 +50,14 @@ describe 'os_patching module' do
       expect(file(cache_dir + '/blackout_windows')).not_to be_file
       expect(file(cache_dir + '/patch_window')).not_to be_file
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).to be_file
-      expect(file('/etc/os_patching')).not_to be_directory
+      run_bolt_task('os_patching::patch_server')
+      run_bolt_task('os_patching::clean_cache')
+      run_bolt_task('os_patching::refresh_fact')
     end
   end
 end
 
-describe 'os_patching module with patching window' do
+describe 'os_patching module with blackout window' do
   context 'base class' do
     it do
       idempotent_apply(pp_class_blackout_window)
@@ -69,7 +71,7 @@ describe 'os_patching module with patching window' do
       expect(file(cache_dir + '/blackout_windows')).to contain (/End of year/)
       expect(file(cache_dir + '/patch_window')).not_to be_file
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).to be_file
-      expect(file('/etc/os_patching')).not_to be_directory
+      expect { run_bolt_task('os_patching::patch_server') }.to raise_error(/Patching blocked/)
     end
   end
 end
@@ -88,7 +90,6 @@ describe 'os_patching module with patching window' do
       expect(file(cache_dir + '/patch_window')).to be_file
       expect(file(cache_dir + '/patch_window')).to contain (/Week1/)
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).to be_file
-      expect(file('/etc/os_patching')).not_to be_directory
     end
   end
 end
@@ -99,7 +100,6 @@ describe 'os_patching module purge' do
       idempotent_apply(pp_class_absent)
       expect(file(cache_dir)).not_to be_directory
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).not_to be_file
-      expect(file('/etc/os_patching')).not_to be_directory
     end
   end
 end
