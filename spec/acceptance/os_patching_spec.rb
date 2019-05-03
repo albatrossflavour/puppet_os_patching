@@ -26,7 +26,7 @@ pp_class_blackout_window = <<-PUPPETCODE
       manage_service => false,
     }
     class { 'os_patching':
-      blackout_windows => { 'End of year change freeze' => { 'start' => '2018-12-15T00:00:00+10:00', 'end' => '2020-01-15T23:59:59+10:00' }},
+      blackout_windows => { 'End of year change freeze' => { 'start' => '2018-12-15T00:00:00+10:00', 'end' => '2030-01-15T23:59:59+10:00' }},
       fact_upload => false,
     }
 PUPPETCODE
