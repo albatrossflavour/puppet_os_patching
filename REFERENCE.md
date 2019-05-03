@@ -16,7 +16,8 @@ the `os_patching` fact.
 
 **Plans**
 
-* [`os_patching::patch_after_healthcheck`](#os_patchingpatch_after_healthcheck): An example plan that uses the [puppet health check](https://forge.puppet.com/albatrossflavour/puppet_health_check)
+* [`os_patching::patch_after_healthcheck`](#os_patchingpatch_after_healthcheck): An example plan that uses the
+[puppet health check](https://forge.puppet.com/albatrossflavour/puppet_health_check)
 module to perform a pre-check on the nodes you're planning to patch.  If the nodes pass the
 check, they get patched
 
@@ -321,7 +322,8 @@ Force a refresh of the os_patching fact cache via a task
 
 ### os_patching::patch_after_healthcheck
 
-An example plan that uses the [puppet health check](https://forge.puppet.com/albatrossflavour/puppet_health_check)
+An example plan that uses the
+[puppet health check](https://forge.puppet.com/albatrossflavour/puppet_health_check)
 module to perform a pre-check on the nodes you're planning to patch.  If the nodes pass the
 check, they get patched
 
