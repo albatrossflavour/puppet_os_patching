@@ -1,11 +1,18 @@
 # Change Log
 
-## [0.11.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.0) (2019-05-02)
+## [0.11.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.0) (2019-05-03)
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.10.0...0.11.0)
 
 **Implemented enhancements:**
 
+- Add litmus tests to run the tasks and validate the results [\#124](https://github.com/albatrossflavour/puppet_os_patching/issues/124)
 - Enable windows support for the manifests and facter [\#120](https://github.com/albatrossflavour/puppet_os_patching/issues/120)
+
+**Merged pull requests:**
+
+- Release to production in preparation for V0.11.0 release [\#123](https://github.com/albatrossflavour/puppet_os_patching/pull/123) ([albatrossflavour](https://github.com/albatrossflavour))
+- Community information added [\#122](https://github.com/albatrossflavour/puppet_os_patching/pull/122) ([albatrossflavour](https://github.com/albatrossflavour))
+- Enable windows support [\#121](https://github.com/albatrossflavour/puppet_os_patching/pull/121) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.10.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.10.0) (2019-04-26)
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.9.0...0.10.0)
