@@ -2,7 +2,7 @@ all:
 	${MAKE} test
 
 install_centos:
-	bundle exec rake 'litmus:provision_list[travis_el]'
+	bundle exec rake 'litmus:provision_list[non_travis_el]'
 
 install_ubuntu:
 	bundle exec rake 'litmus:provision_list[travis_deb]'
