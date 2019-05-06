@@ -1,17 +1,19 @@
 [![Build Status](https://travis-ci.org/albatrossflavour/puppet_os_patching.svg?branch=master)](https://travis-ci.org/albatrossflavour/puppet_os_patching)
 # os_patching
 
-This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently patching works on Linux (Redhat, Suse and Debian derivatives) and Windows
+This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently patching works on Linux (Redhat, Suse and Debian derivatives) and Windows (Server 2008 through to 2019 have been tested).
 
-Under the hood it uses the OS level tools to carry out the actual patching.  That does mean that you need to be sure that your nodes are ABLE to query for their updates (manage YUM, APT, WSUS etc).
+Under the hood it uses the OS level tools or APIs to carry out the actual patching.  That does mean that you need to be sure that your nodes are ABLE to search for their updates using the native tool - e.g. You still need to manage the configuration of YUM, APT, Zypper or Windows Update.
+
+Note - Windows systems require at least PowerShell version 3.0. If you are intending to update an unpatched Windows system prior to Server 2012, you will need to update PowerShell first.
 
 ## Description
 
-Puppet tasks and bolt have opened up methods to integrate operating system level patching into the puppet workflow.  Providing automation of patch execution through tasks and the robust reporting of state through custom facts and PuppetDB.
+Puppet Enterprise tasks and Bolt have opened up methods to integrate operating system level patching into the puppet workflow.  Providing automation of patch execution through tasks and the robust reporting of state through custom facts and PuppetDB.
 
 If you're looking for a simple way to report on your OS patch levels, this module will show all updates which are outstanding, including which are related to security updates.  Do you want to enable self-service patching?  This module will use Puppet's RBAC and orchestration and task execution facilities to give you that power.
 
-It also uses security metadata (where available) to determine if there are security updates.  On Redhat, this is provided from Redhat as additional metadata in YUM.  On Debian, checks are done for which repo the updates are coming from.  There is a parameter to the task to only apply security updates.
+It also uses security metadata (where available) to determine if there are security updates.  On Redhat, this is provided from Redhat as additional metadata in YUM.  On Debian, checks are done for which repo the updates are coming from.  On Windows, this information is provided by default. There is a parameter to the os_patching::patch_server task to only apply security updates.
 
 Blackout windows enable the support for time based change freezes where no patching can happen.  There can be multiple windows defined and each which will automatically expire after reaching the defined end date.
 
@@ -19,7 +21,7 @@ Blackout windows enable the support for time based change freezes where no patch
 
 ### What os_patching affects
 
-The module provides an additional fact (`os_patching`) and has a task to allow the patching of a server.  When the `os_patching` manifest is added to a node it installs a script and cron job to generate cache data used by the `os_patching` fact.
+The module provides an additional fact (`os_patching`) and has a task to allow the patching of a server.  When the `os_patching` manifest is added to a node it installs a script and cron job (Linux) or scheduled task (Windows) to check for available updates and generate cache data used by the `os_patching` fact.
 
 ### Beginning with os_patching
 
@@ -40,7 +42,7 @@ class { 'os_patching':
   blackout_windows => { 'End of year change freeze':
     {
       'start': '2018-12-15T00:00:00+1000',
-      'end': '2019-01-15T23:59:59+1000',
+      'end':   '2019-01-15T23:59:59+1000',
     }
   },
 }
@@ -86,7 +88,7 @@ The task will apply all patches (`security_only=false`) and will reboot the node
 
 ### Facts
 
-Most of the reporting is driven off the custom fact `os_patching_data`, for example:
+Most of the reporting is driven by the custom fact `os_patching_data`, for example:
 
 ```yaml
 # facter -p os_patching
@@ -162,7 +164,7 @@ This shows there are no updates which can be applied to this server and the serv
 }
 ```
 
-Where it shows 6 packages with available updates, along with an array of the package names.  None of the packges are tagged as security related (requires Debian or a subscription to RHEL).  There are no blockers to patching and the blackout window defined is not in effect.
+Where it shows 6 packages with available updates, along with an array of the package names.  None of the packges are tagged as security related (requires Debian, a subscription to RHEL or a Windows system).  There are no blockers to patching and the blackout window defined is not in effect.
 
 The reboot_required flag is set to true, which means there have been changes to packages that require a reboot (libc, kernel etc) but a reboot hasn't happened.  The apps_needing_restart shows the PID and command line of applications that are using files that have been upgraded but the process hasn't been restarted.
 
@@ -194,7 +196,7 @@ The reboot parameter is set in the `os_patching::patch_server` task.  It takes t
 * "patched" (or the legacy value `true`)
   * Reboot the node if patches have been applied
 * "smart"
-  * Use the OS supplied tools (e.g. `needs_restarting` on RHEL) to determine if a reboot is required, if it is reboot, otherwise do not.
+  * Use the OS supplied tools (e.g. `needs_restarting` on RHEL, or a pending reboot check on Windows) to determine if a reboot is required, if it is reboot, otherwise do not.
 
 The default value is "never".
 
@@ -266,24 +268,67 @@ A summary of the patch run is also written to `/var/cache/os_patching/run_histor
 2018-08-08T07:53:59+10:00|Patching blocked |100|||
 ```
 
-### `/var/cache/os_patching` directory
+### OS_Patching Directory and Files
 
-This directory contains the various control files needed for the fact and task to work correctly.  They are managed by the manifest.
+Each system with the os_patching class applied will have several files and a directory managed by the manifest.
 
-* `/var/cache/os_patching/blackout_windows` : contains name, start and end time for all blackout windows
-* `/var/cache/os_patching/package_updates` : a list of all package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
-* `/var/cache/os_patching/security_package_updates` : a list of all security_package updates available, populated by `/usr/local/bin/os_patching_fact_generation.sh`, triggered through cron
-* `/var/cache/os_patching/run_history` : a summary of each run of the `os_patching::patch_server` task, populated by the task
-* `/var/cache/os_patching/reboot_override` : if present, overrides the `reboot=` parameter to the task
-* `/var/cache/os_patching/patch_window` : if present, sets the value for the fact `os_patching.patch_window`
-* `/var/cache/os_patching/reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
-* `/var/cache/os_patching/apps_to_restart` : a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.
+#### Fact Generation Script
 
-With the exception of the run_history file, all files in /var/cache/os_patching will be regenerated after a puppet run and a run of the os_patching_fact_generation.sh script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum and syslog.
+The script used to scan for updates and generate the fact data is stored in the following location based on the OS type:
+
+* Linux - `/usr/local/bin/os_patching_fact_generation.sh`
+* Windows - `c:\ProgramData\os_patching\os_patching_fact_generation.ps1`
+
+#### os_patching directory
+
+The os_patching directory contains the various control files needed for this module and its tasks to work correctly.  The locations are as follows:
+
+* Linux - `/var/cache/os_patching`
+* Windows - `c:\ProgramData\os_patching`
+
+The following files are stored in this directory:
+
+* `blackout_windows` : contains name, start and end time for all blackout windows
+* `package_updates` : a list of all package updates available, populated by `os_patching_fact_generation.sh` (Linux) or `os_patching_fact_generation.ps1` (Windows), triggered through cron (Linux) or task scheduler (Windows)
+* `security_package_updates` : a list of all security_package updates available, populated by `os_patching_fact_generation.sh` (Linux) or `os_patching_fact_generation.ps1` (Windows), triggered through cron (Linux) or task scheduler (Windows)
+* `run_history` : a summary of each run of the `os_patching::patch_server` task, populated by the task
+* `reboot_override` : if present, overrides the `reboot=` parameter to the task
+* `patch_window` : if present, sets the value for the fact `os_patching.patch_window`
+* `reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
+* `apps_to_restart` : (Linux only) a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.
+
+With the exception of the run_history file and windows os_patching scripts, all files in the os_patching directory will be regenerated after a puppet run and a run of the `os_patching_fact_generation.sh` or `os_patching_fact_generation.ps1` script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum, syslog or the Windows event log.
+
+### Windows Systems
+
+As windows includes no native command line tools to manage update installation, PowerShell scripts have been written utilising the Windows Update agent APIs that handle the update search, download, and installation process.
+
+Windows Server 2008 (x86 and x64) through to 2019 have been tested. The code should also function on the equivelant client versions of Windows (e.g. Vista and newer), however this has not been thoroughly tested.
+
+This module does *not* handle the configuration of the update source or any of the other Windows Update settings - it simply triggers a search (fact generation) or searc, download and install (patch_server task). It is recommended to use the [puppetlabs wsus_client module](https://forge.puppet.com/puppetlabs/wsus_client) to configure the followng options:
+
+* WSUS server if you are using one (although this is not strictly required)
+* Set the mode to automatically download updates and notify for install (`AutoNotify`)
+
+For example:
+
+```puppet
+class { 'wsus_client':
+  server_url             => 'http://my-wsus-server.internal:8530', # WSUS Server
+  enable_status_server   => true                                   # Send status to WSUS too
+  auto_update_option     => 'AutoNotify',                          # automatically download updates and notify for install
+}
+```
 
 ## Limitations
 
-RedHat 5 based systems have support but lack a lot of the yum functionality added in 6, so things like the upgraded package list and job ID will be missing.
+* RedHat 5 based systems have support but lack a lot of the yum functionality added in 6, so things like the upgraded package list and job ID will be missing.
+
+* PowerShell version 3.0 or newer is required on Windows Systems.
+
+* If updates or packages are installed outside of this script (e.g. by a user or another automated process), the results will not be captured in the facts.
+
+* On Windows systems, the timeout parameter of the `patch_server` task is implemented as a maintenace window end time (e.g. start time + timeout). This is used by doing a calculation prior to installing each update. If there is insufficient available, the update run will stop. However, at this stage each update is estimated to take 5 minutes to install. This will be improved in a future release to perform an estimation based on update size or type (e.g. an SCCM-like 5 minutes for hotfix, 30 minutes for cumulative update).
 
 ## Development
 
@@ -297,4 +342,4 @@ Fork, develop, submit a pull request
 - [Tommy McNeely](https://github.com/tjm)
 - [Geoff Williams](https://github.com/GeoffWilliams)
 - [Jake Rogers](https://github.com/JakeTRogers)
-- [Nathan Giuliaiani](https://github.com/nathangiuliani)
+- [Nathan Giuliani](https://github.com/nathangiuliani)
