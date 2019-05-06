@@ -157,7 +157,7 @@ class os_patching (
       $fact_file           = 'os_patching_fact_generation.ps1'
       $fact_mode           = '0770'
     }
-    default: { fail translate(("Unsupported OS : ${facts['os']['kernel']")) }
+    default: { fail translate(("Unsupported OS : ${facts['os']['kernel']}")) }
   }
 
   # calculate full path for fact command/script
