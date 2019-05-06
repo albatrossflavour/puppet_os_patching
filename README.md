@@ -297,11 +297,11 @@ The following files are stored in this directory:
 * `reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
 * `apps_to_restart` : (Linux only) a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.
 
-With the exception of the run_history file and windows os_patching scripts, all files in the os_patching directory will be regenerated after a puppet run and a run of the `os_patching_fact_generation.sh` or `os_patching_fact_generation.ps1` script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum, syslog or the Windows event log.
+With the exception of the run_history file and Windows os_patching scripts, all files in the os_patching directory will be regenerated after a puppet run and a run of the `os_patching_fact_generation.sh` or `os_patching_fact_generation.ps1` script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum, syslog or the Windows event log.
 
 ### Windows Systems
 
-As windows includes no native command line tools to manage update installation, PowerShell scripts have been written utilising the Windows Update agent APIs that handle the update search, download, and installation process:
+As Windows includes no native command line tools to manage update installation, PowerShell scripts have been written utilising the Windows Update agent APIs that handle the update search, download, and installation process:
 
 * `os_patching_fact_generation.ps1` which scans for updates and generates fact data (as above)
 * `os_patching_windows.ps1` is utilised by the `patch_server` task and underlying ruby script to handle the update installation process
