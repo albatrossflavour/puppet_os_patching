@@ -301,9 +301,16 @@ With the exception of the run_history file and windows os_patching scripts, all 
 
 ### Windows Systems
 
-As windows includes no native command line tools to manage update installation, PowerShell scripts have been written utilising the Windows Update agent APIs that handle the update search, download, and installation process.
+As windows includes no native command line tools to manage update installation, PowerShell scripts have been written utilising the Windows Update agent APIs that handle the update search, download, and installation process:
+
+* `os_patching_fact_generation.ps1` which scans for updates and generates fact data (as above)
+* `os_patching_windows.ps1` is utilised by the `patch_server` task and underlying ruby script to handle the update installation process
+
+#### Supported Windows Versions
 
 Windows Server 2008 (x86 and x64) through to 2019 have been tested. The code should also function on the equivelant client versions of Windows (e.g. Vista and newer), however this has not been thoroughly tested.
+
+#### Configuration of Windows Update
 
 This module does *not* handle the configuration of the update source or any of the other Windows Update settings - it simply triggers a search (fact generation) or searc, download and install (patch_server task). It is recommended to use the [puppetlabs wsus_client module](https://forge.puppet.com/puppetlabs/wsus_client) to configure the followng options:
 
