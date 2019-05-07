@@ -1,5 +1,21 @@
 # Change Log
 
+## [0.11.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.1) (2019-05-07)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.0...0.11.1)
+
+**Implemented enhancements:**
+
+- Update the README to show the windows paths too [\#127](https://github.com/albatrossflavour/puppet_os_patching/issues/127)
+
+**Fixed bugs:**
+
+- puppetlabs/stdlib version 5.2.0 [\#129](https://github.com/albatrossflavour/puppet_os_patching/issues/129)
+
+**Merged pull requests:**
+
+- Updated ReadMe [\#131](https://github.com/albatrossflavour/puppet_os_patching/pull/131) ([nathangiuliani](https://github.com/nathangiuliani))
+- \#129 restrictions on stdlib are too tight [\#130](https://github.com/albatrossflavour/puppet_os_patching/pull/130) ([albatrossflavour](https://github.com/albatrossflavour))
+
 ## [0.11.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.0) (2019-05-03)
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.10.0...0.11.0)
 
@@ -10,6 +26,8 @@
 
 **Merged pull requests:**
 
+- v0.11.0 release [\#126](https://github.com/albatrossflavour/puppet_os_patching/pull/126) ([albatrossflavour](https://github.com/albatrossflavour))
+- \#124 promote new tests to development [\#125](https://github.com/albatrossflavour/puppet_os_patching/pull/125) ([albatrossflavour](https://github.com/albatrossflavour))
 - Release to production in preparation for V0.11.0 release [\#123](https://github.com/albatrossflavour/puppet_os_patching/pull/123) ([albatrossflavour](https://github.com/albatrossflavour))
 - Community information added [\#122](https://github.com/albatrossflavour/puppet_os_patching/pull/122) ([albatrossflavour](https://github.com/albatrossflavour))
 - Enable windows support [\#121](https://github.com/albatrossflavour/puppet_os_patching/pull/121) ([albatrossflavour](https://github.com/albatrossflavour))
