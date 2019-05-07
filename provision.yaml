@@ -5,9 +5,6 @@ default:
 travis_deb:
   provisioner: docker
   images: ['waffleimage/debian8', 'waffleimage/debian9', 'waffleimage/ubuntu14.04', 'waffleimage/ubuntu16.04', 'waffleimage/ubuntu18.04']
-non_travis_el:
-  provisioner: docker
-  images: ['waffleimage/centos6', 'waffleimage/centos7', 'waffleimage/oraclelinux6', 'waffleimage/oraclelinux7']
 travis_el:
   provisioner: docker
   images: ['waffleimage/centos6', 'waffleimage/centos7', 'waffleimage/oraclelinux6', 'waffleimage/oraclelinux7', 'waffleimage/scientificlinux6', 'waffleimage/scientificlinux7']
