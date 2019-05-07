@@ -29,7 +29,7 @@ matrix:
       - bundle exec bolt command run 'apt-get install wget -y' --inventoryfile inventory.yaml --nodes='localhost*'
       - bundle exec rake 'litmus:install_agent[puppet5]'
       - bundle exec rake litmus:install_module
-      - travis_wait 240 bundle exec rake litmus:acceptance:parallel
+      - travis_wait 30 bundle exec rake litmus:acceptance:parallel
       services: docker
       sudo: required
     -
@@ -41,7 +41,7 @@ matrix:
       - bundle exec rake 'litmus:provision_list[travis_el]'
       - bundle exec rake 'litmus:install_agent[puppet5]'
       - bundle exec rake litmus:install_module
-      - travis_wait 240 bundle exec rake litmus:acceptance:parallel
+      - travis_wait 30 bundle exec rake litmus:acceptance:parallel
       services: docker
       sudo: required
     -
@@ -54,7 +54,7 @@ matrix:
       - bundle exec bolt command run 'apt-get install wget -y' --inventoryfile inventory.yaml --nodes='localhost*'
       - bundle exec rake 'litmus:install_agent[puppet6]'
       - bundle exec rake litmus:install_module
-      - travis_wait 240 bundle exec rake litmus:acceptance:parallel
+      - travis_wait 30 bundle exec rake litmus:acceptance:parallel
       services: docker
       sudo: required
     -
@@ -66,7 +66,7 @@ matrix:
       - bundle exec rake 'litmus:provision_list[travis_el]'
       - bundle exec rake 'litmus:install_agent[puppet6]'
       - bundle exec rake litmus:install_module
-      - travis_wait 240 bundle exec rake litmus:acceptance:parallel
+      - travis_wait 30 bundle exec rake litmus:acceptance:parallel
       services: docker
       sudo: required
     -

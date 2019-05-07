@@ -344,6 +344,7 @@ Fork, develop, submit a pull request
 ## Contributors
 
 - [Tony Green](mailto:tgreen@albatrossflavour.com) | [@albatrossflavor](https://twitter.com/albatrossflavor) | [http://albatrossflavour.com](http://albatrossflavour.com)
+- NotPotato
 - [Brett Gray](https://github.com/beergeek)
 - [Rob Nelson](https://github.com/rnelson0)
 - [Tommy McNeely](https://github.com/tjm)

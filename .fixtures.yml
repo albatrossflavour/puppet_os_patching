@@ -8,7 +8,7 @@ fixtures:
   forge_modules:
     stdlib:
       repo: puppetlabs-stdlib
-      ref: 5.0.0
+      ref: 5.2.0
     cron_core:
       repo: puppetlabs-cron_core
       ref: 1.0.1
