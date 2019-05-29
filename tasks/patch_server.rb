@@ -1,51 +1,5 @@
 #!/opt/puppetlabs/puppet/bin/ruby
 
-# windows logging class
-class WinLog
-  def initialize
-    require 'win32/eventlog'
-
-    # log to send events to
-    windows_log = 'Application'
-
-    # source of event shown in event log
-    @event_source = 'os_patching'
-
-    # add event source if needed
-    # we probably should generate and register an mc file, but the events still show without it
-    Win32::EventLog.add_event_source(:source => windows_log, :key_name => @event_source)
-
-    # create logger
-    @logger = Win32::EventLog.new
-  end
-
-  # match SysLog::Logger event types
-
-  def debug(data)
-    @logger.report_event(:event_type => Win32::EventLog::INFO_TYPE, :data => "Debug: #{data}", :source => @event_source)
-  end
-
-  def error(data)
-    @logger.report_event(:event_type => Win32::EventLog::ERROR_TYPE, :data => data, :source => @event_source)
-  end
-
-  def fatal(data)
-    @logger.report_event(:event_type => Win32::EventLog::ERROR_TYPE, :data => "FATAL: #{data}", :source => @event_source)
-  end
-
-  def info(data)
-    @logger.report_event(:event_type => Win32::EventLog::INFO_TYPE, :data => data, :source => @event_source)
-  end
-
-  def unknown(data)
-    @logger.report_event(:event_type => Win32::EventLog::INFO_TYPE, :data => "Unknown: #{data}", :source => @event_source)
-  end
-
-  def warn(data)
-    @logger.report_event(:event_type => Win32::EventLog::WARN_TYPE, :data => data, :source => @event_source)
-  end
-end
-
 require 'rbconfig'
 require 'open3'
 require 'json'
@@ -59,8 +13,9 @@ $stdout.sync = true
 
 if IS_WINDOWS
   # windows
-  # create windows event logger
-  log = WinLog.new
+  # use ruby file logger
+  require 'logger'
+  log = Logger.new('C:/ProgramData/os_patching/os_patching_task.log','monthly')
   # set paths/commands for windows
   fact_generation_script = 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1'
   fact_generation_cmd = "#{ENV['systemroot']}/system32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy RemoteSigned -file #{fact_generation_script}"
@@ -220,11 +175,17 @@ def err(code, kind, message, starttime)
   shortmsg = messagesplitfirst.chomp
 
   history(starttime, shortmsg, exitcode, '', '', '')
-  log = if IS_WINDOWS
-          WinLog.new
-        else
-          Syslog::Logger.new 'os_patching'
-        end
+  if IS_WINDOWS
+    # windows
+    # use ruby file logger
+    require 'logger'
+    log = Logger.new('C:/ProgramData/os_patching/os_patching_task.log','monthly')
+  else
+    # not windows
+    # create syslog logger
+    require 'syslog/logger'
+    log = Syslog::Logger.new 'os_patching'
+  end
   log.error "ERROR : #{kind} : #{exitcode} : #{message}"
   exit(exitcode.to_i)
 end
