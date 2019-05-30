@@ -336,7 +336,7 @@ class os_patching (
           {
             schedule         => daily,
             start_time       => "01:${patch_cron_min}",
-            minutes_interval => '60',
+            minutes_interval => '720',
           },
           {
             schedule => 'boot',
