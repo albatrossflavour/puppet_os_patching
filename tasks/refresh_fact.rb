@@ -14,7 +14,7 @@ if IS_WINDOWS
   # windows
   # use ruby file logger
   require 'logger'
-  log = Logger.new('C:/ProgramData/os_patching/os_patching_refresh_fact_task.log','monthly')
+  log = Logger.new('C:/ProgramData/os_patching/os_patching_refresh_fact_task.log', 'monthly')
   # set paths/commands for windows
   fact_generation_script = 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1'
   fact_generation_cmd = "#{ENV['systemroot']}/system32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy RemoteSigned -file #{fact_generation_script}"
@@ -64,7 +64,7 @@ def err(code, kind, message, starttime)
     # windows
     # use ruby file logger
     require 'logger'
-    log = Logger.new('C:/ProgramData/os_patching/os_patching_refresh_fact_task.log','monthly')
+    log = Logger.new('C:/ProgramData/os_patching/os_patching_refresh_fact_task.log', 'monthly')
   else
     # not windows
     # create syslog logger
