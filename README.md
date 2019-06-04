@@ -312,7 +312,7 @@ Windows Server 2008 (x86 and x64) through to 2019 have been tested. The code sho
 
 #### Configuration of Windows Update
 
-This module does *not* handle the configuration of the update source or any of the other Windows Update settings - it simply triggers a search (fact generation) or searc, download and install (patch_server task). It is recommended to use the [puppetlabs wsus_client module](https://forge.puppet.com/puppetlabs/wsus_client) to configure the following options:
+This module does *not* handle the configuration of the update source or any of the other Windows Update settings - it simply triggers a search (fact generation) or search, download and install (patch_server task). It is recommended to use the [puppetlabs wsus_client module](https://forge.puppet.com/puppetlabs/wsus_client) to configure the following options:
 
 * WSUS server if you are using one (although this is not strictly required)
 * Set the mode to automatically download updates and notify for install (`AutoNotify`)
