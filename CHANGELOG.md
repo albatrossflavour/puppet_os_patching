@@ -1,5 +1,20 @@
 # Change Log
 
+## [0.11.2](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.2) (2019-06-04)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.1...0.11.2)
+
+**Fixed bugs:**
+
+- Travis tests taking too long [\#138](https://github.com/albatrossflavour/puppet_os_patching/issues/138)
+- Version 0.11.1 of module cannot be installed on Windows \(via Agent\) [\#136](https://github.com/albatrossflavour/puppet_os_patching/issues/136)
+- Unable to run task os\_patching::patch\_server Windows 2012r2 with puppet enterprise agent 6.4.2 [\#133](https://github.com/albatrossflavour/puppet_os_patching/issues/133)
+- \#138 - fix travis issues [\#139](https://github.com/albatrossflavour/puppet_os_patching/pull/139) ([albatrossflavour](https://github.com/albatrossflavour))
+
+**Merged pull requests:**
+
+- \#136 add html to the pdkignore [\#137](https://github.com/albatrossflavour/puppet_os_patching/pull/137) ([albatrossflavour](https://github.com/albatrossflavour))
+- Issue/133 eventlog puppet agent 6.4.2 [\#134](https://github.com/albatrossflavour/puppet_os_patching/pull/134) ([nathangiuliani](https://github.com/nathangiuliani))
+
 ## [0.11.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.1) (2019-05-07)
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.0...0.11.1)
 
@@ -13,6 +28,7 @@
 
 **Merged pull requests:**
 
+- V0.11.1 release to master [\#132](https://github.com/albatrossflavour/puppet_os_patching/pull/132) ([albatrossflavour](https://github.com/albatrossflavour))
 - Updated ReadMe [\#131](https://github.com/albatrossflavour/puppet_os_patching/pull/131) ([nathangiuliani](https://github.com/nathangiuliani))
 - \#129 restrictions on stdlib are too tight [\#130](https://github.com/albatrossflavour/puppet_os_patching/pull/130) ([albatrossflavour](https://github.com/albatrossflavour))
 
