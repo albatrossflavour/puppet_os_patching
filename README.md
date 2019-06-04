@@ -164,7 +164,7 @@ This shows there are no updates which can be applied to this server and the serv
 }
 ```
 
-Where it shows 6 packages with available updates, along with an array of the package names.  None of the packges are tagged as security related (requires Debian, a subscription to RHEL or a Windows system).  There are no blockers to patching and the blackout window defined is not in effect.
+Where it shows 6 packages with available updates, along with an array of the package names.  None of the packages are tagged as security related (requires Debian, a subscription to RHEL or a Windows system).  There are no blockers to patching and the blackout window defined is not in effect.
 
 The reboot_required flag is set to true, which means there have been changes to packages that require a reboot (libc, kernel etc) but a reboot hasn't happened.  The apps_needing_restart shows the PID and command line of applications that are using files that have been upgraded but the process hasn't been restarted.
 
@@ -308,11 +308,11 @@ As Windows includes no native command line tools to manage update installation, 
 
 #### Supported Windows Versions
 
-Windows Server 2008 (x86 and x64) through to 2019 have been tested. The code should also function on the equivelant client versions of Windows (e.g. Vista and newer), however this has not been thoroughly tested.
+Windows Server 2008 (x86 and x64) through to 2019 have been tested. The code should also function on the equivalent client versions of Windows (e.g. Vista and newer), however this has not been thoroughly tested.
 
 #### Configuration of Windows Update
 
-This module does *not* handle the configuration of the update source or any of the other Windows Update settings - it simply triggers a search (fact generation) or searc, download and install (patch_server task). It is recommended to use the [puppetlabs wsus_client module](https://forge.puppet.com/puppetlabs/wsus_client) to configure the followng options:
+This module does *not* handle the configuration of the update source or any of the other Windows Update settings - it simply triggers a search (fact generation) or search, download and install (patch_server task). It is recommended to use the [puppetlabs wsus_client module](https://forge.puppet.com/puppetlabs/wsus_client) to configure the following options:
 
 * WSUS server if you are using one (although this is not strictly required)
 * Set the mode to automatically download updates and notify for install (`AutoNotify`)
@@ -335,7 +335,7 @@ class { 'wsus_client':
 
 * If updates or packages are installed outside of this script (e.g. by a user or another automated process), the results will not be captured in the facts.
 
-* On Windows systems, the timeout parameter of the `patch_server` task is implemented as a maintenace window end time (e.g. start time + timeout). This is used by doing a calculation prior to installing each update. If there is insufficient available, the update run will stop. However, at this stage each update is estimated to take 5 minutes to install. This will be improved in a future release to perform an estimation based on update size or type (e.g. an SCCM-like 5 minutes for hotfix, 30 minutes for cumulative update).
+* On Windows systems, the timeout parameter of the `patch_server` task is implemented as a maintenance window end time (e.g. start time + timeout). This is used by doing a calculation prior to installing each update. If there is insufficient available, the update run will stop. However, at this stage each update is estimated to take 5 minutes to install. This will be improved in a future release to perform an estimation based on update size or type (e.g. an SCCM-like 5 minutes for hotfix, 30 minutes for cumulative update).
 
 ## Development
 
