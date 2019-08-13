@@ -31,6 +31,8 @@ else
   fact_generation_cmd = fact_generation_script
   puppet_cmd = '/opt/puppetlabs/puppet/bin/puppet'
   shutdown_cmd = 'nohup /sbin/shutdown -r +1 2>/dev/null 1>/dev/null &'
+
+  ENV['LC_ALL'] = 'C'
 end
 
 starttime = Time.now.iso8601
