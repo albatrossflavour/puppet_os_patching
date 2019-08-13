@@ -7,6 +7,8 @@ Under the hood it uses the OS level tools or APIs to carry out the actual patchi
 
 Note - Windows systems require at least PowerShell version 3.0. If you are intending to update an unpatched Windows system prior to Server 2012, you will need to update PowerShell first.
 
+[The wiki](https://github.com/albatrossflavour/puppet_os_patching/wiki/Background) contains some useful background information on the module and how it works.
+
 ## Description
 
 Puppet Enterprise tasks and Bolt have opened up methods to integrate operating system level patching into the puppet workflow.  Providing automation of patch execution through tasks and the robust reporting of state through custom facts and PuppetDB.
