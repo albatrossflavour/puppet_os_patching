@@ -111,14 +111,18 @@ else
     chunk(:pinned) do
       data = {}
       pinnedpkgs = []
-      pinnedpackagefile = '/etc/yum/pluginconf.d/versionlock.list'
+      mismatchpinnedpackagefile = os_patching_dir + 'os_version_locked_packages'
+      pinnedpackagefile = os_patching_dir + 'os_version_locked_packages'
       if File.file?(pinnedpackagefile)
         pinnedfile = File.open(pinnedpackagefile, 'r').read
         pinnedfile.each_line do |line|
-          matchdata = line.match(/^[0-9]:(.*)/)
-          if matchdata
-            pinnedpkgs.push matchdata[1]
-          end
+          pinnedpkgs.push line
+        end
+      end
+      if File.file?(mismatchpinnedpackagefile)
+        mismatchfile = File.open(mismatchpinnedpackagefile, 'r').read
+        mismatchfile.each_line do |line|
+          warnings['packages_version_locked_in_catalog_but_not_on_os'].push line
         end
       end
       data['pinned_packages'] = pinnedpkgs
