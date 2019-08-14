@@ -286,7 +286,7 @@ function Invoke-RefreshPuppetFacts {
     $allUpdates | Select-Object -ExpandProperty Title | Out-File $updateFile -Encoding ascii
 
     # output list of KBs that need to be applied
-    $allUpdates | ForEach-Object { ($_ | Select-Object -ExpandProperty KBArticleIDs)[0] } | Out-File $kbFile -Encoding ascii
+    $allUpdates | ForEach-Object { $_.KBArticleIDs | ForEach-Object { "KB$_" } } | Out-File $kbFile -Encoding ascii
 
     # filter to security updates and output
     $securityUpdates | Select-Object -ExpandProperty Title | Out-File $secUpdateFile -Encoding ascii
