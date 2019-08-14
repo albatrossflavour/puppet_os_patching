@@ -54,7 +54,7 @@ else
           kblist.push line.chomp
         end
       end
-      data['missing_update_kbs'] = kbslist
+      data['missing_update_kbs'] = kblist
       data
     end
 
