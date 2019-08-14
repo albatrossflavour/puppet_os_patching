@@ -119,7 +119,7 @@ else
           pinnedpkgs.push line
         end
       end
-      if File.file?(mismatchpinnedpackagefile)
+      if File.file?(mismatchpinnedpackagefile) and not File.zero?(mismatchpinnedpackagefile)
         warnings['packages_version_locked_in_catalog_but_not_on_os'] = []
         mismatchfile = File.open(mismatchpinnedpackagefile, 'r').read
         mismatchfile.each_line do |line|
