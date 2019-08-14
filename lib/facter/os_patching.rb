@@ -47,7 +47,7 @@ else
     chunk(:kb_updates) do
       data = {}
       kblist = []
-      kbfile = os_patching_dir + 'missing_update_kbs'
+      kbfile = os_patching_dir + '/missing_update_kbs'
       if File.file?(kbfile) and not File.zero?(kbfile)
         kbs = File.open(kbfile, 'r').read
         kbs.each_line do |line|
