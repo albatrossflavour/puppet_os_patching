@@ -28,6 +28,8 @@ case $(facter osfamily) in
     FILTER='egrep -v "^Security:"'
     PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
     SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
+    HELDPKGS=$(awk -F'[:-]' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list)
+
   ;;
   Suse)
     PKGS=$(zypper --non-interactive --no-abbrev --quiet lu | grep '|' | grep -v '\sRepository' | awk -F'|' '/^[[:alnum:]]/ {print $3}' | sed 's/^\s*\|\s*$//')
@@ -36,6 +38,7 @@ case $(facter osfamily) in
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
     SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /security/ {print $2}')
+    HELDPKGS=$(dpkg --get-selections | awk '$2 == "hold" {print $1}')
   ;;
   *)
     rm $LOCKFILE
@@ -46,6 +49,17 @@ esac
 DATADIR='/var/cache/os_patching'
 UPDATEFILE="$DATADIR/package_updates"
 SECUPDATEFILE="$DATADIR/security_package_updates"
+OSHELDPKGFILE="$DATADIR/os_version_locked_packages"
+CATHELDPKGFILE="$DATADIR/catalog_version_locked_packages"
+MISMATCHHELDPKGFILE="$DATADIR/mismatched_version_locked_packages"
+CATALOG="$(facter -p puppet_client_datadir)/catalog/$(facter fqdn).json"
+
+if [ -f "${CATALOG}"
+then
+	VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | /opt/puppetlabs/puppet/bin/ruby -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] end")
+else
+	VERSION_LOCK_FROM_CATALOG=''
+fi
 
 
 if [ ! -d "${DATADIR}" ]
@@ -65,6 +79,23 @@ cat /dev/null > ${SECUPDATEFILE}
 for UPDATE in $SECPKGS
 do
   echo "$UPDATE" >> ${SECUPDATEFILE}
+done
+
+cat /dev/null > ${CATHELDPKGFILE}
+for CATHELD in $VERSION_LOCK_FROM_CATALOG
+do
+  echo "$HELD" >> ${CATHELDPKGFILE}
+done
+
+cat /dev/null > ${OSHELDPKGFILE}
+cat /dev/null > ${MISMATCHHELDPKGFILE}
+for HELD in $HELDPKGS
+do
+	if [ $(egrep -c "^${HELD}$" ${CATHELDPKFILE}) == 0 ]
+	then
+		echo "$HELD" >> ${MISMATCHHELDPKGFILE}
+	fi
+  echo "$HELD" >> ${OSHELDPKGFILE}
 done
 
 if [ -f '/usr/bin/needs-restarting' ]
