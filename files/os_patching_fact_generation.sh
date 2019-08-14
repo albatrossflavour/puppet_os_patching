@@ -54,7 +54,7 @@ CATHELDPKGFILE="$DATADIR/catalog_version_locked_packages"
 MISMATCHHELDPKGFILE="$DATADIR/mismatched_version_locked_packages"
 CATALOG="$(facter -p puppet_client_datadir)/catalog/$(facter fqdn).json"
 
-if [ -f "${CATALOG}"
+if [ -f "${CATALOG}" ]
 then
 	VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | /opt/puppetlabs/puppet/bin/ruby -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] end")
 else
@@ -84,14 +84,14 @@ done
 cat /dev/null > ${CATHELDPKGFILE}
 for CATHELD in $VERSION_LOCK_FROM_CATALOG
 do
-  echo "$HELD" >> ${CATHELDPKGFILE}
+  echo "$CATHELD" >> ${CATHELDPKGFILE}
 done
 
 cat /dev/null > ${OSHELDPKGFILE}
 cat /dev/null > ${MISMATCHHELDPKGFILE}
 for HELD in $HELDPKGS
 do
-	if [ $(egrep -c "^${HELD}$" ${CATHELDPKFILE}) == 0 ]
+	if [ $(egrep -c "^${HELD}$" ${CATHELDPKGFILE}) == 0 ]
 	then
 		echo "$HELD" >> ${MISMATCHHELDPKGFILE}
 	fi
