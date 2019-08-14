@@ -44,6 +44,20 @@ else
       data
     end
 
+    chunk(:kb_updates) do
+      data = {}
+      kblist = []
+      kbfile = os_patching_dir + 'missing_update_kbs'
+      if File.file?(kbfile) and not File.zero?(kbfile)
+        kbs = File.open(kbfile, 'r').read
+        kbs.each_line do |line|
+          kblist.push line.chomp
+        end
+      end
+      data['missing_update_kbs'] = kbslist
+      data
+    end
+
     chunk(:secupdates) do
       data = {}
       secupdatelist = []
