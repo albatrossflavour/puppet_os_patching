@@ -81,21 +81,21 @@ do
   echo "$UPDATE" >> ${SECUPDATEFILE}
 done
 
+cat /dev/null > ${OSHELDPKGFILE}
+for HELD in $HELDPKGS
+do
+ echo "$HELD" >> ${OSHELDPKGFILE}
+done
+
+cat /dev/null > ${MISMATCHHELDPKGFILE}
 cat /dev/null > ${CATHELDPKGFILE}
 for CATHELD in $VERSION_LOCK_FROM_CATALOG
 do
-  echo "$CATHELD" >> ${CATHELDPKGFILE}
-done
-
-cat /dev/null > ${OSHELDPKGFILE}
-cat /dev/null > ${MISMATCHHELDPKGFILE}
-for HELD in $HELDPKGS
-do
-	if [ $(egrep -c "^${HELD}$" ${CATHELDPKGFILE}) == 0 ]
+  if [ $(egrep -c "^${CATHELD}$" ${OSHELDPKGFILE}) == 0 ]
 	then
-		echo "$HELD" >> ${MISMATCHHELDPKGFILE}
+		echo "$CATHELD" >> ${MISMATCHHELDPKGFILE}
 	fi
-  echo "$HELD" >> ${OSHELDPKGFILE}
+ echo "$CATHELD" >> ${CATHELDPKGFILE}
 done
 
 if [ -f '/usr/bin/needs-restarting' ]

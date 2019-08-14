@@ -111,18 +111,19 @@ else
     chunk(:pinned) do
       data = {}
       pinnedpkgs = []
-      mismatchpinnedpackagefile = os_patching_dir + 'os_version_locked_packages'
-      pinnedpackagefile = os_patching_dir + 'os_version_locked_packages'
+      mismatchpinnedpackagefile = os_patching_dir + '/mismatched_version_locked_packages'
+      pinnedpackagefile = os_patching_dir + '/os_version_locked_packages'
       if File.file?(pinnedpackagefile)
-        pinnedfile = File.open(pinnedpackagefile, 'r').read
+        pinnedfile = File.open(pinnedpackagefile, 'r').read.chomp
         pinnedfile.each_line do |line|
           pinnedpkgs.push line
         end
       end
       if File.file?(mismatchpinnedpackagefile)
+        warnings['packages_version_locked_in_catalog_but_not_on_os'] = []
         mismatchfile = File.open(mismatchpinnedpackagefile, 'r').read
         mismatchfile.each_line do |line|
-          warnings['packages_version_locked_in_catalog_but_not_on_os'].push line
+          warnings['packages_version_locked_in_catalog_but_not_on_os'].push line.chomp
         end
       end
       data['pinned_packages'] = pinnedpkgs
