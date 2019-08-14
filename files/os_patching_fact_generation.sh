@@ -91,7 +91,7 @@ cat /dev/null > ${MISMATCHHELDPKGFILE}
 cat /dev/null > ${CATHELDPKGFILE}
 for CATHELD in $VERSION_LOCK_FROM_CATALOG
 do
-  if [ $(egrep -c "^${CATHELD}$" ${OSHELDPKGFILE}) == 0 ]
+  if [ $(egrep -c "^${CATHELD}$" ${OSHELDPKGFILE}) -eq 0 ]
 	then
 		echo "$CATHELD" >> ${MISMATCHHELDPKGFILE}
 	fi
