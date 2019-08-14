@@ -292,7 +292,10 @@ class os_patching (
           user        => $patch_data_owner,
           group       => $patch_data_group,
           refreshonly => true,
-          require     => File[$fact_cmd],
+          require     => [
+            File[$fact_cmd],
+            File["${cache_dir}/reboot_override"]
+          ],
         }
       }
 

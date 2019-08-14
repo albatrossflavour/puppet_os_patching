@@ -110,6 +110,9 @@ describe 'os_patching' do
       when 'Linux'
         it { is_expected.to contain_cron('Cache patching data').with_ensure('present') }
         it { is_expected.to contain_cron('Cache patching data at reboot').with_ensure('present') }
+        it { is_expected.to contain_exec('os_patching::exec::fact').that_requires(
+            'File[' + cache_dir + '/reboot_override]'
+        )}
       end
       it { is_expected.to contain_exec('os_patching::exec::fact') }
       it { is_expected.to contain_exec('os_patching::exec::fact_upload') }
