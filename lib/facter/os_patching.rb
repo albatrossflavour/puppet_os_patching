@@ -130,7 +130,7 @@ else
       if File.file?(pinnedpackagefile)
         pinnedfile = File.open(pinnedpackagefile, 'r').read.chomp
         pinnedfile.each_line do |line|
-          pinnedpkgs.push line
+          pinnedpkgs.push line.chomp
         end
       end
       if File.file?(mismatchpinnedpackagefile) and not File.zero?(mismatchpinnedpackagefile)

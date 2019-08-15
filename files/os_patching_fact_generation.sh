@@ -53,7 +53,7 @@ SECUPDATEFILE="$DATADIR/security_package_updates"
 OSHELDPKGFILE="$DATADIR/os_version_locked_packages"
 CATHELDPKGFILE="$DATADIR/catalog_version_locked_packages"
 MISMATCHHELDPKGFILE="$DATADIR/mismatched_version_locked_packages"
-CATALOG="$(facter -p puppet_client_datadir)/catalog/$(facter fqdn).json"
+CATALOG="$(facter -p puppet_vardir)/client_data/catalog/$(facter fqdn).json"
 
 if [ -f "${CATALOG}" ]
 then
