@@ -14,6 +14,10 @@
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
 #
+# @param version_specified_but_not_locked_package_action [Enum]
+#   How should the node behave if there are version specified packages in the catalog
+#   but they are not version locked at the OS layer (Linux specific)
+#
 # @param yum_utils
 #   If managed, what should the yum_utils package set to?
 #
@@ -118,6 +122,7 @@ class os_patching (
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
+  Enum['patch', 'pin', 'stop'] $version_specified_but_not_locked_package_action = 'patch',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -202,6 +207,11 @@ class os_patching (
   file { "${cache_dir}/patch_window":
     ensure  => $patch_window_ensure,
     content => $patch_window,
+  }
+
+  file { "${cache_dir}/vsbnl_package_action":
+    ensure  => $ensure_file,
+    content => $version_specified_but_not_locked_package_action,
   }
 
   $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {

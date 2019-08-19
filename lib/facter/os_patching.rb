@@ -165,6 +165,23 @@ else
       data
     end
 
+    # How to deal with Version Specified But Not Locked packages
+    chunk(:VSBNLP) do
+      data = {}
+      nsbnlpfile = os_patching_dir + '/vsbnl_package_action'
+      if File.file?(nsbnlpfile)
+        nsbnlp = File.open(nsbnlpfile, 'r').to_a
+        line = nsbnlp.last
+        matchdata = line.match(/^(.*)$/)
+        if matchdata[0]
+          data['version_specified_but_not_locked_package_action'] = matchdata[0]
+        end
+      else
+        data['version_specified_but_not_locked_package_action'] = 'patch'
+      end
+      data
+    end
+
     # Patch window
     chunk(:patch_window) do
       data = {}
