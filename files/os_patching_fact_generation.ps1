@@ -275,6 +275,7 @@ function Invoke-RefreshPuppetFacts {
     #paths to facts
     $dataDir = 'C:\ProgramData\os_patching'
     $updateFile = Join-Path -Path $dataDir -ChildPath 'package_updates'
+    $kbFile = Join-Path -Path $dataDir -ChildPath 'missing_update_kbs'
     $secUpdateFile = Join-Path -Path $dataDir -ChildPath 'security_package_updates'
     $rebootReqdFile = Join-Path -Path $dataDir -ChildPath  'reboot_required'
 
@@ -283,6 +284,9 @@ function Invoke-RefreshPuppetFacts {
 
     # output list of required updates
     $allUpdates | Select-Object -ExpandProperty Title | Out-File $updateFile -Encoding ascii
+
+    # output list of KBs that need to be applied
+    $allUpdates | ForEach-Object { $_.KBArticleIDs | ForEach-Object { "KB$_" } } | Out-File $kbFile -Encoding ascii
 
     # filter to security updates and output
     $securityUpdates | Select-Object -ExpandProperty Title | Out-File $secUpdateFile -Encoding ascii
