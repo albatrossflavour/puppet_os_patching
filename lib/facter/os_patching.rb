@@ -121,7 +121,7 @@ else
       data
     end
 
-    # Are there any pinned packages in yum?
+    # Are there any pinned/version locked packages?
     chunk(:pinned) do
       data = {}
       pinnedpkgs = []
