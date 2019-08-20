@@ -525,6 +525,12 @@ elsif facts['values']['os']['family'] == 'Debian'
   deb_opts = '-o Apt::Get::Purge=false -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
   apt_std_out, stderr, status = Open3.capture3("#{deb_front} apt-get #{dpkg_params} -y #{deb_opts} #{apt_mode}")
   err(status, 'os_patching/apt', stderr, starttime) if status != 0
+  # Should we clean the cache prior to starting?
+  if params['apt_autoremove'] && params['apt_autoremove'] == true
+    _auto_remove_out, stderr, status = Open3.capture3('#{deb_front} apt-get -y autoremove')
+  end
+  err(status, 'os_patching/auto_remove', stderr, starttime) if status != 0
+  log.info 'Cache cleaned'
 
   output('Success', reboot, security_only, 'Patching complete', pkg_list, apt_std_out, '', pinned_pkgs, starttime)
   log.info 'Patching complete'
