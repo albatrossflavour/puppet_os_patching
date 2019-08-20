@@ -198,6 +198,11 @@ class os_patching (
     notify => Exec[$fact_exec],
   }
 
+  $autoremove_ensure = $apt_autoremove ? {
+    true    => 'present',
+    default => 'absent'
+  }
+
   $patch_window_ensure = ($ensure == 'present' and $patch_window ) ? {
     true    => 'file',
     default => 'absent'
@@ -325,7 +330,7 @@ class os_patching (
 
       if $facts['os']['family'] == 'Debian' and $apt_autoremove == true {
         cron { 'Run apt autoremove on reboot':
-          ensure  => $ensure,
+          ensure  => $autoremove_ensure,
           command => 'apt-get -y autoremove',
           user    => $patch_cron_user,
           special => 'reboot',
