@@ -28,7 +28,7 @@ case $(facter osfamily) in
     FILTER='egrep -v "^Security:"'
     PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
     SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
-    HELDPKGS=$(awk -F'[:-]' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list)
+    HELDPKGS=$(awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list)
 
   ;;
   Suse)
