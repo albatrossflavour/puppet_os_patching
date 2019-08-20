@@ -303,6 +303,11 @@ class os_patching (
             }
             'Debian': {
               $match = $pkg.match(/(.*)_(.)/)
+              exec { "hold-${match[0]}":
+                command => "/bin/echo '${match[0]} hold' | /usr/bin/dpkg --set-selections",
+                unless  => "/usr/bin/dpkg --get-selections ${match[0]} | /bin/grep hold",
+                require => Package[$match[0]]
+              }
               apt::pin { "hold-${match[0]}":
                 packages => $match[0],
                 version  => $match[1],
