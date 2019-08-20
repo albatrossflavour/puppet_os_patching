@@ -25,6 +25,9 @@
 # @param fact_upload [Boolean]
 #   Should `puppet fact upload` be run after any changes to the fact cache files?
 #
+# @param apt_autoremove [Boolean]
+#   Should `apt-get autoremove` be run during reboot?
+#
 # @param manage_delta_rpm [Boolean]
 #   Should the deltarpm package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `delta_rpm` to determine how it should be manged
@@ -124,7 +127,7 @@ class os_patching (
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
   Boolean $block_patching_on_warnings = false,
-  Boolean $apt_autoremove             = true,
+  Boolean $apt_autoremove             = false,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
