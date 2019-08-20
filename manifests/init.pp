@@ -294,6 +294,7 @@ class os_patching (
             'RedHat': {
               yum::versionlock { "0:${pkg}":
                 ensure => present,
+                notify => Exec[$fact_exec],
               }
             }
             default: { fail translate(('Unsupported OS'))}
