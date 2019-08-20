@@ -301,7 +301,16 @@ class os_patching (
                 notify => Exec[$fact_exec],
               }
             }
-            default: { fail translate(('Unsupported OS'))}
+            'Debian': {
+              $match = $pkg.match(/(.*)_(.)/)
+              apt::pin { "hold-${match[0]}":
+                packages => $match[0],
+                version  => $match[1],
+                priority => 1001,
+                notify   => Exec[$fact_exec],
+             }
+           }
+           default: { fail translate(('Unsupported OS'))}
           }
         }
       }
