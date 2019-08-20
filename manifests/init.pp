@@ -303,14 +303,14 @@ class os_patching (
             }
             'Debian': {
               $match = $pkg.match(/([A-Za-z0-9\-]*)_(.*)/)
-              exec { "hold-${match[0]}":
+              exec { "hold-${match[1]}":
                 command => "/bin/echo '${match[0]} hold' | /usr/bin/dpkg --set-selections",
-                unless  => "/usr/bin/dpkg --get-selections ${match[0]} | /bin/grep hold",
-                require => Package[$match[0]]
+                unless  => "/usr/bin/dpkg --get-selections ${match[1]} | /bin/grep hold",
+                require => Package[$match[1]]
               }
-              apt::pin { "hold-${match[0]}":
-                packages => $match[0],
-                version  => $match[1],
+              apt::pin { "hold-${match[1]}":
+                packages => $match[1],
+                version  => $match[2],
                 priority => 1001,
                 notify   => Exec[$fact_exec],
              }
