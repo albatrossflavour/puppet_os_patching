@@ -28,10 +28,6 @@
     "clean_cache": {
       "description": "Should the yum/dpkg caches be cleaned at the start of the task? (Defaults to false)",
       "type": "Optional[Boolean]"
-    },
-    "apt_autoremove": {
-      "description": "Should `apt-get autoremove` be run after a successful patch run? (Defaults to false)",
-      "type": "Optional[Boolean]"
     }
   },
   "implementations": [
