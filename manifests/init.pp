@@ -118,6 +118,7 @@ class os_patching (
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
+  Boolean $apt_autoremove             = true,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -317,6 +318,15 @@ class os_patching (
         user    => $patch_cron_user,
         special => 'reboot',
         require => File[$fact_cmd],
+      }
+
+      if $facts['os']['family'] == 'Debian' and $apt_autoremove == true {
+        cron { 'Run apt autoremove on reboot':
+          ensure  => $ensure,
+          command => 'apt-get -y autoremove',
+          user    => $patch_cron_user,
+          special => 'reboot',
+        }
       }
     }
     'windows': {
