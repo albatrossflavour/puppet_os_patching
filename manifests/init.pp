@@ -345,7 +345,7 @@ class os_patching (
         require => File[$fact_cmd],
       }
 
-      if $facts['os']['family'] == 'Debian' and $apt_autoremove == true {
+      if $facts['os']['family'] == 'Debian' {
         cron { 'Run apt autoremove on reboot':
           ensure  => $autoremove_ensure,
           command => 'apt-get -y autoremove',
