@@ -292,7 +292,7 @@ class os_patching (
         #  purge => true,
         #}
 
-      if ( $auto_version_lock_packages == true ) {
+      if ( $auto_version_lock_packages == true ) and ( $facts['os_patching']['warnings']['packages_version_locked_in_catalog_but_not_on_os'] ) {
         $facts['os_patching']['warnings']['packages_version_locked_in_catalog_but_not_on_os'].each | String $pkg | {
           case $facts['os']['family'] {
             'RedHat': {
