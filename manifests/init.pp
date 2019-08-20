@@ -302,7 +302,7 @@ class os_patching (
               }
             }
             'Debian': {
-              $match = $pkg.match(/([A-Za-z0-9\-])_(.)/)
+              $match = $pkg.match(/([A-Za-z0-9\-]*)_(.*)/)
               exec { "hold-${match[0]}":
                 command => "/bin/echo '${match[0]} hold' | /usr/bin/dpkg --set-selections",
                 unless  => "/usr/bin/dpkg --get-selections ${match[0]} | /bin/grep hold",
