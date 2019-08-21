@@ -14,7 +14,7 @@
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
 #
-# @param abort_patching_on_warnings [Boolean]
+# @param block_patching_on_warnings [Boolean]
 #   If there are warnings present in the os_patching fact, should the patching task run?
 #   If `true` the run will abort and take no action
 #   If `false` the run will continue and attempt to patch (default)
@@ -128,7 +128,7 @@ class os_patching (
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
   Boolean $auto_version_lock_packages = false,
-  Boolean $abort_patching_on_warnings = false,
+  Boolean $block_patching_on_warnings = false,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -215,7 +215,7 @@ class os_patching (
     default => 'absent'
   }
 
-  $abort_patching_ensure = ($ensure == 'present' and $abort_patching_on_warnings ) ? {
+  $block_patching_ensure = ($ensure == 'present' and $block_patching_on_warnings ) ? {
     true    => 'file',
     default => 'absent'
   }
@@ -225,8 +225,8 @@ class os_patching (
     content => $patch_window,
   }
 
-  file { "${cache_dir}/abort_patching_on_warning":
-    ensure  => $abort_patching_ensure,
+  file { "${cache_dir}/block_patching_on_warning":
+    ensure  => $block_patching_ensure,
     notify  => Exec[$fact_exec],
   }
 

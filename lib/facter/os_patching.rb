@@ -133,10 +133,10 @@ else
         end
       end
       if File.file?(mismatchpinnedpackagefile) and not File.zero?(mismatchpinnedpackagefile)
-        warnings['packages_version_locked_in_catalog_but_not_on_os'] = []
+        warnings['package_versions_specified_but_not_locked'] = []
         mismatchfile = File.open(mismatchpinnedpackagefile, 'r').read
         mismatchfile.each_line do |line|
-          warnings['packages_version_locked_in_catalog_but_not_on_os'].push line.chomp
+          warnings['package_versions_specified_but_not_locked'].push line.chomp
         end
       end
       data['pinned_packages'] = pinnedpkgs
@@ -249,11 +249,11 @@ else
     end
 
     # Should we patch if there are warnings?
-    chunk(:abort_patching_on_warning) do
+    chunk(:block_patching_on_warning) do
       data = {}
-      abort_on_warningfile = os_patching_dir + '/abort_patching_on_warning'
+      abort_on_warningfile = os_patching_dir + '/block_patching_on_warning'
       if File.file?(abort_on_warningfile)
-        data['abort_patching_on_warning'] = 'true'
+        data['block_patching_on_warning'] = 'true'
         if not warnings.empty?
           blocked = true
           blocked_reasons.push warnings
@@ -261,7 +261,7 @@ else
         data['blocked'] = blocked
         data['blocked_reasons'] = blocked_reasons
       else
-        data['abort_patching_on_warning'] = 'false'
+        data['block_patching_on_warning'] = 'false'
         data['warnings'] = warnings
         data['blocked'] = blocked
         data['blocked_reasons'] = blocked_reasons
