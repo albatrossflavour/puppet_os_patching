@@ -165,19 +165,19 @@ else
       data
     end
 
-    # How to deal with Version Specified But Not Locked packages
-    chunk(:VSBNLP) do
+    # Should we patch if there are warnings?
+    chunk(:abort_patching_on_warning) do
       data = {}
-      nsbnlpfile = os_patching_dir + '/vsbnl_package_action'
-      if File.file?(nsbnlpfile)
-        nsbnlp = File.open(nsbnlpfile, 'r').to_a
-        line = nsbnlp.last
+      abort_on_warningfile = os_patching_dir + '/abort_patching_on_warning'
+      if File.file?(abort_on_warningfile)
+        abort_on_warning = File.open(abort_on_warningfile, 'r').to_a
+        line = abort_on_warning.last
         matchdata = line.match(/^(.*)$/)
         if matchdata[0]
-          data['version_specified_but_not_locked_package_action'] = matchdata[0]
+          data['abort_patching_on_warning'] = matchdata[0]
         end
       else
-        data['version_specified_but_not_locked_package_action'] = 'patch'
+        data['abort_patching_on_warning'] = 'false'
       end
       data
     end
