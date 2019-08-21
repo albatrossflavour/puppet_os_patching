@@ -249,11 +249,11 @@ else
     end
 
     # Should we patch if there are warnings?
-    chunk(:abort_patching_on_warning) do
+    chunk(:block_patching_on_warning) do
       data = {}
-      abort_on_warningfile = os_patching_dir + '/abort_patching_on_warning'
+      abort_on_warningfile = os_patching_dir + '/block_patching_on_warning'
       if File.file?(abort_on_warningfile)
-        data['abort_patching_on_warning'] = 'true'
+        data['block_patching_on_warning'] = 'true'
         if not warnings.empty?
           blocked = true
           blocked_reasons.push warnings
@@ -261,19 +261,13 @@ else
         data['blocked'] = blocked
         data['blocked_reasons'] = blocked_reasons
       else
-        data['abort_patching_on_warning'] = 'false'
+        data['block_patching_on_warning'] = 'false'
         data['warnings'] = warnings
         data['blocked'] = blocked
         data['blocked_reasons'] = blocked_reasons
       end
       data
     end
-
-    #chunk(:warnings) do
-    #  data = {}
-    #  data['warnings'] = warnings
-    #  data
-    #end
 
   end
 end
