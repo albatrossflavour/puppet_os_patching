@@ -14,9 +14,10 @@
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
 #
-# @param version_specified_but_not_locked_package_action [Enum]
-#   How should the node behave if there are version specified packages in the catalog
-#   but they are not version locked at the OS layer (Linux specific)
+# @param abort_patching_on_warnings [Enum]
+#   If there are warnings present in the os_patching fact, should the patching task run?
+#   If `true` the run will abort and take no action
+#   If `false` the run will continue and attempt to patch (default)
 #
 # @param yum_utils
 #   If managed, what should the yum_utils package set to?
@@ -127,7 +128,7 @@ class os_patching (
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
   Boolean $auto_version_lock_packages = false,
-  Enum['patch', 'pin', 'stop'] $version_specified_but_not_locked_package_action = 'patch',
+  Boolean $abort_patching_on_warnings = false,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -219,9 +220,9 @@ class os_patching (
     content => $patch_window,
   }
 
-  file { "${cache_dir}/vsbnl_package_action":
+  file { "${cache_dir}/abort_patching_on_warning":
     ensure  => $ensure_file,
-    content => $version_specified_but_not_locked_package_action,
+    content => $abort_patching_on_warning,
   }
 
   $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {
