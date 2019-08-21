@@ -13,6 +13,8 @@ else
     require 'time'
     now = Time.now.iso8601
     warnings = {}
+    blocked = false
+    blocked_reasons = []
 
     if Facter.value(:kernel) == 'Linux'
       os_patching_dir = '/var/cache/os_patching'
@@ -44,6 +46,20 @@ else
       data
     end
 
+    chunk(:kb_updates) do
+      data = {}
+      kblist = []
+      kbfile = os_patching_dir + '/missing_update_kbs'
+      if File.file?(kbfile) and not File.zero?(kbfile)
+        kbs = File.open(kbfile, 'r').read
+        kbs.each_line do |line|
+          kblist.push line.chomp
+        end
+      end
+      data['missing_update_kbs'] = kblist
+      data
+    end
+
     chunk(:secupdates) do
       data = {}
       secupdatelist = []
@@ -69,9 +85,6 @@ else
     chunk(:blackouts) do
       data = {}
       arraydata = {}
-      data['blocked'] = false
-      data['blocked_reasons'] = {}
-      data['blocked_reasons'] = []
       blackoutfile = os_patching_dir + '/blackout_windows'
       if File.file?(blackoutfile)
         blackouts = File.open(blackoutfile, 'r').read
@@ -92,14 +105,14 @@ else
             end
 
             if (matchdata[2]..matchdata[3]).cover?(now)
-              data['blocked'] = true
-              data['blocked_reasons'].push matchdata[1]
+              blocked = true
+              blocked_reasons.push matchdata[1]
             end
             # rubocop:enable Metrics/BlockNesting
           else
             warnings['blackouts'] = "Invalid blackout entry : #{line}"
-            data['blocked'] = true
-            data['blocked_reasons'].push "Invalid blackout entry : #{line}"
+            blocked = true
+            blocked_reasons.push "Invalid blackout entry : #{line}"
           end
         end
       end
@@ -107,18 +120,23 @@ else
       data
     end
 
-    # Are there any pinned packages in yum?
+    # Are there any pinned/version locked packages?
     chunk(:pinned) do
       data = {}
       pinnedpkgs = []
-      pinnedpackagefile = '/etc/yum/pluginconf.d/versionlock.list'
+      mismatchpinnedpackagefile = os_patching_dir + '/mismatched_version_locked_packages'
+      pinnedpackagefile = os_patching_dir + '/os_version_locked_packages'
       if File.file?(pinnedpackagefile)
-        pinnedfile = File.open(pinnedpackagefile, 'r').read
+        pinnedfile = File.open(pinnedpackagefile, 'r').read.chomp
         pinnedfile.each_line do |line|
-          matchdata = line.match(/^[0-9]:(.*)/)
-          if matchdata
-            pinnedpkgs.push matchdata[1]
-          end
+          pinnedpkgs.push line.chomp
+        end
+      end
+      if File.file?(mismatchpinnedpackagefile) and not File.zero?(mismatchpinnedpackagefile)
+        warnings['version_specified_but_not_locked_packages'] = []
+        mismatchfile = File.open(mismatchpinnedpackagefile, 'r').read
+        mismatchfile.each_line do |line|
+          warnings['version_specified_but_not_locked_packages'].push line.chomp
         end
       end
       data['pinned_packages'] = pinnedpkgs
@@ -229,9 +247,25 @@ else
       end
       data
     end
-    chunk(:warnings) do
+
+    # Should we patch if there are warnings?
+    chunk(:block_patching_on_warnings) do
       data = {}
-      data['warnings'] = warnings
+      abort_on_warningsfile = os_patching_dir + '/block_patching_on_warnings'
+      if File.file?(abort_on_warningsfile)
+        data['block_patching_on_warnings'] = 'true'
+        if not warnings.empty?
+          blocked = true
+          blocked_reasons.push warnings
+        end
+        data['blocked'] = blocked
+        data['blocked_reasons'] = blocked_reasons
+      else
+        data['block_patching_on_warnings'] = 'false'
+        data['warnings'] = warnings
+        data['blocked'] = blocked
+        data['blocked_reasons'] = blocked_reasons
+      end
       data
     end
   end

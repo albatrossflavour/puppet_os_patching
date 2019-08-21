@@ -14,11 +14,19 @@
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
 #
+# @param block_patching_on_warnings [Boolean]
+#   If there are warnings present in the os_patching fact, should the patching task run?
+#   If `true` the run will abort and take no action
+#   If `false` the run will continue and attempt to patch (default)
+#
 # @param yum_utils
 #   If managed, what should the yum_utils package set to?
 #
 # @param fact_upload [Boolean]
 #   Should `puppet fact upload` be run after any changes to the fact cache files?
+#
+# @param apt_autoremove [Boolean]
+#   Should `apt-get autoremove` be run during reboot?
 #
 # @param manage_delta_rpm [Boolean]
 #   Should the deltarpm package be managed by this module on RedHat family nodes?
@@ -118,6 +126,8 @@ class os_patching (
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
+  Boolean $block_patching_on_warnings = false,
+  Boolean $apt_autoremove             = false,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -194,7 +204,17 @@ class os_patching (
     notify => Exec[$fact_exec],
   }
 
+  $autoremove_ensure = $apt_autoremove ? {
+    true    => 'present',
+    default => 'absent'
+  }
+
   $patch_window_ensure = ($ensure == 'present' and $patch_window ) ? {
+    true    => 'file',
+    default => 'absent'
+  }
+
+  $block_patching_ensure = ($ensure == 'present' and $block_patching_on_warnings ) ? {
     true    => 'file',
     default => 'absent'
   }
@@ -202,6 +222,11 @@ class os_patching (
   file { "${cache_dir}/patch_window":
     ensure  => $patch_window_ensure,
     content => $patch_window,
+  }
+
+  file { "${cache_dir}/block_patching_on_warnings":
+    ensure  => $block_patching_ensure,
+    notify  => Exec[$fact_exec],
   }
 
   $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {
@@ -227,10 +252,10 @@ class os_patching (
         fail translate(('Blackout description can only contain alphanumerics, space, dash and underscore'))
       }
       if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail translate(('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)'))
+        fail translate(('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)'))
       }
       if ( $value['end'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail translate(('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTdd:mm:hh:ss[-+]hh:mm)'))
+        fail translate(('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)'))
       }
       if ( $value['start'] > $value['end'] ){
         fail translate(('Blackout end time must after the start time'))
@@ -268,6 +293,7 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
+
       if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
         package { 'yum-utils':
           ensure => $yum_utils,
@@ -292,7 +318,10 @@ class os_patching (
           user        => $patch_data_owner,
           group       => $patch_data_group,
           refreshonly => true,
-          require     => File[$fact_cmd],
+          require     => [
+            File[$fact_cmd],
+            File["${cache_dir}/reboot_override"]
+          ],
         }
       }
 
@@ -314,6 +343,15 @@ class os_patching (
         user    => $patch_cron_user,
         special => 'reboot',
         require => File[$fact_cmd],
+      }
+
+      if $facts['os']['family'] == 'Debian' {
+        cron { 'Run apt autoremove on reboot':
+          ensure  => $autoremove_ensure,
+          command => 'apt-get -y autoremove',
+          user    => $patch_cron_user,
+          special => 'reboot',
+        }
       }
     }
     'windows': {
