@@ -14,6 +14,11 @@
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
 #
+# @param block_patching_on_warnings [Boolean]
+#   If there are warnings present in the os_patching fact, should the patching task run?
+#   If `true` the run will abort and take no action
+#   If `false` the run will continue and attempt to patch (default)
+#
 # @param yum_utils
 #   If managed, what should the yum_utils package set to?
 #
@@ -118,6 +123,7 @@ class os_patching (
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
+  Boolean $block_patching_on_warnings = false,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -199,9 +205,19 @@ class os_patching (
     default => 'absent'
   }
 
+  $block_patching_ensure = ($ensure == 'present' and $block_patching_on_warnings ) ? {
+    true    => 'file',
+    default => 'absent'
+  }
+
   file { "${cache_dir}/patch_window":
     ensure  => $patch_window_ensure,
     content => $patch_window,
+  }
+
+  file { "${cache_dir}/block_patching_on_warnings":
+    ensure  => $block_patching_ensure,
+    notify  => Exec[$fact_exec],
   }
 
   $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {
@@ -268,6 +284,7 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
+
       if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
         package { 'yum-utils':
           ensure => $yum_utils,
