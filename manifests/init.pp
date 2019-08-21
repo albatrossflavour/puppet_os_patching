@@ -215,14 +215,19 @@ class os_patching (
     default => 'absent'
   }
 
+  $abort_patching_ensure = ($ensure == 'present' and $abort_patching_on_warning ) ? {
+    true    => 'file',
+    default => 'absent'
+  }
+
   file { "${cache_dir}/patch_window":
     ensure  => $patch_window_ensure,
     content => $patch_window,
   }
 
   file { "${cache_dir}/abort_patching_on_warning":
-    ensure  => $ensure_file,
-    content => $abort_patching_on_warning,
+    ensure  => $abort_patching_ensure,
+    notify  => Exec[$fact_exec],
   }
 
   $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {
