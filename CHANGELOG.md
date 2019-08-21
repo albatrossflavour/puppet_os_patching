@@ -1,17 +1,33 @@
 # Change Log
 
-## [0.11.2](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.2) (2019-06-04)
-[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.1...0.11.2)
+## [0.12.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.12.0) (2019-08-21)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.1...0.12.0)
+
+**Implemented enhancements:**
+
+- add flag to run "apt-get autoremove" after patching on ubuntu servers [\#149](https://github.com/albatrossflavour/puppet_os_patching/issues/149)
+- Add a list of required KBs to the os\_patching fact on windows [\#145](https://github.com/albatrossflavour/puppet_os_patching/issues/145)
+- Create the wiki and populate some how to guides [\#128](https://github.com/albatrossflavour/puppet_os_patching/issues/128)
+- Timeouts on os\_patching\_fact\_generation.sh? [\#94](https://github.com/albatrossflavour/puppet_os_patching/issues/94)
+- \#149 allow Debian to run `apt-get autoremove` at reboot [\#151](https://github.com/albatrossflavour/puppet_os_patching/pull/151) ([albatrossflavour](https://github.com/albatrossflavour))
+- Toggle to allow warnings to block patching \#143 [\#150](https://github.com/albatrossflavour/puppet_os_patching/pull/150) ([albatrossflavour](https://github.com/albatrossflavour))
+- Updates to facter and bug fixes [\#148](https://github.com/albatrossflavour/puppet_os_patching/pull/148) ([albatrossflavour](https://github.com/albatrossflavour))
+- Fix handling of KBArticleIDs [\#146](https://github.com/albatrossflavour/puppet_os_patching/pull/146) ([kreeuwijk](https://github.com/kreeuwijk))
+- Force usage of the 'C' locale [\#142](https://github.com/albatrossflavour/puppet_os_patching/pull/142) ([smortex](https://github.com/smortex))
 
 **Fixed bugs:**
 
 - Travis tests taking too long [\#138](https://github.com/albatrossflavour/puppet_os_patching/issues/138)
 - Version 0.11.1 of module cannot be installed on Windows \(via Agent\) [\#136](https://github.com/albatrossflavour/puppet_os_patching/issues/136)
 - Unable to run task os\_patching::patch\_server Windows 2012r2 with puppet enterprise agent 6.4.2 [\#133](https://github.com/albatrossflavour/puppet_os_patching/issues/133)
+- Fix missing slash in facter code [\#147](https://github.com/albatrossflavour/puppet_os_patching/pull/147) ([kreeuwijk](https://github.com/kreeuwijk))
+- Bugfix: Add missing dependency [\#144](https://github.com/albatrossflavour/puppet_os_patching/pull/144) ([theosotr](https://github.com/theosotr))
+- The declared ISO format does not exist, had one extra `dd` [\#141](https://github.com/albatrossflavour/puppet_os_patching/pull/141) ([rnelson0](https://github.com/rnelson0))
 - \#138 - fix travis issues [\#139](https://github.com/albatrossflavour/puppet_os_patching/pull/139) ([albatrossflavour](https://github.com/albatrossflavour))
 
 **Merged pull requests:**
 
+- V0.11.2 release [\#140](https://github.com/albatrossflavour/puppet_os_patching/pull/140) ([albatrossflavour](https://github.com/albatrossflavour))
 - \#136 add html to the pdkignore [\#137](https://github.com/albatrossflavour/puppet_os_patching/pull/137) ([albatrossflavour](https://github.com/albatrossflavour))
 - Issue/133 eventlog puppet agent 6.4.2 [\#134](https://github.com/albatrossflavour/puppet_os_patching/pull/134) ([nathangiuliani](https://github.com/nathangiuliani))
 
