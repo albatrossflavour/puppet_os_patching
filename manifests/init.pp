@@ -308,12 +308,12 @@ class os_patching (
                 unless  => "/usr/bin/dpkg --get-selections ${match[1]} | /bin/grep hold",
                 require => Package[$match[1]]
               }
-              apt::pin { "hold-${match[1]}":
-                packages => $match[1],
-                version  => $match[2],
-                priority => 1001,
-                notify   => Exec[$fact_exec],
-             }
+              #apt::pin { "hold-${match[1]}":
+                #  packages => $match[1],
+                #version  => $match[2],
+                #priority => 1001,
+                #notify   => Exec[$fact_exec],
+                #}
            }
            default: { fail translate(('Unsupported OS'))}
           }
