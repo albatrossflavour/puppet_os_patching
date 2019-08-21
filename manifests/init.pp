@@ -225,7 +225,7 @@ class os_patching (
     content => $patch_window,
   }
 
-  file { "${cache_dir}/block_patching_on_warning":
+  file { "${cache_dir}/block_patching_on_warnings":
     ensure  => $block_patching_ensure,
     notify  => Exec[$fact_exec],
   }
