@@ -304,7 +304,7 @@ class os_patching (
             'Debian': {
               $match = $pkg.match(/([A-Za-z0-9\-]*)_(.*)/)
               exec { "hold-${match[1]}":
-                command => "/bin/echo '${match[0]} hold' | /usr/bin/dpkg --set-selections",
+                command => "/bin/echo '${match[1]} hold' | /usr/bin/dpkg --set-selections",
                 unless  => "/usr/bin/dpkg --get-selections ${match[1]} | /bin/grep hold",
                 require => Package[$match[1]]
               }
