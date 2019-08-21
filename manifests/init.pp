@@ -25,10 +25,6 @@
 # @param fact_upload [Boolean]
 #   Should `puppet fact upload` be run after any changes to the fact cache files?
 #
-# @param auto_version_lock_packages [Boolean]
-#   Should any version specified packages that aren't already OS locked be locked?
-#   This may increase the number of runs before idempotency is achieved.
-#
 # @param manage_delta_rpm [Boolean]
 #   Should the deltarpm package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `delta_rpm` to determine how it should be manged
@@ -127,7 +123,6 @@ class os_patching (
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
-  Boolean $auto_version_lock_packages = false,
   Boolean $block_patching_on_warnings = false,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
@@ -182,11 +177,6 @@ class os_patching (
   $ensure_file = $ensure ? {
     'present' => 'file',
     default   => 'absent',
-  }
-
-  $ensure_auto_version_lock_packages = $auto_version_lock_packages ? {
-    true    => 'present',
-    default => 'absent',
   }
 
   $ensure_dir = $ensure ? {
@@ -294,37 +284,6 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
-      #resources { 'yum::versionlock':
-        #  purge => true,
-        #}
-
-      if ( $auto_version_lock_packages == true ) and ( $facts['os_patching']['warnings']['packages_version_locked_in_catalog_but_not_on_os'] ) {
-        $facts['os_patching']['warnings']['packages_version_locked_in_catalog_but_not_on_os'].each | String $pkg | {
-          case $facts['os']['family'] {
-            'RedHat': {
-              yum::versionlock { "0:${pkg}":
-                ensure => present,
-                notify => Exec[$fact_exec],
-              }
-            }
-            'Debian': {
-              $match = $pkg.match(/([A-Za-z0-9\-]*)_(.*)/)
-              exec { "hold-${match[1]}":
-                command => "/bin/echo '${match[1]} hold' | /usr/bin/dpkg --set-selections",
-                unless  => "/usr/bin/dpkg --get-selections ${match[1]} | /bin/grep hold",
-                require => Package[$match[1]]
-              }
-              #apt::pin { "hold-${match[1]}":
-                #  packages => $match[1],
-                #version  => $match[2],
-                #priority => 1001,
-                #notify   => Exec[$fact_exec],
-                #}
-           }
-           default: { fail translate(('Unsupported OS'))}
-          }
-        }
-      }
 
       if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
         package { 'yum-utils':
