@@ -25,6 +25,9 @@
 # @param fact_upload [Boolean]
 #   Should `puppet fact upload` be run after any changes to the fact cache files?
 #
+# @param apt_autoremove [Boolean]
+#   Should `apt-get autoremove` be run during reboot?
+#
 # @param manage_delta_rpm [Boolean]
 #   Should the deltarpm package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `delta_rpm` to determine how it should be manged
@@ -124,6 +127,7 @@ class os_patching (
   Boolean $manage_yum_plugin_security = false,
   Boolean $fact_upload                = true,
   Boolean $block_patching_on_warnings = false,
+  Boolean $apt_autoremove             = false,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
@@ -198,6 +202,11 @@ class os_patching (
     mode   => $fact_mode,
     source => "puppet:///modules/${module_name}/${fact_file}",
     notify => Exec[$fact_exec],
+  }
+
+  $autoremove_ensure = $apt_autoremove ? {
+    true    => 'present',
+    default => 'absent'
   }
 
   $patch_window_ensure = ($ensure == 'present' and $patch_window ) ? {
@@ -334,6 +343,15 @@ class os_patching (
         user    => $patch_cron_user,
         special => 'reboot',
         require => File[$fact_cmd],
+      }
+
+      if $facts['os']['family'] == 'Debian' {
+        cron { 'Run apt autoremove on reboot':
+          ensure  => $autoremove_ensure,
+          command => 'apt-get -y autoremove',
+          user    => $patch_cron_user,
+          special => 'reboot',
+        }
       }
     }
     'windows': {
