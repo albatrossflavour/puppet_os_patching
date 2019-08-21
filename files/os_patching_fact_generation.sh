@@ -28,20 +28,18 @@ case $(facter osfamily) in
     FILTER='egrep -v "^Security:"'
     PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
     SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
-    HELDPKGS=$(awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list)
-    DELIMITER='-'
+    HELDPKGS=$(awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list | sed 's/-[0-9].*//'
+)
   ;;
   Suse)
     PKGS=$(zypper --non-interactive --no-abbrev --quiet lu | grep '|' | grep -v '\sRepository' | awk -F'|' '/^[[:alnum:]]/ {print $3}' | sed 's/^\s*\|\s*$//')
     SECPKGS=$(zypper --non-interactive --no-abbrev --quiet lp -g security | grep '|' | grep -v '^Repository' | awk -F'|' '/^[[:alnum:]]/ {print $2}' | sed 's/^\s*\|\s*$//')
     HELDPKGS=$(zypper --non-interactive --no-abbrev --quiet ll | grep '|' | grep -v '^Repository' | awk -F'|' '/^[[:alnum:]]/ {print $2}' | sed 's/^\s*\|\s*$//')
-    DELIMITER='-'
   ;;
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
     SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /security/ {print $2}')
     HELDPKGS=$(dpkg --get-selections | awk '$2 == "hold" {print $1}')
-    DELIMITER='_'
   ;;
   *)
     rm $LOCKFILE
@@ -59,7 +57,7 @@ CATALOG="$(facter -p puppet_vardir)/client_data/catalog/$(puppet config print ce
 
 if [ -f "${CATALOG}" ]
 then
-	VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | /opt/puppetlabs/puppet/bin/ruby -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] + '${DELIMITER}' + m['parameters']['ensure'] end")
+	VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | /opt/puppetlabs/puppet/bin/ruby -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] end")
 else
 	VERSION_LOCK_FROM_CATALOG=''
 fi
