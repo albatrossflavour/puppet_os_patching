@@ -254,7 +254,7 @@ else
       abort_on_warningfile = os_patching_dir + '/abort_patching_on_warning'
       if File.file?(abort_on_warningfile)
         data['abort_patching_on_warning'] = 'true'
-        if warnings[0]
+        if not warnings.empty?
           blocked = true
           blocked_reasons.push warnings
         end
@@ -269,11 +269,11 @@ else
       data
     end
 
-    chunk(:warnings) do
-      data = {}
-      data['warnings'] = warnings
-      data
-    end
+    #chunk(:warnings) do
+    #  data = {}
+    #  data['warnings'] = warnings
+    #  data
+    #end
 
   end
 end
