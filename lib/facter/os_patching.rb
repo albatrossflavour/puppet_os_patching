@@ -13,6 +13,8 @@ else
     require 'time'
     now = Time.now.iso8601
     warnings = {}
+    blocked = false
+    blocked_reasons = []
 
     if Facter.value(:kernel) == 'Linux'
       os_patching_dir = '/var/cache/os_patching'
@@ -83,9 +85,6 @@ else
     chunk(:blackouts) do
       data = {}
       arraydata = {}
-      data['blocked'] = false
-      data['blocked_reasons'] = {}
-      data['blocked_reasons'] = []
       blackoutfile = os_patching_dir + '/blackout_windows'
       if File.file?(blackoutfile)
         blackouts = File.open(blackoutfile, 'r').read
@@ -106,14 +105,14 @@ else
             end
 
             if (matchdata[2]..matchdata[3]).cover?(now)
-              data['blocked'] = true
-              data['blocked_reasons'].push matchdata[1]
+              blocked = true
+              blocked_reasons.push matchdata[1]
             end
             # rubocop:enable Metrics/BlockNesting
           else
             warnings['blackouts'] = "Invalid blackout entry : #{line}"
-            data['blocked'] = true
-            data['blocked_reasons'].push "Invalid blackout entry : #{line}"
+            blocked = true
+            blocked_reasons.push "Invalid blackout entry : #{line}"
           end
         end
       end
@@ -161,18 +160,6 @@ else
           data['last_run']['security_only'] = matchdata[4]
           data['last_run']['job_id'] = matchdata[5]
         end
-      end
-      data
-    end
-
-    # Should we patch if there are warnings?
-    chunk(:abort_patching_on_warning) do
-      data = {}
-      abort_on_warningfile = os_patching_dir + '/abort_patching_on_warning'
-      if File.file?(abort_on_warningfile)
-        data['abort_patching_on_warning'] = 'true'
-      else
-        data['abort_patching_on_warning'] = 'false'
       end
       data
     end
@@ -260,10 +247,33 @@ else
       end
       data
     end
+
+    # Should we patch if there are warnings?
+    chunk(:abort_patching_on_warning) do
+      data = {}
+      abort_on_warningfile = os_patching_dir + '/abort_patching_on_warning'
+      if File.file?(abort_on_warningfile)
+        data['abort_patching_on_warning'] = 'true'
+        if warnings[0]
+          blocked = true
+          blocked_reasons.push warnings
+        end
+        data['blocked'] = blocked
+        data['blocked_reasons'] = blocked_reasons
+      else
+        data['abort_patching_on_warning'] = 'false'
+        data['warnings'] = warnings
+        data['blocked'] = blocked
+        data['blocked_reasons'] = blocked_reasons
+      end
+      data
+    end
+
     chunk(:warnings) do
       data = {}
       data['warnings'] = warnings
       data
     end
+
   end
 end
