@@ -170,12 +170,7 @@ else
       data = {}
       abort_on_warningfile = os_patching_dir + '/abort_patching_on_warning'
       if File.file?(abort_on_warningfile)
-        abort_on_warning = File.open(abort_on_warningfile, 'r').to_a
-        line = abort_on_warning.last
-        matchdata = line.match(/^(.*)$/)
-        if matchdata[0]
-          data['abort_patching_on_warning'] = matchdata[0]
-        end
+        data['abort_patching_on_warning'] = 'true'
       else
         data['abort_patching_on_warning'] = 'false'
       end
