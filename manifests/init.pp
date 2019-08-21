@@ -14,7 +14,7 @@
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
 #
-# @param abort_patching_on_warnings [Enum]
+# @param abort_patching_on_warnings [Boolean]
 #   If there are warnings present in the os_patching fact, should the patching task run?
 #   If `true` the run will abort and take no action
 #   If `false` the run will continue and attempt to patch (default)
@@ -215,7 +215,7 @@ class os_patching (
     default => 'absent'
   }
 
-  $abort_patching_ensure = ($ensure == 'present' and $abort_patching_on_warning ) ? {
+  $abort_patching_ensure = ($ensure == 'present' and $abort_patching_on_warnings ) ? {
     true    => 'file',
     default => 'absent'
   }
