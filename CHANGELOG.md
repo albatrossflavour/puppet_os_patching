@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.12.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.12.1) (2019-08-23)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.12.1)
+
+**Fixed bugs:**
+
+- \#148 ensure versionlock file is there before we read it [\#154](https://github.com/albatrossflavour/puppet_os_patching/pull/154) ([albatrossflavour](https://github.com/albatrossflavour))
+- Prevent error message to stderr on RedHat [\#153](https://github.com/albatrossflavour/puppet_os_patching/pull/153) ([smortex](https://github.com/smortex))
+
 ## [0.12.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.12.0) (2019-08-21)
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.1...0.12.0)
 
@@ -23,10 +31,10 @@
 - Fix missing slash in facter code [\#147](https://github.com/albatrossflavour/puppet_os_patching/pull/147) ([kreeuwijk](https://github.com/kreeuwijk))
 - Bugfix: Add missing dependency [\#144](https://github.com/albatrossflavour/puppet_os_patching/pull/144) ([theosotr](https://github.com/theosotr))
 - The declared ISO format does not exist, had one extra `dd` [\#141](https://github.com/albatrossflavour/puppet_os_patching/pull/141) ([rnelson0](https://github.com/rnelson0))
-- \#138 - fix travis issues [\#139](https://github.com/albatrossflavour/puppet_os_patching/pull/139) ([albatrossflavour](https://github.com/albatrossflavour))
 
 **Merged pull requests:**
 
+- V0.12.0 release [\#152](https://github.com/albatrossflavour/puppet_os_patching/pull/152) ([albatrossflavour](https://github.com/albatrossflavour))
 - V0.11.2 release [\#140](https://github.com/albatrossflavour/puppet_os_patching/pull/140) ([albatrossflavour](https://github.com/albatrossflavour))
 - \#136 add html to the pdkignore [\#137](https://github.com/albatrossflavour/puppet_os_patching/pull/137) ([albatrossflavour](https://github.com/albatrossflavour))
 - Issue/133 eventlog puppet agent 6.4.2 [\#134](https://github.com/albatrossflavour/puppet_os_patching/pull/134) ([nathangiuliani](https://github.com/nathangiuliani))
