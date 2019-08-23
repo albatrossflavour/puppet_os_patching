@@ -28,14 +28,8 @@ case $(facter osfamily) in
     FILTER='egrep -v "^Security:"'
     PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
     SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
-    VLFILE='/etc/yum/pluginconf.d/versionlock.list'
-    if [ -f "$VLFILE" ]
-    then
-      HELDPKGS=$(awk -F':' '/:/ {print $2}' ${VLFILE} | sed 's/-[0-9].*//')
-    else
-      HELDPKGS=''
-    fi
-
+    HELDPKGS=$([ -r /etc/yum/pluginconf.d/versionlock.list ] && awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list | sed 's/-[0-9].*//'
+)
   ;;
   Suse)
     PKGS=$(zypper --non-interactive --no-abbrev --quiet lu | grep '|' | grep -v '\sRepository' | awk -F'|' '/^[[:alnum:]]/ {print $3}' | sed 's/^\s*\|\s*$//')
