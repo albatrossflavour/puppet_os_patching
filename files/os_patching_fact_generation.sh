@@ -51,6 +51,11 @@ case $OSFAMILY in
     SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /Security/ {print $2}')
     HELDPKGS=$(dpkg --get-selections | awk '$2 == "hold" {print $1}')
   ;;
+  FreeBSD)
+    PKGS=$(pkg version -ql\< | awk '{print $1}')
+    SECPKGS=$(pkg audit -qF)
+    HELDPKGS=$(pkg lock -ql)
+  ;;
   *)
     rm $LOCKFILE
     exit 1
@@ -65,9 +70,17 @@ CATHELDPKGFILE="$DATADIR/catalog_version_locked_packages"
 MISMATCHHELDPKGFILE="$DATADIR/mismatched_version_locked_packages"
 CATALOG="$VARDIR/client_data/catalog/$(puppet config print certname --section agent).json"
 
+# Prefer AIO ruby if available, but fallback to system ruby otherwise.
+if [ -x /opt/puppetlabs/puppet/bin/ruby ]
+then
+	RUBY=/opt/puppetlabs/puppet/bin/ruby
+else
+	RUBY=ruby
+fi
+
 if [ -f "${CATALOG}" ]
 then
-	VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | ruby -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] end")
+	VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | $RUBY -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] end")
 else
 	VERSION_LOCK_FROM_CATALOG=''
 fi

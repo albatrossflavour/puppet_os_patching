@@ -93,6 +93,14 @@
         "8",
         "9"
       ]
+    },
+    {
+      "operatingsystem": "FreeBSD",
+      "operatingsystemrelease": [
+        "11",
+        "12",
+        "13"
+      ]
     }
   ],
   "requirements": [
