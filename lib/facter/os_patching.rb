@@ -257,11 +257,16 @@ else
         line = command.last
         matchdata = line.match(/^(.*)$/)
         if matchdata[0]
-          data['pre_patching_command'] = matchdata[0]
-        else
-          data['pre_patching_command'] = 'ERROR'
+          if File.file?(matchdata[0])
+            data['pre_patching_command'] = matchdata[0]
+          else
+            warnings['blackouts'] = "Invalid pre_patching_command entry : #{matchdata[0]}"
+            blocked = true
+            blocked_reasons.push "Invalid pre_patching_command entry : #(matchdata[0]}"
+          end
         end
       end
+      data
     end
 
     # Should we patch if there are warnings?
