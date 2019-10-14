@@ -424,6 +424,8 @@ if File.exists?(pre_patching_command)
   _fact_out, stderr, status = Open3.capture3(pre_patching_command)
   err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
   log.info "Finished pre_patching_command : #(pre_patching_command)"
+else
+  err(200, 'os_patching/pre_patching_command', "Pre patching command not found #{pre_patching_command}", starttime)
 end
 
 # There are no updates available, exit cleanly rebooting if the override flag is set
