@@ -252,7 +252,7 @@ else
     chunk(:pre_patching_command) do
       data = {}
       pre_patching_command = os_patching_dir + '/pre_patching_command'
-      if File.file?(pre_patching_command)
+      if File.file?(pre_patching_command) and not File.empty?(pre_patching_commmand)
         command = File.open(pre_patching_command, 'r').to_a
         line = command.last
         matchdata = line.match(/^(.*)$/)
