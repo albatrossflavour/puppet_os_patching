@@ -132,6 +132,7 @@ class os_patching (
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override = 'default',
+  Optional[Stdlib::AbsolutePath] $pre_patch_cmd,
   Optional[Hash] $blackout_windows   = undef,
   $patch_window                      = undef,
   $patch_cron_hour                   = absent,
@@ -209,6 +210,11 @@ class os_patching (
     default => 'absent'
   }
 
+  $pre_patch_cmd_ensure = ($ensure == 'present' and $pre_patch_cmd ) ? {
+    true    => 'file',
+    default => 'absent'
+  }
+
   $patch_window_ensure = ($ensure == 'present' and $patch_window ) ? {
     true    => 'file',
     default => 'absent'
@@ -222,6 +228,11 @@ class os_patching (
   file { "${cache_dir}/patch_window":
     ensure  => $patch_window_ensure,
     content => $patch_window,
+  }
+
+  file { "${cache_dir}/pre_patch_command":
+    ensure  => $pre_patch_cmd_ensure,
+    content => $pre_patch_cmd,
   }
 
   file { "${cache_dir}/block_patching_on_warnings":
