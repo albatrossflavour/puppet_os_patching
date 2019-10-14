@@ -249,6 +249,22 @@ else
     end
 
     # Should we patch if there are warnings?
+    chunk(:pre_patching_command) do
+      data = {}
+      pre_patching_command = os_patching_dir + '/pre_patching_command'
+      if File.file?(pre_patching_command)
+        command = File.open(pre_patching_command, 'r').to_a
+        line = command.last
+        matchdata = line.match(/^(.*)$/)
+        if matchdata[0]
+          data['pre_patching_command'] = matchdata[0]
+        else
+          data['pre_patching_command'] = 'ERROR'
+        end
+      end
+    end
+
+    # Should we patch if there are warnings?
     chunk(:block_patching_on_warnings) do
       data = {}
       abort_on_warningsfile = os_patching_dir + '/block_patching_on_warnings'
