@@ -132,7 +132,7 @@ class os_patching (
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override = 'default',
-  Optional[Stdlib::AbsolutePath] $pre_patch_cmd,
+  Optional[Stdlib::Absolutepath] $pre_patch_cmd = undef,
   Optional[Hash] $blackout_windows   = undef,
   $patch_window                      = undef,
   $patch_cron_hour                   = absent,
