@@ -230,7 +230,7 @@ class os_patching (
     content => $patch_window,
   }
 
-  file { "${cache_dir}/pre_patch_command":
+  file { "${cache_dir}/pre_patching_command":
     ensure  => $pre_patch_cmd_ensure,
     content => $pre_patch_cmd,
   }
