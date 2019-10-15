@@ -420,7 +420,7 @@ end
 pre_patching_command = if facts['values']['os_patching']['pre_patching_command']
                          facts['values']['os_patching']['pre_patching_command']
                        else
-                         ''
+                         :undef
                        end
 
 if File.exist?(pre_patching_command)
@@ -433,7 +433,9 @@ if File.exist?(pre_patching_command)
     err(210, 'os_patching/pre_patching_command', "Pre patching command not executable #{pre_patching_command}", starttime)
   end
 else
-  err(200, 'os_patching/pre_patching_command', "Pre patching command not found #{pre_patching_command}", starttime)
+  if pre_patching_command != ''
+    err(200, 'os_patching/pre_patching_command', "Pre patching command not found #{pre_patching_command}", starttime)
+  end
 end
 
 # There are no updates available, exit cleanly rebooting if the override flag is set
