@@ -433,7 +433,9 @@ if File.exist?(pre_patching_command)
     err(210, 'os_patching/pre_patching_command', "Pre patching command not executable #{pre_patching_command}", starttime)
   end
 else
-  err(200, 'os_patching/pre_patching_command', "Pre patching command not found #{pre_patching_command}", starttime)
+  if pre_patching_command != ''
+    err(200, 'os_patching/pre_patching_command', "Pre patching command not found #{pre_patching_command}", starttime)
+  end
 end
 
 # There are no updates available, exit cleanly rebooting if the override flag is set
