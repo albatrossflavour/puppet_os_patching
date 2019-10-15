@@ -50,9 +50,6 @@ describe 'os_patching module' do
       expect(file(cache_dir + '/blackout_windows')).not_to be_file
       expect(file(cache_dir + '/patch_window')).not_to be_file
       expect(file('/usr/local/bin/os_patching_fact_generation.sh')).to be_file
-      if host_inventory['facter']['os']['name'] == 'Ubuntu'
-        run_bolt_task('os_patching::patch_server')
-      end
       if host_inventory['facter']['os']['name'] == 'CentOS' || host_inventory['facter']['os']['name'] == 'Ubuntu'
         run_bolt_task('os_patching::clean_cache')
         run_bolt_task('os_patching::refresh_fact')
