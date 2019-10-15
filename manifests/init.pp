@@ -240,8 +240,8 @@ class os_patching (
   }
 
   file { "${cache_dir}/block_patching_on_warnings":
-    ensure  => $block_patching_ensure,
-    notify  => Exec[$fact_exec],
+    ensure => $block_patching_ensure,
+    notify => Exec[$fact_exec],
   }
 
   $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {

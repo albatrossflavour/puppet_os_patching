@@ -157,11 +157,24 @@ describe 'os_patching' do
         it { is_expected.to contain_cron('Cache patching data').with_ensure('present') }
         it { is_expected.to contain_cron('Cache patching data at reboot').with_ensure('present') }
         it { is_expected.to contain_exec('os_patching::exec::fact').that_requires(
-            'File[' + cache_dir + '/reboot_override]'
+          'File[' + cache_dir + '/reboot_override]',
         )}
       end
       it { is_expected.to contain_exec('os_patching::exec::fact') }
       it { is_expected.to contain_exec('os_patching::exec::fact_upload') }
+
+      context 'block on warnings' do
+        let(:params) { { 'block_patching_on_warnings' => true } }
+        it { is_expected.to contain_file(cache_dir + '/block_patching_on_warnings') }
+      end
+
+      context 'debian reboot' do
+        let(:params) { { 'apt_autoremove' => true } }
+        case os_facts[:osfamily]
+        when 'Debian'
+          it { is_expected.to contain_cron('Run apt autoremove on reboot').with_ensure('present') }
+        end
+      end
 
       context 'purge module' do
         let(:params) { {'ensure' => 'absent'} }

@@ -22,6 +22,7 @@ validate:
 	bundle exec rake validate
 	bundle exec rake rubocop
 	bundle exec rake check:git_ignore
+	bundle exec puppet-lint manifests
 
 unit:
 	bundle exec rake spec
