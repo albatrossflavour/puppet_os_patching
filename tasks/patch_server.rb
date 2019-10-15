@@ -420,7 +420,7 @@ end
 pre_patching_command = if facts['values']['os_patching']['pre_patching_command']
                          facts['values']['os_patching']['pre_patching_command']
                        else
-                         :undef
+                         ''
                        end
 
 if File.exist?(pre_patching_command)
