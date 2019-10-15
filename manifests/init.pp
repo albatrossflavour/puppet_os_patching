@@ -60,7 +60,8 @@
 #
 # @param pre_patching_command [Stdlib::AbsolutePath]
 #   The full path of the command to run prior to running patching.  Can be used to
-#   run customised workflows such as gracefully shutting down applications.
+#   run customised workflows such as gracefully shutting down applications.  The entry
+#   must be a single absolute filename with no arguments or parameters.
 #
 # @param patch_cron_hour
 #   The hour(s) for the cron job to run (defaults to absent, which means '*' in cron)

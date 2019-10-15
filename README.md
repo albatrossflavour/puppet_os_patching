@@ -184,6 +184,8 @@ $ puppet task run os_patching::patch_server --query="inventory[certname] {facts.
 
 You can use the parameter `os_patching::pre_patching_command` to supply a file name to be run prior to running the patch job.  The file much be executable and should exit with a return code of `0` if the command was successful.
 
+The entry must be a single command, with no arguments or parameters.
+
 ### To reboot or not to reboot, that is the question...
 
 The logic for how to handle reboots is a little complex as it has to handle a wide range of scenarios and desired outcomes.
