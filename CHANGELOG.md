@@ -1,13 +1,21 @@
 # Change Log
 
-=======
-## [0.12.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.12.1) (2019-08-23)
-[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.12.1)
+## [0.13.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.13.0) (2019-10-16)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.13.0)
+
+**Implemented enhancements:**
+
+- Enable a pre-patching command to be specified [\#159](https://github.com/albatrossflavour/puppet_os_patching/issues/159)
 
 **Fixed bugs:**
 
 - \#148 ensure versionlock file is there before we read it [\#154](https://github.com/albatrossflavour/puppet_os_patching/pull/154) ([albatrossflavour](https://github.com/albatrossflavour))
 - Prevent error message to stderr on RedHat [\#153](https://github.com/albatrossflavour/puppet_os_patching/pull/153) ([smortex](https://github.com/smortex))
+
+**Merged pull requests:**
+
+- Merge to production [\#160](https://github.com/albatrossflavour/puppet_os_patching/pull/160) ([albatrossflavour](https://github.com/albatrossflavour))
+- clear out 'Obsoleting' entries [\#158](https://github.com/albatrossflavour/puppet_os_patching/pull/158) ([kreeuwijk](https://github.com/kreeuwijk))
 
 ## [0.12.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.12.0) (2019-08-21)
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.1...0.12.0)
