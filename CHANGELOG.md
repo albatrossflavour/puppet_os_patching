@@ -14,6 +14,7 @@
 
 **Merged pull requests:**
 
+- Fix issues with empty pre\_patching\_command entries [\#161](https://github.com/albatrossflavour/puppet_os_patching/pull/161) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge to production [\#160](https://github.com/albatrossflavour/puppet_os_patching/pull/160) ([albatrossflavour](https://github.com/albatrossflavour))
 - clear out 'Obsoleting' entries [\#158](https://github.com/albatrossflavour/puppet_os_patching/pull/158) ([kreeuwijk](https://github.com/kreeuwijk))
 
