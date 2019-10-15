@@ -27,7 +27,9 @@ case $(facter osfamily) in
     # We need to filter those out as they screw up the package listing
     FILTER='egrep -v "^Security:"'
     PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
+    PKGS=$(echo $PKGS | sed 's/Obsoleting.*//')
     SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
+    SECPKGS=$(echo $SECPKGS | sed 's/Obsoleting.*//')
     HELDPKGS=$([ -r /etc/yum/pluginconf.d/versionlock.list ] && awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list | sed 's/-[0-9].*//'
 )
   ;;
