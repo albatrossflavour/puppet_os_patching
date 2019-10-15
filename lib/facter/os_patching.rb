@@ -50,7 +50,7 @@ else
       data = {}
       kblist = []
       kbfile = os_patching_dir + '/missing_update_kbs'
-      if File.file?(kbfile) and not File.zero?(kbfile)
+      if File.file?(kbfile) && !File.zero?(kbfile)
         kbs = File.open(kbfile, 'r').read
         kbs.each_line do |line|
           kblist.push line.chomp
@@ -93,7 +93,6 @@ else
           next if line =~ /^#|^$/
           matchdata = line.match(/^([\w ]*),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}\+\d{,2}:\d{,2}),(\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2})$/)
           if matchdata
-            # rubocop:disable Metrics/BlockNesting
             arraydata[matchdata[1]] = {} unless arraydata[matchdata[1]]
             if matchdata[2] > matchdata[3]
               arraydata[matchdata[1]]['start'] = 'Start date after end date'
@@ -108,7 +107,6 @@ else
               blocked = true
               blocked_reasons.push matchdata[1]
             end
-            # rubocop:enable Metrics/BlockNesting
           else
             warnings['blackouts'] = "Invalid blackout entry : #{line}"
             blocked = true
@@ -132,7 +130,7 @@ else
           pinnedpkgs.push line.chomp
         end
       end
-      if File.file?(mismatchpinnedpackagefile) and not File.zero?(mismatchpinnedpackagefile)
+      if File.file?(mismatchpinnedpackagefile) && !File.zero?(mismatchpinnedpackagefile)
         warnings['version_specified_but_not_locked_packages'] = []
         mismatchfile = File.open(mismatchpinnedpackagefile, 'r').read
         mismatchfile.each_line do |line|
@@ -252,7 +250,7 @@ else
     chunk(:pre_patching_command) do
       data = {}
       pre_patching_command = os_patching_dir + '/pre_patching_command'
-      if File.file?(pre_patching_command) and not File.empty?(pre_patching_command)
+      if File.file?(pre_patching_command) && !File.empty?(pre_patching_command)
         command = File.open(pre_patching_command, 'r').to_a
         line = command.last
         matchdata = line.match(/^(.*)$/)
@@ -281,18 +279,16 @@ else
       abort_on_warningsfile = os_patching_dir + '/block_patching_on_warnings'
       if File.file?(abort_on_warningsfile)
         data['block_patching_on_warnings'] = 'true'
-        if not warnings.empty?
+        unless warnings.empty?
           blocked = true
           blocked_reasons.push warnings
         end
-        data['blocked'] = blocked
-        data['blocked_reasons'] = blocked_reasons
       else
         data['block_patching_on_warnings'] = 'false'
         data['warnings'] = warnings
-        data['blocked'] = blocked
-        data['blocked_reasons'] = blocked_reasons
       end
+      data['blocked'] = blocked
+      data['blocked_reasons'] = blocked_reasons
       data
     end
   end

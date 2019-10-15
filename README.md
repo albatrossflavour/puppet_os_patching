@@ -174,12 +174,15 @@ The pinned packages entry lists any packages which have been specifically exclud
 
 Last run shows a summary of the information from the last `os_patching::patch_server` task.
 
-
 The fact `os_patching.patch_window` can be used to assign nodes to an arbitrary group.  The fact can be used as part of the query fed into the task to determine which nodes to patch:
 
 ```bash
 $ puppet task run os_patching::patch_server --query="inventory[certname] {facts.os_patching.patch_window = 'Week3'}"
 ```
+
+### Running custom commands before patching
+
+You can use the parameter `os_patching::pre_patching_command` to supply a file name to be run prior to running the patch job.  The file much be executable and should exit with a return code of `0` if the command was successful.
 
 ### To reboot or not to reboot, that is the question...
 

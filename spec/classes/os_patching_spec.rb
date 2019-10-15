@@ -35,6 +35,37 @@ describe 'os_patching' do
         end
       end
 
+      case os_facts[:osfamily]
+      when 'Debian'
+        context 'with apt_autoremove => true' do
+          let(:params) { {'apt_autoremove' => true } }
+          it { is_expected.to contain_cron('Run apt autoremove on reboot').with_ensure('present') }
+        end
+        context 'with apt_autoremove => default' do
+          it { is_expected.to contain_cron('Run apt autoremove on reboot').with_ensure('absent') }
+        end
+      end
+
+      context 'with block_patching_on_warnings => true' do
+        let(:params) { {'block_patching_on_warnings' => true } }
+        it { is_expected.to contain_file("#{cache_dir}/block_patching_on_warnings").with({
+          'ensure' => 'file',
+        })}
+      end
+
+      context 'with block_patching_on_warnings => false' do
+        let(:params) { {'block_patching_on_warnings' => false } }
+        it { is_expected.to contain_file("#{cache_dir}/block_patching_on_warnings").with({
+          'ensure' => 'absent',
+        })}
+      end
+
+      context 'with block_patching_on_warnings => default' do
+        it { is_expected.to contain_file("#{cache_dir}/block_patching_on_warnings").with({
+          'ensure' => 'absent',
+        })}
+      end
+
       context 'with reboot_override => always' do
         let(:params) { {'reboot_override' => 'always'} }
         it { is_expected.to contain_file("#{cache_dir}/reboot_override").with({
@@ -67,6 +98,21 @@ describe 'os_patching' do
           'ensure' => 'file',
         })}
         it { is_expected.to contain_file(cache_dir + '/patch_window').with_content(/^Week3$/)}
+      end
+
+      context 'with pre_patching_command => /bin/true' do
+        let(:params) { {'pre_patching_command' => '/bin/true'} }
+        it { is_expected.to contain_file(cache_dir + '/pre_patching_command').with({
+          'ensure' => 'file',
+        })}
+        it { is_expected.to contain_file(cache_dir + '/pre_patching_command').with_content(/^\/bin\/true$/)}
+      end
+
+      context 'with pre_patching_command => undef' do
+        let(:params) { {'pre_patching_command' => :undef } }
+        it { is_expected.to contain_file(cache_dir + '/pre_patching_command').with({
+          'ensure' => 'absent',
+        })}
       end
 
       context 'with blackout window set' do

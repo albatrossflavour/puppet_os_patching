@@ -58,6 +58,10 @@
 # @param patch_window [String]
 #   A freeform text entry used to allocate a node to a specific patch window (Optional)
 #
+# @param pre_patching_command [Stdlib::AbsolutePath]
+#   The full path of the command to run prior to running patching.  Can be used to
+#   run customised workflows such as gracefully shutting down applications.
+#
 # @param patch_cron_hour
 #   The hour(s) for the cron job to run (defaults to absent, which means '*' in cron)
 #
