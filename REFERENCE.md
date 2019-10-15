@@ -210,6 +210,16 @@ A freeform text entry used to allocate a node to a specific patch window (Option
 
 Default value: `undef`
 
+##### `pre_patching_command`
+
+Data type: `Optional[Stdlib::Absolutepath]`
+
+The full path of the command to run prior to running patching.  Can be used to
+run customised workflows such as gracefully shutting down applications.  The entry
+must be a single absolute filename with no arguments or parameters.
+
+Default value: `undef`
+
 ##### `patch_cron_hour`
 
 Data type: `Any`
