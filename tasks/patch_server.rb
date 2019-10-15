@@ -425,10 +425,10 @@ pre_patching_command = if facts['values']['os_patching']['pre_patching_command']
 
 if File.exist?(pre_patching_command)
   if File.executable?(pre_patching_command)
-    log.info 'Running pre_patching_command : #(pre_patching_command)'
+    log.info 'Running pre_patching_command : #{pre_patching_command}'
     _fact_out, stderr, status = Open3.capture3(pre_patching_command)
     err(status, 'os_patching/pre_patching_command', "Pre-patching-command failed: #{stderr}", starttime) if status != 0
-    log.info 'Finished pre_patching_command : #(pre_patching_command)'
+    log.info 'Finished pre_patching_command : #{pre_patching_command}'
   else
     err(210, 'os_patching/pre_patching_command', "Pre patching command not executable #{pre_patching_command}", starttime)
   end

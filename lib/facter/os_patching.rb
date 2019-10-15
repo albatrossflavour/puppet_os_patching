@@ -264,9 +264,9 @@ else
               blocked_reasons.push "Pre_patching_command not executable : #{matchdata[0]}"
             end
           else
-            warnings['blackouts'] = "Invalid pre_patching_command entry : #{matchdata[0]}"
+            warnings['pre_patching_command'] = "Invalid pre_patching_command entry : #{matchdata[0]}.  Must be a single command with no arguments"
             blocked = true
-            blocked_reasons.push "Invalid pre_patching_command entry : #{matchdata[0]}"
+            blocked_reasons.push "Invalid pre_patching_command entry : #{matchdata[0].  Must be a single command with no arguments}"
           end
         end
       end
