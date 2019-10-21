@@ -1,29 +1,29 @@
 [![Build Status](https://travis-ci.org/albatrossflavour/puppet_os_patching.svg?branch=master)](https://travis-ci.org/albatrossflavour/puppet_os_patching)
 # os_patching
 
-This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently patching works on Linux (Redhat, Suse and Debian derivatives) and Windows (Server 2008 through to 2019 have been tested).
+This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently, patching works on Linux (Redhat, Suse and Debian derivatives) and Windows (Server 2008 through to 2019 have been tested).
 
-Under the hood it uses the OS level tools or APIs to carry out the actual patching.  That does mean that you need to be sure that your nodes are ABLE to search for their updates using the native tool - e.g. You still need to manage the configuration of YUM, APT, Zypper or Windows Update.
+Under the hood, it uses the OS level tools or APIs to carry out the actual patching.  That does mean that you need to be sure that your nodes can search for their updates using the native tool - e.g. You still need to manage the configuration of YUM, APT, Zypper or Windows Update.
 
-Note - Windows systems require at least PowerShell version 3.0. If you are intending to update an unpatched Windows system prior to Server 2012, you will need to update PowerShell first.
+Note - Windows systems require at least PowerShell version 3.0. If you are intending to update an unpatched Windows system before Server 2012, you will need to update PowerShell first.
 
 [The wiki](https://github.com/albatrossflavour/puppet_os_patching/wiki/Background) contains some useful background information on the module and how it works.
 
 ## Description
 
-Puppet Enterprise tasks and Bolt have opened up methods to integrate operating system level patching into the puppet workflow.  Providing automation of patch execution through tasks and the robust reporting of state through custom facts and PuppetDB.
+Puppet Enterprise tasks and Bolt have opened up methods to integrate operating system level patching into the puppet workflow.  Providing automation of patch execution through tasks and the robust reporting of the state through custom facts and PuppetDB.
 
-If you're looking for a simple way to report on your OS patch levels, this module will show all updates which are outstanding, including which are related to security updates.  Do you want to enable self-service patching?  This module will use Puppet's RBAC and orchestration and task execution facilities to give you that power.
+If you're looking for a simple way to report on your OS patch levels, this module will show all outstanding updates, including which are related to security updates.  Do you want to enable self-service patching?  This module will use Puppet's RBAC and orchestration and task execution facilities to give you that power.
 
 It also uses security metadata (where available) to determine if there are security updates.  On Redhat, this is provided from Redhat as additional metadata in YUM.  On Debian, checks are done for which repo the updates are coming from.  On Windows, this information is provided by default. There is a parameter to the os_patching::patch_server task to only apply security updates.
 
-Blackout windows enable the support for time based change freezes where no patching can happen.  There can be multiple windows defined and each which will automatically expire after reaching the defined end date.
+Blackout windows enable the support for time-based change freezes where no patching can happen.  There can be multiple windows defined and each will automatically expire after reaching the defined end date.
 
 ## Setup
 
 ### What os_patching affects
 
-The module provides an additional fact (`os_patching`) and has a task to allow the patching of a server.  When the `os_patching` manifest is added to a node it installs a script and cron job (Linux) or scheduled task (Windows) to check for available updates and generate cache data used by the `os_patching` fact.
+The module provides an additional fact (`os_patching`) and has a task to allow the patching of a server.  When the `os_patching` manifest is added to a node it installs a script and cron job (Linux) or a scheduled task (Windows) to check for available updates and generate cache data used by the `os_patching` fact.
 
 ### Beginning with os_patching
 
@@ -55,7 +55,7 @@ In that example, the node is assigned to a "patch window", will be forced to reb
 ### Task
 Run a basic patching task from the command line:
 ```bash
-os_patching::patch_server - Carry out OS patching on the server, optionally including a reboot and/or only applying security related updates
+os_patching::patch_server - Carry out OS patching on the server, optionally including a reboot and/or only applying security-related updates
 
 USAGE:
 $ puppet task run os_patching::patch_server [dpkg_params=<value>] [reboot=<value>] [security_only=<value>] [timeout=<value>] [yum_params=<value>] <[--nodes, -n <node-names>] | [--query, -q <'query'>]>
@@ -66,7 +66,7 @@ PARAMETERS:
 - reboot : Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart']]]
     Should the server reboot after patching has been applied? (Defaults to "never")
 - security_only : Optional[Boolean]
-    Limit patches to those tagged as security related? (Defaults to false)
+    Limit patches to those tagged as security-related? (Defaults to false)
 - timeout : Optional[Integer]
     How many seconds should we wait until timing out the patch run? (Defaults to 3600 seconds)
 - yum_params : Optional[String]
@@ -120,7 +120,7 @@ Most of the reporting is driven by the custom fact `os_patching_data`, for examp
 }
 ```
 
-This shows there are no updates which can be applied to this server and the server doesn't need a reboot or any application restarts.  When there are updates to add, you will see similar to this:
+This shows there are no updates that can be applied to this server and the server doesn't need a reboot or any application restarts.  When there are updates to add, you will see similar to this:
 
 ```yaml
 # facter -p os_patching
@@ -166,13 +166,13 @@ This shows there are no updates which can be applied to this server and the serv
 }
 ```
 
-Where it shows 6 packages with available updates, along with an array of the package names.  None of the packages are tagged as security related (requires Debian, a subscription to RHEL or a Windows system).  There are no blockers to patching and the blackout window defined is not in effect.
+Where it shows 6 packages with available updates, along with an array of the package names.  None of the packages are tagged as security-related (requires Debian, a subscription to RHEL or a Windows system).  There are no blockers to patching and the blackout window defined is not in effect.
 
-The reboot_required flag is set to true, which means there have been changes to packages that require a reboot (libc, kernel etc) but a reboot hasn't happened.  The apps_needing_restart shows the PID and command line of applications that are using files that have been upgraded but the process hasn't been restarted.
+The reboot_required flag is set to true, which means there have been changes to packages that require a reboot (libc, kernel, etc) but a reboot hasn't happened.  The apps_needing_restart shows the PID and command line of applications that are using files that have been upgraded but the process hasn't been restarted.
 
 The pinned packages entry lists any packages which have been specifically excluded from being patched, from [version lock](https://access.redhat.com/solutions/98873) on Red Hat or by [pinning](https://wiki.debian.org/AptPreferences) in Debian.
 
-Last run shows a summary of the information from the last `os_patching::patch_server` task.
+The last run shows a summary of the information from the last `os_patching::patch_server` task.
 
 The fact `os_patching.patch_window` can be used to assign nodes to an arbitrary group.  The fact can be used as part of the query fed into the task to determine which nodes to patch:
 
@@ -182,7 +182,7 @@ $ puppet task run os_patching::patch_server --query="inventory[certname] {facts.
 
 ### Running custom commands before patching
 
-You can use the parameter `os_patching::pre_patching_command` to supply a file name to be run prior to running the patch job.  The file much be executable and should exit with a return code of `0` if the command was successful.
+You can use the parameter `os_patching::pre_patching_command` to supply a file name to be run before running the patch job.  The file must be executable and should exit with a return code of `0` if the command was successful.
 
 The entry must be a single command, with no arguments or parameters.
 
@@ -203,11 +203,11 @@ The reboot parameter is set in the `os_patching::patch_server` task.  It takes t
 * "patched" (or the legacy value `true`)
   * Reboot the node if patches have been applied
 * "smart"
-  * Use the OS supplied tools (e.g. `needs_restarting` on RHEL, or a pending reboot check on Windows) to determine if a reboot is required, if it is reboot, otherwise do not.
+  * Use the OS supplied tools (e.g. `needs_restarting` on RHEL, or a pending reboot check on Windows) to determine if a reboot is required, if it is, then reboot the machine, otherwise do not.
 
 The default value is "never".
 
-These parameters set the default action for all nodes during the run of the task.  It is possible to override the behaviour on a node by using...
+These parameters set the default action for all nodes during the run of the task.  It is possible to override the behavior on a node by using...
 
 #### The `reboot_override` fact
 
@@ -219,7 +219,7 @@ During the task run, any value other than "default" will override the value for 
 
 #### Why?
 
-By having a reboot mode set by the task parameter, it is possible to set the behaviour for all nodes in a patching run (I do 100's at once).  Having the override functionality provided by the fact, you can allow individual nodes included in the patching run excluded from the reboot behaviour.  Maybe there are a couple of nodes you know you need to patch but you can't reboot them immediately, you can set their reboot_override fact to "never" and handle the reboot manually at another time.
+By having a reboot mode set by the task parameter, it is possible to set the behavior for all nodes in a patching run (I do 100's at once).  Having the override functionality provided by the fact, you can allow individual nodes included in the patching run excluded from the reboot behavior.  Maybe there are a couple of nodes you know you need to patch but you can't reboot them immediately, you can set their reboot_override fact to "never" and handle the reboot manually at another time.
 
 ### Task output
 
@@ -260,7 +260,7 @@ If patching was executed, the task will report similar to below:
 If patching was blocked, the task will report similar to below:
 
 ```json
-Error: Task exited : 100
+Error: Task exited: 100
 Patching blocked
 ```
 A summary of the patch run is also written to `/var/cache/os_patching/run_history`, the last line of which is used by the `os_patching.last_run` fact.
@@ -304,18 +304,18 @@ The following files are stored in this directory:
 * `reboot_required` : if the OS can determine that the server needs to be rebooted due to package changes, this file contains the result.  Populates the fact reboot.reboot_required.
 * `apps_to_restart` : (Linux only) a list of processes (PID and command line) that haven't been restarted since the packages they use were patched.  Sets the fact reboot.apps_needing_restart and .reboot.app_restart_required.
 
-With the exception of the run_history file and Windows os_patching scripts, all files in the os_patching directory will be regenerated after a puppet run and a run of the `os_patching_fact_generation.sh` or `os_patching_fact_generation.ps1` script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum, syslog or the Windows event log.
+Except for the run_history file and Windows os_patching scripts, all files in the os_patching directory will be regenerated after a puppet run and a run of the `os_patching_fact_generation.sh` or `os_patching_fact_generation.ps1` script, which runs every hour by default.  If run_history is removed, the same information can be obtained from PDB, apt/yum, syslog or the Windows event log.
 
 ### Windows Systems
 
-As Windows includes no native command line tools to manage update installation, PowerShell scripts have been written utilising the Windows Update agent APIs that handle the update search, download, and installation process:
+As Windows includes no native command line tools to manage update installation, PowerShell scripts have been written utilizing the Windows Update agent APIs that handle the update search, download, and installation process:
 
 * `os_patching_fact_generation.ps1` which scans for updates and generates fact data (as above)
 * `os_patching_windows.ps1` is utilised by the `patch_server` task and underlying ruby script to handle the update installation process
 
 #### Supported Windows Versions
 
-Windows Server 2008 (x86 and x64) through to 2019 have been tested. The code should also function on the equivalent client versions of Windows (e.g. Vista and newer), however this has not been thoroughly tested.
+Windows Server 2008 (x86 and x64) through to 2019 have been tested. The code should also function on the equivalent client versions of Windows (e.g. Vista and newer), however, this has not been thoroughly tested.
 
 #### Configuration of Windows Update
 
@@ -342,7 +342,7 @@ class { 'wsus_client':
 
 * If updates or packages are installed outside of this script (e.g. by a user or another automated process), the results will not be captured in the facts.
 
-* On Windows systems, the timeout parameter of the `patch_server` task is implemented as a maintenance window end time (e.g. start time + timeout). This is used by doing a calculation prior to installing each update. If there is insufficient available, the update run will stop. However, at this stage each update is estimated to take 5 minutes to install. This will be improved in a future release to perform an estimation based on update size or type (e.g. an SCCM-like 5 minutes for hotfix, 30 minutes for cumulative update).
+* On Windows systems, the timeout parameter of the `patch_server` task is implemented as a maintenance window end time (e.g. start time + timeout). This is used by doing a calculation before installing each update. If there is insufficient available, the update run will stop. However, at this stage, each update is estimated to take 5 minutes to install. This will be improved in a future release to perform an estimation based on update size or type (e.g. an SCCM-like 5 minutes for a hotfix, 30 minutes for a cumulative update).
 
 ## Development
 
