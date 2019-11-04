@@ -264,8 +264,8 @@ class os_patching (
   if ($blackout_windows) {
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
-      if ( $key !~ /^[A-Za-z0-9 ]+$/ ){
-        fail translate(('Blackout description can only contain alphanumerics and space'))
+      if ( $key !~ /^[A-Za-z0-9_ ]+$/ ){
+        fail translate(('Blackout description can only contain alphanumerics, space and underscore'))
       }
       if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
         fail translate(('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)'))
