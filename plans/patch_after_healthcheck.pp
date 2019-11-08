@@ -20,6 +20,6 @@ plan os_patching::patch_after_healthcheck (TargetSpec $nodes) {
   $skipped_targets = $nodes_skipped.map | $value | { $value['certname'] }
   $targets = $nodes_to_patch.map | $value | { $value['certname'] }
 
-  #notice ("Skipping the following nodes due to health check failures : ${nodes_skipped}")
+  out::message("Skipping the following nodes due to health check failures : ${nodes_skipped}")
   return run_task('os_patching::patch_server', $targets)
 }
