@@ -10,7 +10,7 @@ plan os_patching::patch_after_healthcheck (TargetSpec $nodes) {
                             target_noop_state      => false,
                             target_service_enabled => true,
                             target_service_running => true,
-                            target_runinterval     => 1800,
+                            target_runinterval     => 14400,
                             '_catch_errors'        => true,
   )
 
@@ -20,6 +20,6 @@ plan os_patching::patch_after_healthcheck (TargetSpec $nodes) {
   $skipped_targets = $nodes_skipped.map | $value | { $value['certname'] }
   $targets = $nodes_to_patch.map | $value | { $value['certname'] }
 
-  notice ("Skipping the following nodes due to health check failures : ${nodes_skipped}")
+  #notice ("Skipping the following nodes due to health check failures : ${nodes_skipped}")
   return run_task('os_patching::patch_server', $targets)
 }
