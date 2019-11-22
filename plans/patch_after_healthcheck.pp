@@ -3,9 +3,9 @@
 #   module to perform a pre-check on the nodes you're planning to patch.  If the nodes pass the
 #   check, they get patched
 plan os_patching::patch_after_healthcheck (
-  TargetSpec $nodes
-  Optional[Boolean] $noop_state = false
-  Optional[Integer] $runinterval = 1800
+  TargetSpec $nodes,
+  Optional[Boolean] $noop_state = false,
+  Optional[Integer] $runinterval = 1800,
   ) {  
   # Run an initial health check to make sure the target nodes are ready
 
