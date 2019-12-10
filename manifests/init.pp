@@ -155,7 +155,7 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
-      $fact_upload_cmd     = '/opt/puppetlabs/bin/puppet facts upload'
+      $fact_upload_cmd     = 'puppet facts upload'
       $cache_dir           = '/var/cache/os_patching'
       $fact_dir            = '/usr/local/bin'
       $fact_file           = 'os_patching_fact_generation.sh'
@@ -295,7 +295,7 @@ class os_patching (
   if $fact_upload_exec and $fact_upload {
     exec { $fact_upload_exec:
       command     => $fact_upload_cmd,
-      path        => ['/usr/bin','/bin','/sbin','/usr/local/bin'],
+      path        => ['/opt/puppetlabs/bin/', '/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
       subscribe   => File[
         $fact_cmd,
