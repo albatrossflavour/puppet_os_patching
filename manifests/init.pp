@@ -380,6 +380,15 @@ class os_patching (
         }
       }
 
+      file { "${cache_dir}/files":
+        ensure => $ensure_dir,
+      }
+      file { "${cache_dir}/files/os_patching_windows.ps1":
+        ensure => $ensure_file,
+        mode   => $fact_mode,
+        source => "puppet://modules/${module_name}/os_patching_windows.ps1",
+      }
+
       scheduled_task { 'os_patching fact generation':
         ensure    => $ensure,
         enabled   => true,
