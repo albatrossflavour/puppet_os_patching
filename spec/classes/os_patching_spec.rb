@@ -11,7 +11,9 @@ describe 'os_patching' do
         let(:fact_cmd) { '/usr/local/bin/os_patching_fact_generation.sh' }
       when 'windows'
         let(:cache_dir) { 'C:/ProgramData/os_patching' }
-        let(:fact_cmd) { 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1' }
+        let(:fact_cmd) { cache_dir + '/os_patching_fact_generation.ps1' }
+        let(:cache_files_dir) { cache_dir + '/files' }
+        let(:patch_cmd) { cache_files_dir + '/os_patching_windows.ps1' }
       end
 
       case os_facts[:osfamily]
@@ -159,6 +161,16 @@ describe 'os_patching' do
         it { is_expected.to contain_exec('os_patching::exec::fact').that_requires(
           'File[' + cache_dir + '/reboot_override]',
         )}
+      when 'windows'
+        it { is_expected.to contain_file(cache_files_dir).with({
+          'ensure' => 'directory',
+        })}
+        it { is_expected.to contain_file(patch_cmd).with({
+          'ensure' => 'file',
+        })}
+        it { is_expected.to contain_scheduled_task('os_patching fact generation').with({
+          'ensure' => 'present',
+        })}
       end
       it { is_expected.to contain_exec('os_patching::exec::fact') }
       it { is_expected.to contain_exec('os_patching::exec::fact_upload') }
