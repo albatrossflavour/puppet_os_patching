@@ -127,6 +127,7 @@ class os_patching (
   String $patch_data_owner            = 'root',
   String $patch_data_group            = 'root',
   String $patch_cron_user             = $patch_data_owner,
+  String $puppet_binary_dir,
   Boolean $manage_yum_utils           = false,
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
@@ -155,7 +156,7 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
-      $fact_upload_cmd     = '/opt/puppetlabs/bin/puppet facts upload'
+      $fact_upload_cmd     = "${puppet_binary_dir}/puppet facts upload"
       $cache_dir           = '/var/cache/os_patching'
       $fact_dir            = '/usr/local/bin'
       $fact_file           = 'os_patching_fact_generation.sh'
@@ -167,7 +168,7 @@ class os_patching (
       }
     }
     'windows': {
-      $fact_upload_cmd     = '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload'
+      $fact_upload_cmd     = "\"${puppet_binary_dir}/puppet.bat\" facts upload"
       $cache_dir           = 'C:/ProgramData/os_patching'
       $fact_dir            = $cache_dir
       $fact_file           = 'os_patching_fact_generation.ps1'

@@ -9,13 +9,42 @@ describe 'os_patching' do
       when 'Linux'
         let(:cache_dir) { '/var/cache/os_patching' }
         let(:fact_cmd) { '/usr/local/bin/os_patching_fact_generation.sh' }
+
+        context 'default installation path for Puppet' do
+          it {
+            is_expected.to contain_exec('os_patching::exec::fact_upload').with(
+              'command' => '/opt/puppetlabs/bin/puppet facts upload',
+            )
+          }
+        end
+
+        context 'alternate installation path for Puppet' do
+          let(:params) { {'puppet_binary_dir' => '/usr/local/bin' } }
+
+          it {
+            is_expected.to contain_exec('os_patching::exec::fact_upload').with(
+              'command' => '/usr/local/bin/puppet facts upload',
+            )
+          }
+        end
       when 'windows'
         let(:cache_dir) { 'C:/ProgramData/os_patching' }
         let(:fact_cmd) { 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1' }
+
         context 'default installation path for Puppet' do
           it {
             is_expected.to contain_exec('os_patching::exec::fact_upload').with(
               'command' => '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload',
+            )
+          }
+        end
+
+        context 'alternate installation path for Puppet' do
+          let(:params) { {'puppet_binary_dir' => 'D:/Program Files/Puppet Labs/Puppet/bin' } }
+
+          it {
+            is_expected.to contain_exec('os_patching::exec::fact_upload').with(
+              'command' => '"D:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload',
             )
           }
         end
