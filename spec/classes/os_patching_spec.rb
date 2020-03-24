@@ -12,6 +12,13 @@ describe 'os_patching' do
       when 'windows'
         let(:cache_dir) { 'C:/ProgramData/os_patching' }
         let(:fact_cmd) { 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1' }
+        context 'default installation path for Puppet' do
+          it {
+            is_expected.to contain_exec('os_patching::exec::fact_upload').with(
+              'command' => '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload',
+            )
+          }
+        end
       end
 
       case os_facts[:osfamily]
