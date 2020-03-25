@@ -29,7 +29,6 @@ else
     options[:keys] = node_config.dig('ssh', 'private-key') unless node_config.dig('ssh', 'private-key').nil?
     options[:password] = node_config.dig('ssh', 'password') unless node_config.dig('ssh', 'password').nil?
     # Support both net-ssh 4 and 5.
-    # rubocop:disable Metrics/BlockNesting
     options[:verify_host_key] = if node_config.dig('ssh', 'host-key-check').nil?
                                   # Fall back to SSH behavior. This variable will only be set in net-ssh 5.3+.
                                   if @strict_host_key_checking.nil? || @strict_host_key_checking
@@ -51,7 +50,6 @@ else
                                 else
                                   Net::SSH::Verifiers::Null.new
                                 end
-    # rubocop:enable Metrics/BlockNesting
     host = if ENV['TARGET_HOST'].include?(':')
              ENV['TARGET_HOST'].split(':').first
            else
