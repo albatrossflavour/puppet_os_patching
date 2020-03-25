@@ -13,9 +13,6 @@
 # @param patch_cron_user [String]
 #   User who runs the cron job
 #
-# @param puppet_binary_dir [String]
-#   Location of the Puppet binaries
-#
 # @param manage_yum_utils [Boolean]
 #   Should the yum_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
