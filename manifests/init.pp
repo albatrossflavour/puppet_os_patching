@@ -1,6 +1,9 @@
 # @summary This manifest sets up a script and cron job to populate
 #   the `os_patching` fact.
 #
+# @param puppet_binary_dir [String]
+#   Location of the Puppet binaries
+#
 # @param patch_data_owner [String]
 #   User name for the owner of the patch data
 #
@@ -127,10 +130,10 @@
 #     ensure => absent,
 #   }
 class os_patching (
+  String $puppet_binary_dir,
   String $patch_data_owner            = 'root',
   String $patch_data_group            = 'root',
   String $patch_cron_user             = $patch_data_owner,
-  String $puppet_binary_dir,
   Boolean $manage_yum_utils           = false,
   Boolean $manage_delta_rpm           = false,
   Boolean $manage_yum_plugin_security = false,
