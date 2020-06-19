@@ -22,11 +22,11 @@ matrix:
     -
       bundler_args:
       dist: trusty
-      env: PLATFORM=centos:el_puppet6
-      rvm: 2.4.1
+      env: PLATFORMS=deb_puppet6
+      rvm: 2.5.1
       script:
-        #- bundle exec rake 'litmus:provision[docker, litmusimage/centos:7]'
-        - bundle exec rake 'litmus:provision_list[travis_el]'
+        - bundle exec rake 'litmus:provision_list[travis_deb]'
+        - bundle exec bolt command run 'apt-get install wget -y' --inventoryfile inventory.yaml --targets='localhost*'
         - bundle exec rake 'litmus:install_agent[puppet6]'
         - bundle exec rake litmus:install_module
         - travis_wait 60 bundle exec rake litmus:acceptance:parallel
