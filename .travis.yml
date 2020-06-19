@@ -8,7 +8,7 @@ before_install:
   - gem update --system $RUBYGEMS_VERSION
   - gem --version
   - bundle -v
-  #  - bundle config set without 'system_tests'
+#  - bundle config set without 'system_tests'
 script:
   - 'bundle exec rake $CHECK'
 rvm:
