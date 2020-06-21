@@ -41,7 +41,7 @@ matrix:
         - bundle exec rake 'litmus:provision_list[travis_deb]'
         - bundle exec rake 'litmus:install_agent[puppet6]'
         - bundle exec rake litmus:install_module
-        - travis_wait 60 bundle exec rake litmus:acceptance:parallel
+        - bundle exec rake litmus:acceptance:parallel
       services: docker
       sudo: required
     -
