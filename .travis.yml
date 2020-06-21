@@ -28,7 +28,7 @@ matrix:
         - bundle exec rake 'litmus:provision[docker, litmusimage/centos:7]'
         - bundle exec rake litmus:install_agent
         - bundle exec rake litmus:install_module
-        - bundle exec rake litmus:acceptance:parallel
+        - travis_wait 60 bundle exec rake litmus:acceptance:parallel
       services: docker
       sudo: required
     -
