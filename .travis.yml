@@ -38,7 +38,7 @@ matrix:
       env: PLATFORM=deb_puppet6
       rvm: 2.4.1
       script:
-        - bundle exec rake 'litmus:provision_list[travis_deb]'
+        - bundle exec rake 'litmus:provision[docker, litmusimage/centos:7]'
         - bundle exec rake 'litmus:install_agent[puppet6]'
         - bundle exec rake litmus:install_module
         - bundle exec rake litmus:acceptance:parallel
