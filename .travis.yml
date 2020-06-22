@@ -25,7 +25,8 @@ matrix:
       env: PLATFORM=centos:el_puppet6
       rvm: 2.4.1
       script:
-        - bundle exec rake 'litmus:provision[docker, litmusimage/centos:7]'
+        #- bundle exec rake 'litmus:provision[docker, litmusimage/centos:7]'
+        - bundle exec rake 'litmus:provision_list[travis_el]'
         - bundle exec rake litmus:install_agent
         - bundle exec rake litmus:install_module
         - travis_wait 60 bundle exec rake litmus:acceptance:parallel
