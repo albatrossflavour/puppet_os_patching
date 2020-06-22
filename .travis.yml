@@ -41,6 +41,7 @@ matrix:
 branches:
   only:
     - master
+    - /^feature/
     - /^v\d/
     - release
     - development
