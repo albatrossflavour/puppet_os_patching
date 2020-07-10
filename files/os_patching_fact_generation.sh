@@ -39,7 +39,7 @@ case $(facter osfamily) in
   ;;
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
-    SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /security/ {print $2}')
+    SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /Security/ {print $2}')
     HELDPKGS=$(dpkg --get-selections | awk '$2 == "hold" {print $1}')
   ;;
   *)
