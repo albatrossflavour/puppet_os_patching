@@ -173,7 +173,7 @@ class os_patching (
       $fact_file           = 'os_patching_fact_generation.ps1'
       $fact_mode           = '0770'
     }
-    default: { fail translate(("Unsupported OS : ${facts['kernel']}")) }
+    default: { fail("Unsupported OS : ${facts['kernel']}") }
   }
 
   # calculate full path for fact command/script
@@ -195,7 +195,7 @@ class os_patching (
   }
 
   if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
-    fail translate(('The patch window can only contain alphanumerics, space, underscore and dash'))
+    fail('The patch window can only contain alphanumerics, space, underscore and dash')
   }
 
   file { $cache_dir:
@@ -265,16 +265,16 @@ class os_patching (
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
       if ( $key !~ /^[A-Za-z0-9_ ]+$/ ){
-        fail translate(('Blackout description can only contain alphanumerics, space and underscore'))
+        fail('Blackout description can only contain alphanumerics, space and underscore')
       }
       if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail translate(('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)'))
+        fail('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
       if ( $value['end'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail translate(('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)'))
+        fail('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
       if ( $value['start'] > $value['end'] ){
-        fail translate(('Blackout end time must after the start time'))
+        fail('Blackout end time must after the start time')
       }
     }
   }
@@ -399,6 +399,6 @@ class os_patching (
         require   => File[$fact_cmd],
       }
     }
-    default: { fail translate(('Unsupported OS'))}
+    default: { fail('Unsupported OS')}
   }
 }
