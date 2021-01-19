@@ -17,7 +17,17 @@ else
   echo "$$" > $LOCKFILE
 fi
 
-case $(facter osfamily) in
+if [ $(puppet --version|cut -d. -f1) -gt 6 ]; then
+  OSFAMILY=$(puppet facts show --render-as s osfamily | cut -d\" -f4)
+  VARDIR=$(puppet facts show --render-as s puppet_vardir | cut -d\" -f4)
+  OSRELEASEMAJOR=$(puppet facts show --render-as s os.release.major | cut -d\" -f4)
+else
+  OSFAMILY=$(facter osfamily)
+  VARDIR=$(facter -p puppet_vardir)
+  OSRELEASEMAJOR=$(facter os.release.major)
+fi
+
+case $OSFAMILY in
   RedHat)
     # Sometimes yum check-update will output extra info like this:
     # ---
@@ -54,7 +64,7 @@ SECUPDATEFILE="$DATADIR/security_package_updates"
 OSHELDPKGFILE="$DATADIR/os_version_locked_packages"
 CATHELDPKGFILE="$DATADIR/catalog_version_locked_packages"
 MISMATCHHELDPKGFILE="$DATADIR/mismatched_version_locked_packages"
-CATALOG="$(facter -p puppet_vardir)/client_data/catalog/$(puppet config print certname --section agent).json"
+CATALOG="$VARDIR/client_data/catalog/$(puppet config print certname --section agent).json"
 
 if [ -f "${CATALOG}" ]
 then
@@ -102,7 +112,7 @@ done
 
 if [ -f '/usr/bin/needs-restarting' ]
 then
-  case $(facter os.release.major) in
+  case $OSRELEASEMAJOR in
     7)
       /usr/bin/needs-restarting -r 2>/dev/null 1>/dev/null
       if [ $? -gt 0 ]
@@ -134,7 +144,7 @@ else
   touch $DATADIR/reboot_required
 fi
 
-if [ $(facter osfamily) = 'Debian' ] || [ $(facter osfamily) = 'Suse' ]
+if [ $OSFAMILY = 'Debian' ] || [ $OSFAMILY = 'Suse' ]
 then
   if [ -f '/var/run/reboot-required' ]
   then
