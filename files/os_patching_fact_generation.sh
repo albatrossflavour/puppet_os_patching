@@ -19,7 +19,7 @@ fi
 
 if [ $(puppet --version|cut -d. -f1) -gt 6 ]; then
   OSFAMILY=$(puppet facts show --render-as s osfamily | cut -d\" -f4)
-  VARDIR=$(puppet facts show --render-as s puppet_vardir | cut -d\" -f4)
+  VARDIR=$(puppet config print vardir)
   OSRELEASEMAJOR=$(puppet facts show --render-as s os.release.major | cut -d\" -f4)
 else
   OSFAMILY=$(facter osfamily)
