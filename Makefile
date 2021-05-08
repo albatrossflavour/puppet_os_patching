@@ -11,10 +11,10 @@ install_module:
 	bundle exec rake litmus:install_module
 
 test:
-	${MAKE} validate
-	${MAKE} unit
+	#${MAKE} validate
+	#${MAKE} unit
 	${MAKE} acceptance
-	${MAKE} documentation
+	#${MAKE} documentation
 
 validate:
 	bundle exec rake metadata_lint
@@ -28,7 +28,7 @@ unit:
 	bundle exec rake spec
 
 acceptance:
-	${MAKE} test_puppet5
+#	${MAKE} test_puppet5
 	${MAKE} test_puppet6
 
 test_puppet6:

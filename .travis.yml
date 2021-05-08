@@ -8,11 +8,11 @@ before_install:
   - gem update --system $RUBYGEMS_VERSION
   - gem --version
   - bundle -v
+  #  - bundle config set without 'system_tests'
 script:
   - 'bundle exec rake $CHECK'
-bundler_args: --without system_tests
 rvm:
-  - 2.5.1
+  - 2.4.1
 env:
   global:
     - PUPPET_GEM_VERSION="~> 6.0"
@@ -22,51 +22,26 @@ matrix:
     -
       bundler_args:
       dist: trusty
-      env: PLATFORMS=deb_puppet5
-      rvm: 2.5.1
-      script:
-      - bundle exec rake 'litmus:provision_list[travis_deb]'
-      - bundle exec bolt command run 'apt-get install wget -y' --inventoryfile inventory.yaml --nodes='localhost*'
-      - bundle exec rake 'litmus:install_agent[puppet5]'
-      - bundle exec rake litmus:install_module
-      - travis_wait 60 bundle exec rake litmus:acceptance:parallel
-      services: docker
-      sudo: required
-    -
-      bundler_args:
-      dist: trusty
-      env: PLATFORM=centos:el_puppet5
-      rvm: 2.5.1
-      script:
-      - bundle exec rake 'litmus:provision_list[travis_el]'
-      - bundle exec rake 'litmus:install_agent[puppet5]'
-      - bundle exec rake litmus:install_module
-      - travis_wait 60 bundle exec rake litmus:acceptance:parallel
-      services: docker
-      sudo: required
-    -
-      bundler_args:
-      dist: trusty
-      env: PLATFORMS=deb_puppet6
-      rvm: 2.5.1
-      script:
-      - bundle exec rake 'litmus:provision_list[travis_deb]'
-      - bundle exec bolt command run 'apt-get install wget -y' --inventoryfile inventory.yaml --nodes='localhost*'
-      - bundle exec rake 'litmus:install_agent[puppet6]'
-      - bundle exec rake litmus:install_module
-      - travis_wait 60 bundle exec rake litmus:acceptance:parallel
-      services: docker
-      sudo: required
-    -
-      bundler_args:
-      dist: trusty
       env: PLATFORM=centos:el_puppet6
-      rvm: 2.5.1
+      rvm: 2.4.1
       script:
-      - bundle exec rake 'litmus:provision_list[travis_el]'
-      - bundle exec rake 'litmus:install_agent[puppet6]'
-      - bundle exec rake litmus:install_module
-      - travis_wait 60 bundle exec rake litmus:acceptance:parallel
+        #- bundle exec rake 'litmus:provision[docker, litmusimage/centos:7]'
+        - bundle exec rake 'litmus:provision_list[travis_el]'
+        - bundle exec rake 'litmus:install_agent[puppet6]'
+        - bundle exec rake litmus:install_module
+        - travis_wait 60 bundle exec rake litmus:acceptance:parallel
+      services: docker
+      sudo: required
+    -
+      bundler_args:
+      dist: trusty
+      env: PLATFORM=deb_puppet6
+      rvm: 2.4.1
+      script:
+        - bundle exec rake 'litmus:provision_list[travis_deb]'
+        - bundle exec rake 'litmus:install_agent[puppet6]'
+        - bundle exec rake litmus:install_module
+        - travis_wait 60 bundle exec rake litmus:acceptance:parallel
       services: docker
       sudo: required
     -
@@ -75,10 +50,11 @@ matrix:
       env: CHECK=parallel_spec
     -
       env: PUPPET_GEM_VERSION="~> 5.0" CHECK=parallel_spec
-      rvm: 2.4.4
+      rvm: 2.4.1
 branches:
   only:
     - master
+    - /^feature/
     - /^v\d/
     - release
     - development
@@ -92,5 +68,4 @@ deploy:
   on:
     tags: true
     all_branches: true
-    condition: "$DEPLOY_TO_FORGE = yes"
-
+    condition: "$DEPLOY_TO_FORGE = no"

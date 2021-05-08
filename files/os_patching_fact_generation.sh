@@ -26,9 +26,9 @@ case $(facter osfamily) in
     # ---
     # We need to filter those out as they screw up the package listing
     FILTER='egrep -v "^Security:"'
-    PKGS=$(yum -q check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
+    PKGS=$(yum -q check-update 2>/dev/null| $FILTER |  egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
     PKGS=$(echo $PKGS | sed 's/Obsoleting.*//')
-    SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -v "is broken|^Loaded plugins" | awk '/^[[:alnum:]]/ {print $1}')
+    SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
     SECPKGS=$(echo $SECPKGS | sed 's/Obsoleting.*//')
     HELDPKGS=$([ -r /etc/yum/pluginconf.d/versionlock.list ] && awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list | sed 's/-[0-9].*//')
   ;;
@@ -39,7 +39,7 @@ case $(facter osfamily) in
   ;;
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
-    SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /security/ {print $2}')
+    SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /Security/ {print $2}')
     HELDPKGS=$(dpkg --get-selections | awk '$2 == "hold" {print $1}')
   ;;
   *)
