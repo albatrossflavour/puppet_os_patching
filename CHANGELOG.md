@@ -27,6 +27,7 @@
 **Merged pull requests:**
 
 - puppetlabs-translate deprecated [\#189](https://github.com/albatrossflavour/puppet_os_patching/pull/189) ([binford2k](https://github.com/binford2k))
+- Master release - bug fixes and travis  [\#183](https://github.com/albatrossflavour/puppet_os_patching/pull/183) ([albatrossflavour](https://github.com/albatrossflavour))
 - Working on \#180 : Adding rescue to allow code to continue after NoMet… [\#181](https://github.com/albatrossflavour/puppet_os_patching/pull/181) ([sharumpe](https://github.com/sharumpe))
 - Fixing failing development tests [\#179](https://github.com/albatrossflavour/puppet_os_patching/pull/179) ([Tamerz](https://github.com/Tamerz))
 - Change yum check-update to include valid entries instead of exclude invalid [\#175](https://github.com/albatrossflavour/puppet_os_patching/pull/175) ([freiheit](https://github.com/freiheit))
