@@ -168,10 +168,10 @@ describe 'os_patching' do
         it { is_expected.to contain_file(cache_dir + '/block_patching_on_warnings') }
       end
 
-      context 'debian reboot' do
-        let(:params) { { 'apt_autoremove' => true } }
-        case os_facts[:osfamily]
-        when 'Debian'
+      case os_facts[:osfamily]
+      when 'Debian'
+        context 'debian reboot' do
+          let(:params) { { 'apt_autoremove' => true } }
           it { is_expected.to contain_cron('Run apt autoremove on reboot').with_ensure('present') }
         end
       end

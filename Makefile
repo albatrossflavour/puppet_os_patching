@@ -1,78 +1,44 @@
 all:
 	${MAKE} test
 
-install_centos:
-	bundle exec rake 'litmus:provision_list[travis_el]'
-
-install_ubuntu:
-	bundle exec rake 'litmus:provision_list[travis_deb]'
-
-install_module:
-	bundle exec rake litmus:install_module
-
 test:
-	#${MAKE} validate
-	#${MAKE} unit
+	${MAKE} setup
+	${MAKE} validate
+	${MAKE} unit
 	${MAKE} acceptance
-	#${MAKE} documentation
+	${MAKE} documentation
+
+setup:
+	pdk bundle install
 
 validate:
-	bundle exec rake metadata_lint
-	bundle exec rake syntax
-	bundle exec rake validate
-	bundle exec rake rubocop
-	bundle exec rake check:git_ignore
-	bundle exec puppet-lint manifests
+	pdk bundle exec rake metadata_lint
+	pdk bundle exec rake syntax
+	pdk bundle exec rake validate
+	pdk bundle exec rake rubocop
+	pdk bundle exec rake lint
+	pdk bundle exec rake check:git_ignore
+	pdk bundle exec rake check:dot_underscore
+	pdk bundle exec rake check:symlinks
+	pdk bundle exec puppet-lint manifests
 
 unit:
-	bundle exec rake spec
+	pdk bundle exec rake spec
 
 acceptance:
 	#${MAKE} test_puppet5
 	${MAKE} test_puppet6
 	#${MAKE} test_puppet7
 
-test_puppet7:
-	${MAKE} install_centos
-	bundle exec rake litmus:install_agent[puppet7]
-	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel
-	${MAKE} teardown
-	${MAKE} install_ubuntu
-	bundle exec rake litmus:install_agent[puppet7]
-	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel
-	${MAKE} teardown
-
 test_puppet6:
-	${MAKE} install_centos
-	bundle exec rake litmus:install_agent[puppet6]
-	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel
-	${MAKE} teardown
-	${MAKE} install_ubuntu
-	bundle exec rake litmus:install_agent[puppet6]
-	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel
-	${MAKE} teardown
-
-test_puppet5:
-	${MAKE} install_centos
-	bundle exec rake litmus:install_agent[puppet5]
-	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel
-	${MAKE} teardown
-	${MAKE} install_ubuntu
-	bundle exec rake litmus:install_agent[puppet5]
-	${MAKE} install_module
-	bundle exec rake litmus:acceptance:parallel
-	${MAKE} teardown
-
-documentation:
-	bundle exec puppet strings generate --format=markdown
+	pdk bundle exec rake 'litmus:provision_list[release_tests]'
+	pdk bundle exec rake litmus:install_agent[puppet6]
+	pdk bundle exec rake litmus:install_module
+	pdk bundle exec rake litmus:acceptance:parallel
+	pdk bundle exec rake litmus:tear_down
 
 teardown:
-	bundle exec rake litmus:tear_down
+	pdk bundle exec rake litmus:tear_down
 
-shell:
-	ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p 2222
+documentation:
+	pdk bundle exec puppet strings generate --format=markdown

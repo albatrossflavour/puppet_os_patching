@@ -24,7 +24,7 @@ Layout/FirstParameterIndentation:
 # Cop supports --auto-correct.
 # Configuration parameters: SupportedStyles, IndentationWidth.
 # SupportedStyles: special_inside_parentheses, consistent, align_braces
-Layout/IndentHash:
+Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 
 # Offense count: 13
@@ -86,14 +86,6 @@ RSpec/MultipleDescribes:
 # FunctionalMethods: let, let!, subject, watch
 # IgnoredMethods: lambda, proc, it
 Style/BlockDelimiters:
-  Exclude:
-    - 'spec/classes/os_patching_spec.rb'
-
-# Offense count: 12
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-# SupportedStyles: braces, no_braces, context_dependent
-Style/BracesAroundHashParameters:
   Exclude:
     - 'spec/classes/os_patching_spec.rb'
 
@@ -169,7 +161,7 @@ Style/TrailingCommaInArguments:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyleForMultiline, SupportedStylesForMultiline.
 # SupportedStylesForMultiline: comma, consistent_comma, no_comma
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
   Exclude:
     - 'spec/classes/os_patching_spec.rb'
     - 'spec/spec_helper.rb'
