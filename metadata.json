@@ -92,10 +92,10 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 5.3.2 < 7.0.0"
+      "version_requirement": ">= 5.3.2 < 8.0.0"
     }
   ],
-  "pdk-version": "1.18.0",
-  "template-url": "pdk-default#1.18.0",
-  "template-ref": "tags/1.18.0-0-g095317c"
+  "pdk-version": "2.1.0",
+  "template-url": "pdk-default#2.1.0",
+  "template-ref": "tags/2.1.0-0-ga675ea5"
 }
