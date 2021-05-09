@@ -32,6 +32,7 @@ group :system_tests do
   gem "puppet-module-win-system-r#{minor_version}", '~> 1.0',   require: false, platforms: [:mswin, :mingw, :x64_mingw]
   gem "puppet_pot_generator", :git => 'git@github.com:puppetlabs/puppet_pot_generator.git'
   gem 'rubocop-i18n'
+  gem 'github_changelog_generator'
   gem "puppet_litmus",                                          require: false, platforms: [:ruby, :mswin, :mingw, :x64_mingw] if ENV['PUPPET_GEM_VERSION'].nil? or ENV['PUPPET_GEM_VERSION'] !~ %r{ 5}
 end
 
