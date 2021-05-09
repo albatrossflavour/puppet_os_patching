@@ -3,7 +3,7 @@
 # Generate cache of patch data for consumption by Puppet custom facts.
 #
 
-PATH=/bin:/sbin:/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin
+PATH=/opt/puppetlabs/puppet/bin:/opt/puppetlabs/bin:/bin:/sbin:/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin
 
 LOCKFILE=/var/run/os_patching_fact_generation.lock
 
@@ -39,7 +39,7 @@ case $(facter osfamily) in
   ;;
   Debian)
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
-    SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /security/ {print $2}')
+    SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /Security/ {print $2}')
     HELDPKGS=$(dpkg --get-selections | awk '$2 == "hold" {print $1}')
   ;;
   *)
@@ -58,7 +58,7 @@ CATALOG="$(facter -p puppet_vardir)/client_data/catalog/$(puppet config print ce
 
 if [ -f "${CATALOG}" ]
 then
-	VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | /opt/puppetlabs/puppet/bin/ruby -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and ((r['parameters']['ensure'].match /\d.+/) rescue false) }.each do | m | puts m['title'] end")
+	VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | ruby -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] end")
 else
 	VERSION_LOCK_FROM_CATALOG=''
 fi

@@ -1,24 +1,47 @@
-# Change Log
+# Changelog
 
-## [0.13.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.13.0) (2019-10-16)
-[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.13.0)
+## [0.14.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.14.0) (2021-05-09)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.14.0)
 
 **Implemented enhancements:**
 
 - Enable a pre-patching command to be specified [\#159](https://github.com/albatrossflavour/puppet_os_patching/issues/159)
+- \#149 allow Debian to run `apt-get autoremove` at reboot [\#151](https://github.com/albatrossflavour/puppet_os_patching/pull/151) ([albatrossflavour](https://github.com/albatrossflavour))
+- Toggle to allow warnings to block patching \#143 [\#150](https://github.com/albatrossflavour/puppet_os_patching/pull/150) ([albatrossflavour](https://github.com/albatrossflavour))
+- Updates to facter and bug fixes [\#148](https://github.com/albatrossflavour/puppet_os_patching/pull/148) ([albatrossflavour](https://github.com/albatrossflavour))
+- Force usage of the 'C' locale [\#142](https://github.com/albatrossflavour/puppet_os_patching/pull/142) ([smortex](https://github.com/smortex))
 
 **Fixed bugs:**
 
 - \#148 ensure versionlock file is there before we read it [\#154](https://github.com/albatrossflavour/puppet_os_patching/pull/154) ([albatrossflavour](https://github.com/albatrossflavour))
 - Prevent error message to stderr on RedHat [\#153](https://github.com/albatrossflavour/puppet_os_patching/pull/153) ([smortex](https://github.com/smortex))
+- Bugfix: Add missing dependency [\#144](https://github.com/albatrossflavour/puppet_os_patching/pull/144) ([theosotr](https://github.com/theosotr))
+- The declared ISO format does not exist, had one extra `dd` [\#141](https://github.com/albatrossflavour/puppet_os_patching/pull/141) ([rnelson0](https://github.com/rnelson0))
+
+**Closed issues:**
+
+- Fact generation misses Debian security packages [\#184](https://github.com/albatrossflavour/puppet_os_patching/issues/184)
+- Unable to fetch some archives [\#177](https://github.com/albatrossflavour/puppet_os_patching/issues/177)
 
 **Merged pull requests:**
 
+- puppetlabs-translate deprecated [\#189](https://github.com/albatrossflavour/puppet_os_patching/pull/189) ([binford2k](https://github.com/binford2k))
+- Master release - bug fixes and travis  [\#183](https://github.com/albatrossflavour/puppet_os_patching/pull/183) ([albatrossflavour](https://github.com/albatrossflavour))
+- Working on \#180 : Adding rescue to allow code to continue after NoMet… [\#181](https://github.com/albatrossflavour/puppet_os_patching/pull/181) ([sharumpe](https://github.com/sharumpe))
+- Fixing failing development tests [\#179](https://github.com/albatrossflavour/puppet_os_patching/pull/179) ([Tamerz](https://github.com/Tamerz))
+- Change yum check-update to include valid entries instead of exclude invalid [\#175](https://github.com/albatrossflavour/puppet_os_patching/pull/175) ([freiheit](https://github.com/freiheit))
+- fix\(patch\_server\) change regex after yum history [\#171](https://github.com/albatrossflavour/puppet_os_patching/pull/171) ([bmx0r](https://github.com/bmx0r))
+- Do not hardcode the path of AIO commands [\#168](https://github.com/albatrossflavour/puppet_os_patching/pull/168) ([smortex](https://github.com/smortex))
+- Improve os\_patching::patch\_after\_healthcheck plan [\#167](https://github.com/albatrossflavour/puppet_os_patching/pull/167) ([kreeuwijk](https://github.com/kreeuwijk))
+- Inconsistence between facter and manifest [\#164](https://github.com/albatrossflavour/puppet_os_patching/pull/164) ([elfranne](https://github.com/elfranne))
+- Update README.md [\#162](https://github.com/albatrossflavour/puppet_os_patching/pull/162) ([LDaneliukas](https://github.com/LDaneliukas))
 - Fix issues with empty pre\_patching\_command entries [\#161](https://github.com/albatrossflavour/puppet_os_patching/pull/161) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge to production [\#160](https://github.com/albatrossflavour/puppet_os_patching/pull/160) ([albatrossflavour](https://github.com/albatrossflavour))
 - clear out 'Obsoleting' entries [\#158](https://github.com/albatrossflavour/puppet_os_patching/pull/158) ([kreeuwijk](https://github.com/kreeuwijk))
 
 ## [0.12.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.12.0) (2019-08-21)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.1...0.12.0)
 
 **Implemented enhancements:**
@@ -27,20 +50,12 @@
 - Add a list of required KBs to the os\_patching fact on windows [\#145](https://github.com/albatrossflavour/puppet_os_patching/issues/145)
 - Create the wiki and populate some how to guides [\#128](https://github.com/albatrossflavour/puppet_os_patching/issues/128)
 - Timeouts on os\_patching\_fact\_generation.sh? [\#94](https://github.com/albatrossflavour/puppet_os_patching/issues/94)
-- \#149 allow Debian to run `apt-get autoremove` at reboot [\#151](https://github.com/albatrossflavour/puppet_os_patching/pull/151) ([albatrossflavour](https://github.com/albatrossflavour))
-- Toggle to allow warnings to block patching \#143 [\#150](https://github.com/albatrossflavour/puppet_os_patching/pull/150) ([albatrossflavour](https://github.com/albatrossflavour))
-- Updates to facter and bug fixes [\#148](https://github.com/albatrossflavour/puppet_os_patching/pull/148) ([albatrossflavour](https://github.com/albatrossflavour))
-- Fix handling of KBArticleIDs [\#146](https://github.com/albatrossflavour/puppet_os_patching/pull/146) ([kreeuwijk](https://github.com/kreeuwijk))
-- Force usage of the 'C' locale [\#142](https://github.com/albatrossflavour/puppet_os_patching/pull/142) ([smortex](https://github.com/smortex))
 
 **Fixed bugs:**
 
 - Travis tests taking too long [\#138](https://github.com/albatrossflavour/puppet_os_patching/issues/138)
 - Version 0.11.1 of module cannot be installed on Windows \(via Agent\) [\#136](https://github.com/albatrossflavour/puppet_os_patching/issues/136)
 - Unable to run task os\_patching::patch\_server Windows 2012r2 with puppet enterprise agent 6.4.2 [\#133](https://github.com/albatrossflavour/puppet_os_patching/issues/133)
-- Fix missing slash in facter code [\#147](https://github.com/albatrossflavour/puppet_os_patching/pull/147) ([kreeuwijk](https://github.com/kreeuwijk))
-- Bugfix: Add missing dependency [\#144](https://github.com/albatrossflavour/puppet_os_patching/pull/144) ([theosotr](https://github.com/theosotr))
-- The declared ISO format does not exist, had one extra `dd` [\#141](https://github.com/albatrossflavour/puppet_os_patching/pull/141) ([rnelson0](https://github.com/rnelson0))
 - \#138 - fix travis issues [\#139](https://github.com/albatrossflavour/puppet_os_patching/pull/139) ([albatrossflavour](https://github.com/albatrossflavour))
 
 **Merged pull requests:**
@@ -49,8 +64,11 @@
 - V0.11.2 release [\#140](https://github.com/albatrossflavour/puppet_os_patching/pull/140) ([albatrossflavour](https://github.com/albatrossflavour))
 - \#136 add html to the pdkignore [\#137](https://github.com/albatrossflavour/puppet_os_patching/pull/137) ([albatrossflavour](https://github.com/albatrossflavour))
 - Issue/133 eventlog puppet agent 6.4.2 [\#134](https://github.com/albatrossflavour/puppet_os_patching/pull/134) ([nathangiuliani](https://github.com/nathangiuliani))
+- Updated ReadMe [\#131](https://github.com/albatrossflavour/puppet_os_patching/pull/131) ([nathangiuliani](https://github.com/nathangiuliani))
+- \#129 restrictions on stdlib are too tight [\#130](https://github.com/albatrossflavour/puppet_os_patching/pull/130) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.11.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.1) (2019-05-07)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.0...0.11.1)
 
 **Implemented enhancements:**
@@ -64,10 +82,9 @@
 **Merged pull requests:**
 
 - V0.11.1 release to master [\#132](https://github.com/albatrossflavour/puppet_os_patching/pull/132) ([albatrossflavour](https://github.com/albatrossflavour))
-- Updated ReadMe [\#131](https://github.com/albatrossflavour/puppet_os_patching/pull/131) ([nathangiuliani](https://github.com/nathangiuliani))
-- \#129 restrictions on stdlib are too tight [\#130](https://github.com/albatrossflavour/puppet_os_patching/pull/130) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.11.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.0) (2019-05-03)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.10.0...0.11.0)
 
 **Implemented enhancements:**
@@ -84,6 +101,7 @@
 - Enable windows support [\#121](https://github.com/albatrossflavour/puppet_os_patching/pull/121) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.10.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.10.0) (2019-04-26)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.9.0...0.10.0)
 
 **Implemented enhancements:**
@@ -95,17 +113,19 @@
 - Release to production [\#119](https://github.com/albatrossflavour/puppet_os_patching/pull/119) ([albatrossflavour](https://github.com/albatrossflavour))
 - Add example plan [\#118](https://github.com/albatrossflavour/puppet_os_patching/pull/118) ([albatrossflavour](https://github.com/albatrossflavour))
 - Resync development [\#116](https://github.com/albatrossflavour/puppet_os_patching/pull/116) ([albatrossflavour](https://github.com/albatrossflavour))
+- Switch over to litmus tests [\#114](https://github.com/albatrossflavour/puppet_os_patching/pull/114) ([albatrossflavour](https://github.com/albatrossflavour))
+- Feature/sles [\#113](https://github.com/albatrossflavour/puppet_os_patching/pull/113) ([JakeTRogers](https://github.com/JakeTRogers))
 
 ## [0.9.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.9.0) (2019-04-26)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.8.0...0.9.0)
 
 **Merged pull requests:**
 
 - Merge Litmus and Suse to production [\#115](https://github.com/albatrossflavour/puppet_os_patching/pull/115) ([albatrossflavour](https://github.com/albatrossflavour))
-- Switch over to litmus tests [\#114](https://github.com/albatrossflavour/puppet_os_patching/pull/114) ([albatrossflavour](https://github.com/albatrossflavour))
-- Feature/sles [\#113](https://github.com/albatrossflavour/puppet_os_patching/pull/113) ([JakeTRogers](https://github.com/JakeTRogers))
 
 ## [0.8.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.8.0) (2019-01-24)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.7.0...0.8.0)
 
 **Closed issues:**
@@ -124,6 +144,7 @@
 - Merge pull request \#102 from albatrossflavour/development [\#103](https://github.com/albatrossflavour/puppet_os_patching/pull/103) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.7.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.7.0) (2018-12-09)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.4...0.7.0)
 
 **Fixed bugs:**
@@ -142,6 +163,7 @@
 - Merge pull request \#87 from albatrossflavour/development [\#88](https://github.com/albatrossflavour/puppet_os_patching/pull/88) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.6.4](https://github.com/albatrossflavour/puppet_os_patching/tree/0.6.4) (2018-10-03)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.3...0.6.4)
 
 **Merged pull requests:**
@@ -150,6 +172,7 @@
 - Merge pull request \#85 from albatrossflavour/development [\#86](https://github.com/albatrossflavour/puppet_os_patching/pull/86) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.6.3](https://github.com/albatrossflavour/puppet_os_patching/tree/0.6.3) (2018-10-03)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.2...0.6.3)
 
 **Merged pull requests:**
@@ -159,6 +182,7 @@
 - Merge pull request \#82 from albatrossflavour/development [\#83](https://github.com/albatrossflavour/puppet_os_patching/pull/83) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.6.2](https://github.com/albatrossflavour/puppet_os_patching/tree/0.6.2) (2018-10-03)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.1...0.6.2)
 
 **Merged pull requests:**
@@ -168,6 +192,7 @@
 - Merge pull request \#79 from albatrossflavour/development [\#80](https://github.com/albatrossflavour/puppet_os_patching/pull/80) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.6.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.6.1) (2018-10-02)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.0...0.6.1)
 
 **Merged pull requests:**
@@ -176,6 +201,7 @@
 - Merge pull request \#77 from albatrossflavour/development [\#78](https://github.com/albatrossflavour/puppet_os_patching/pull/78) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.6.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.6.0) (2018-10-02)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.5.0...0.6.0)
 
 **Implemented enhancements:**
@@ -217,6 +243,7 @@
 - Merge pull request \#50 from albatrossflavour/development [\#51](https://github.com/albatrossflavour/puppet_os_patching/pull/51) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.5.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.5.0) (2018-09-23)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.4.1...0.5.0)
 
 **Merged pull requests:**
@@ -226,6 +253,7 @@
 - Resync to dev [\#47](https://github.com/albatrossflavour/puppet_os_patching/pull/47) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.4.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.4.1) (2018-09-16)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.4.0...0.4.1)
 
 **Merged pull requests:**
@@ -233,11 +261,12 @@
 - V0.4.1 [\#46](https://github.com/albatrossflavour/puppet_os_patching/pull/46) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.4.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.4.0) (2018-09-16)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.5...0.4.0)
 
 **Implemented enhancements:**
 
-- `packages\_updated` does not show the kernel itself [\#29](https://github.com/albatrossflavour/puppet_os_patching/issues/29)
+- `packages_updated` does not show the kernel itself [\#29](https://github.com/albatrossflavour/puppet_os_patching/issues/29)
 
 **Fixed bugs:**
 
@@ -259,6 +288,7 @@
 - Sync back to dev [\#28](https://github.com/albatrossflavour/puppet_os_patching/pull/28) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.3.5](https://github.com/albatrossflavour/puppet_os_patching/tree/0.3.5) (2018-08-16)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.4...0.3.5)
 
 **Merged pull requests:**
@@ -269,6 +299,7 @@
 - Resync to development [\#24](https://github.com/albatrossflavour/puppet_os_patching/pull/24) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.3.4](https://github.com/albatrossflavour/puppet_os_patching/tree/0.3.4) (2018-08-10)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.3...0.3.4)
 
 **Merged pull requests:**
@@ -278,23 +309,20 @@
 - Remove shell commands as much as possible [\#21](https://github.com/albatrossflavour/puppet_os_patching/pull/21) ([albatrossflavour](https://github.com/albatrossflavour))
 - Ooops [\#20](https://github.com/albatrossflavour/puppet_os_patching/pull/20) ([albatrossflavour](https://github.com/albatrossflavour))
 - Add cron job to refresh cache at reboot [\#19](https://github.com/albatrossflavour/puppet_os_patching/pull/19) ([albatrossflavour](https://github.com/albatrossflavour))
-
-## [0.3.3](https://github.com/albatrossflavour/puppet_os_patching/tree/0.3.3) (2018-08-09)
-[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.2...0.3.3)
-
-**Merged pull requests:**
-
 - Ensure we honour reboot\_override even if a reboot isn't required [\#18](https://github.com/albatrossflavour/puppet_os_patching/pull/18) ([albatrossflavour](https://github.com/albatrossflavour))
 - Secure the params a little more [\#17](https://github.com/albatrossflavour/puppet_os_patching/pull/17) ([albatrossflavour](https://github.com/albatrossflavour))
-
-## [0.3.2](https://github.com/albatrossflavour/puppet_os_patching/tree/0.3.2) (2018-08-09)
-[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.1...0.3.2)
-
-**Merged pull requests:**
-
 - Updates to detect when reboots are required [\#16](https://github.com/albatrossflavour/puppet_os_patching/pull/16) ([albatrossflavour](https://github.com/albatrossflavour))
 
+## [0.3.3](https://github.com/albatrossflavour/puppet_os_patching/tree/0.3.3) (2018-08-09)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.2...0.3.3)
+
+## [0.3.2](https://github.com/albatrossflavour/puppet_os_patching/tree/0.3.2) (2018-08-09)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.1...0.3.2)
+
 ## [0.3.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.3.1) (2018-08-09)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.2.1...0.3.1)
 
 **Merged pull requests:**
@@ -302,6 +330,7 @@
 - Resync to development [\#15](https://github.com/albatrossflavour/puppet_os_patching/pull/15) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.2.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.2.1) (2018-08-07)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.1.19...0.2.1)
 
 **Merged pull requests:**
@@ -316,6 +345,7 @@
 - Major update for all areas [\#7](https://github.com/albatrossflavour/puppet_os_patching/pull/7) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.1.19](https://github.com/albatrossflavour/puppet_os_patching/tree/0.1.19) (2018-07-09)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.1.17...0.1.19)
 
 **Merged pull requests:**
@@ -323,21 +353,21 @@
 - Feature/smarter tasks [\#6](https://github.com/albatrossflavour/puppet_os_patching/pull/6) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.1.17](https://github.com/albatrossflavour/puppet_os_patching/tree/0.1.17) (2018-06-01)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.1.16...0.1.17)
 
 ## [0.1.16](https://github.com/albatrossflavour/puppet_os_patching/tree/0.1.16) (2018-05-29)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.1.14...0.1.16)
 
 ## [0.1.14](https://github.com/albatrossflavour/puppet_os_patching/tree/0.1.14) (2018-05-28)
+
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.1.13...0.1.14)
 
 ## [0.1.13](https://github.com/albatrossflavour/puppet_os_patching/tree/0.1.13) (2018-05-28)
-**Merged pull requests:**
 
-- Merge pull request \#1 from albatrossflavour/development [\#4](https://github.com/albatrossflavour/puppet_os_patching/pull/4) ([albatrossflavour](https://github.com/albatrossflavour))
-- clean up unused caches [\#3](https://github.com/albatrossflavour/puppet_os_patching/pull/3) ([albatrossflavour](https://github.com/albatrossflavour))
-- Updates [\#1](https://github.com/albatrossflavour/puppet_os_patching/pull/1) ([albatrossflavour](https://github.com/albatrossflavour))
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/44fd883ad50bccbcd0843608f71b4e7499295af8...0.1.13)
 
 
 
-\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
+\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
