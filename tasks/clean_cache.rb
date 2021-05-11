@@ -71,7 +71,7 @@ else
 end
 
 # Check we are on a supported platform
-unless osfamily == 'RedHat' || osfamily == 'Debian' || osfamily == 'Suse'
+unless ['RedHat', 'Debian', 'Suse'].include?(osfamily)
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 

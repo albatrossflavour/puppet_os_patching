@@ -265,11 +265,11 @@ err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
 
 if facts['os']
-  os = facts['os']['family']
+  os = facts['os']
   os_patching = facts['os_patching']
 elsif facts['values']
-  os = os['family']
-  os_patching = os_patching
+  os = facts['values']['os']
+  os_patching = facts['values']['os_patching']
 else
   err(200, 'os_patching/facts', 'Could not find facts', starttime)
 end
