@@ -1,12 +1,15 @@
 # Changelog
 
-## [0.14.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.14.0) (2021-05-09)
+## [0.15.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.15.0) (2021-05-11)
 
-[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.14.0)
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.14.0...0.15.0)
 
 **Implemented enhancements:**
 
-- Enable a pre-patching command to be specified [\#159](https://github.com/albatrossflavour/puppet_os_patching/issues/159)
+- long usernames in `yum history` cause 'yum did not appear to run' [\#192](https://github.com/albatrossflavour/puppet_os_patching/issues/192)
+- facter -p no longer supported with Puppet 7 [\#190](https://github.com/albatrossflavour/puppet_os_patching/issues/190)
+- --nodes is deprecated [\#165](https://github.com/albatrossflavour/puppet_os_patching/issues/165)
+- fix facter no longer working on puppet 7 [\#191](https://github.com/albatrossflavour/puppet_os_patching/pull/191) ([maxadamo](https://github.com/maxadamo))
 - \#149 allow Debian to run `apt-get autoremove` at reboot [\#151](https://github.com/albatrossflavour/puppet_os_patching/pull/151) ([albatrossflavour](https://github.com/albatrossflavour))
 - Toggle to allow warnings to block patching \#143 [\#150](https://github.com/albatrossflavour/puppet_os_patching/pull/150) ([albatrossflavour](https://github.com/albatrossflavour))
 - Updates to facter and bug fixes [\#148](https://github.com/albatrossflavour/puppet_os_patching/pull/148) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -14,6 +17,8 @@
 
 **Fixed bugs:**
 
+- NoMethodError in os\_patching\_fact\_generation.sh [\#180](https://github.com/albatrossflavour/puppet_os_patching/issues/180)
+- expand filter inline and remove $FILTER variables [\#188](https://github.com/albatrossflavour/puppet_os_patching/pull/188) ([michael-letsengage](https://github.com/michael-letsengage))
 - \#148 ensure versionlock file is there before we read it [\#154](https://github.com/albatrossflavour/puppet_os_patching/pull/154) ([albatrossflavour](https://github.com/albatrossflavour))
 - Prevent error message to stderr on RedHat [\#153](https://github.com/albatrossflavour/puppet_os_patching/pull/153) ([smortex](https://github.com/smortex))
 - Bugfix: Add missing dependency [\#144](https://github.com/albatrossflavour/puppet_os_patching/pull/144) ([theosotr](https://github.com/theosotr))
@@ -21,8 +26,7 @@
 
 **Closed issues:**
 
-- Fact generation misses Debian security packages [\#184](https://github.com/albatrossflavour/puppet_os_patching/issues/184)
-- Unable to fetch some archives [\#177](https://github.com/albatrossflavour/puppet_os_patching/issues/177)
+- "Security:" filter ineffective [\#187](https://github.com/albatrossflavour/puppet_os_patching/issues/187)
 
 **Merged pull requests:**
 
@@ -39,6 +43,19 @@
 - Fix issues with empty pre\_patching\_command entries [\#161](https://github.com/albatrossflavour/puppet_os_patching/pull/161) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge to production [\#160](https://github.com/albatrossflavour/puppet_os_patching/pull/160) ([albatrossflavour](https://github.com/albatrossflavour))
 - clear out 'Obsoleting' entries [\#158](https://github.com/albatrossflavour/puppet_os_patching/pull/158) ([kreeuwijk](https://github.com/kreeuwijk))
+
+## [0.14.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.14.0) (2021-05-09)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.14.0)
+
+**Implemented enhancements:**
+
+- Enable a pre-patching command to be specified [\#159](https://github.com/albatrossflavour/puppet_os_patching/issues/159)
+
+**Closed issues:**
+
+- Fact generation misses Debian security packages [\#184](https://github.com/albatrossflavour/puppet_os_patching/issues/184)
+- Unable to fetch some archives [\#177](https://github.com/albatrossflavour/puppet_os_patching/issues/177)
 
 ## [0.12.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.12.0) (2019-08-21)
 
