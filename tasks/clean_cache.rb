@@ -57,20 +57,29 @@ end
 
 # Cache the facts
 log.debug 'Gathering facts'
-full_facts, stderr, status = Open3.capture3('/opt/puppetlabs/puppet/bin/puppet', 'facts')
+full_facts, stderr, status = Open3.capture3('/opt/puppetlabs/puppet/bin/puppet', 'facts', 'find')
 err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
 
+# Puppet 7 facts or not?
+if facts['os']
+  osfamily = facts['os']['family']
+elsif facts['values']
+  osfamily = facts['values']['os']['family']
+else
+  err(200, 'os_patching/facts', 'Could not find facts', starttime)
+end
+
 # Check we are on a supported platform
-unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian' || facts['values']['os']['family'] == 'Suse'
+unless osfamily == 'RedHat' || osfamily == 'Debian' || osfamily == 'Suse'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
-clean_cache = if facts['values']['os']['family'] == 'RedHat'
+clean_cache = if osfamily == 'RedHat'
                 'yum clean all'
-              elsif facts['values']['os']['family'] == 'Debian'
+              elsif osfamily == 'Debian'
                 'apt-get clean'
-              elsif facts['values']['os']['family'] == 'Suse'
+              elsif osfamily == 'Suse'
                 'zypper cc --all'
               end
 

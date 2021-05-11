@@ -78,7 +78,7 @@ class profiles::soe::patching (
 ##### Run patching on the node `centos.example.com` using the smart reboot option
 
 ```puppet
-puppet task run os_patching::patch_server --params '{"reboot": "smart"}' --nodes centos.example.com
+puppet task run os_patching::patch_server --params '{"reboot": "smart"}' --targets centos.example.com
 ```
 
 ##### Remove from a managed system

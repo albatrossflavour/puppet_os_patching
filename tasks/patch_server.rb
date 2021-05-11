@@ -264,21 +264,31 @@ full_facts, stderr, status = Open3.capture3(puppet_cmd, 'facts')
 err(status, 'os_patching/facter', stderr, starttime) if status != 0
 facts = JSON.parse(full_facts)
 
+if facts['os']
+  os = facts['os']['family']
+  os_patching = facts['os_patching']
+elsif facts['values']
+  os = os['family']
+  os_patching = os_patching
+else
+  err(200, 'os_patching/facts', 'Could not find facts', starttime)
+end
+
 # Check we are on a supported platform
-unless facts['values']['os']['family'] == 'RedHat' || facts['values']['os']['family'] == 'Debian' || facts['values']['os']['family'] == 'Suse' || facts['values']['os']['family'] == 'windows'
+unless os['family'] == 'RedHat' || os['family'] == 'Debian' || os['family'] == 'Suse' || os['family'] == 'windows'
   err(200, 'os_patching/unsupported_os', 'Unsupported OS', starttime)
 end
 
 # Get the pinned packages
-pinned_pkgs = facts['values']['os_patching']['pinned_packages']
+pinned_pkgs = os_patching['pinned_packages']
 
 # Should we clean the cache prior to starting?
 if params['clean_cache'] && params['clean_cache'] == true
-  clean_cache = if facts['values']['os']['family'] == 'RedHat'
+  clean_cache = if os['family'] == 'RedHat'
                   'yum clean all'
-                elsif facts['values']['os']['family'] == 'Debian'
+                elsif os['family'] == 'Debian'
                   'apt-get clean'
-                elsif facts['values']['os']['family'] == 'Suse'
+                elsif os['family'] == 'Suse'
                   'zypper cc --all'
                 end
   _fact_out, stderr, status = Open3.capture3(clean_cache)
@@ -289,7 +299,7 @@ end
 # Refresh the patching fact cache on non-windows systems
 # Windows scans can take a long time, and we do one at the start of the os_patching_windows script anyway.
 # No need to do yet another scan prior to this, it just wastes valuable time.
-if facts['values']['os']['family'] != 'windows'
+if os['family'] != 'windows'
   _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
   err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
 end
@@ -297,7 +307,7 @@ end
 # Let's figure out the reboot gordian knot
 #
 # If the override is set, it doesn't matter that anything else is set to at this point
-reboot_override = facts['values']['os_patching']['reboot_override']
+reboot_override = os_patching['reboot_override']
 reboot_param = params['reboot']
 reboot = ''
 if reboot_override == 'always'
@@ -396,29 +406,29 @@ else
 end
 
 # Is the patching blocker flag set?
-blocker = facts['values']['os_patching']['blocked']
+blocker = os_patching['blocked']
 if blocker.to_s.chomp == 'true'
   # Patching is blocked, list the reasons and error
   # need to error as it SHOULDN'T ever happen if you
   # use the right workflow through tasks.
   log.error 'Patching blocked, not continuing'
-  block_reason = facts['values']['os_patching']['blocker_reasons']
+  block_reason = os_patching['blocker_reasons']
   err(100, 'os_patching/blocked', "Patching blocked #{block_reason}", starttime)
 end
 
 # Should we look at security or all patches to determine if we need to patch?
 # (requires RedHat subscription or Debian based distro... for now)
 if security_only == true
-  updatecount = facts['values']['os_patching']['security_package_update_count']
+  updatecount = os_patching['security_package_update_count']
   securityflag = '--security'
 else
-  updatecount = facts['values']['os_patching']['package_update_count']
+  updatecount = os_patching['package_update_count']
   securityflag = ''
 end
 
 # Get pre_patching_command
-pre_patching_command = if facts['values']['os_patching']['pre_patching_command']
-                         facts['values']['os_patching']['pre_patching_command']
+pre_patching_command = if os_patching['pre_patching_command']
+                         os_patching['pre_patching_command']
                        else
                          ''
                        end
@@ -457,14 +467,14 @@ if updatecount.zero?
 end
 
 # Run the patching
-if facts['values']['os']['family'] == 'RedHat'
+if os['family'] == 'RedHat'
   log.info 'Running yum upgrade'
   log.debug "Timeout value set to : #{timeout}"
   yum_end = ''
   status, output = run_with_timeout("yum #{yum_params} #{securityflag} upgrade -y", timeout, 2)
   err(status, 'os_patching/yum', "yum upgrade returned non-zero (#{status}) : #{output}", starttime) if status != 0
 
-  if facts['values']['os']['release']['major'].to_i > 5
+  if os['release']['major'].to_i > 5
     # Capture the yum job ID
     log.info 'Getting yum job ID'
     job = ''
@@ -476,7 +486,7 @@ if facts['values']['os']['family'] == 'RedHat'
       # ID     | Login user               | Date and time    | 8< SNIP >8
       # ------------------------------------------------------ 8< SNIP >8
       #     69 | System <unset>           | 2018-09-17 17:18 | 8< SNIP >8
-      matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\.\-<> ]*\|\s*([\d:\- ]*)/)
+      matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\-<> ]*\|\s*([\d:\- ]*)/)
       next unless matchdata
       job = matchdata[1]
       yum_end = matchdata[2]
@@ -527,15 +537,15 @@ if facts['values']['os']['family'] == 'RedHat'
 
   output(yum_return, reboot, security_only, 'Patching complete', pkg_hash, output, job, pinned_pkgs, starttime)
   log.info 'Patching complete'
-elsif facts['values']['os']['family'] == 'Debian'
+elsif os['family'] == 'Debian'
   # Are we doing security only patching?
   apt_mode = ''
   pkg_list = []
   if security_only == true
-    pkg_list = facts['values']['os_patching']['security_package_updates']
+    pkg_list = os_patching['security_package_updates']
     apt_mode = 'install ' + pkg_list.join(' ')
   else
-    pkg_list = facts['values']['os_patching']['package_updates']
+    pkg_list = os_patching['package_updates']
     apt_mode = 'dist-upgrade'
   end
 
@@ -548,7 +558,7 @@ elsif facts['values']['os']['family'] == 'Debian'
 
   output('Success', reboot, security_only, 'Patching complete', pkg_list, apt_std_out, '', pinned_pkgs, starttime)
   log.info 'Patching complete'
-elsif facts['values']['os']['family'] == 'windows'
+elsif os['family'] == 'windows'
   # we're on windows
 
   # Are we doing security only patching?
@@ -607,20 +617,20 @@ elsif facts['values']['os']['family'] == 'windows'
   # def output(returncode, reboot, security, message, packages_updated, debug, job_id, pinned_packages, starttime)
   output('Success', reboot, security_only, 'Patching complete', update_titles, win_std_out.split("\n"), '', '', starttime)
 
-elsif facts['values']['os']['family'] == 'Suse'
+elsif os['family'] == 'Suse'
   zypper_required_params = '--non-interactive --no-abbrev --quiet'
   zypper_cmd_params = '--auto-agree-with-licenses'
-  if facts['values']['os']['release']['major'].to_i > 11
+  if os['release']['major'].to_i > 11
     zypper_cmd_params = "#{zypper_cmd_params} --replacefiles"
   end
   pkg_list = []
   if security_only == true
-    pkg_list = facts['values']['os_patching']['security_package_updates']
+    pkg_list = os_patching['security_package_updates']
     log.info 'Running zypper patch'
     status, output = run_with_timeout("zypper #{zypper_required_params} #{zypper_params} patch -g security #{zypper_cmd_params}", timeout, 2)
     err(status, 'os_patching/zypper', "zypper patch returned non-zero (#{status}) : #{output}", starttime) if status != 0
   else
-    pkg_list = facts['values']['os_patching']['package_updates']
+    pkg_list = os_patching['package_updates']
     log.info 'Running zypper update'
     status, output = run_with_timeout("zypper #{zypper_required_params} #{zypper_params} update -t package #{zypper_cmd_params}", timeout, 2)
     err(status, 'os_patching/zypper', "zypper update returned non-zero (#{status}) : #{output}", starttime) if status != 0
@@ -638,14 +648,14 @@ end
 # Windows scans can take an eternity after a patch run prior to being reboot (30+ minutes in a lab on 2008 versions..)
 # Best not to delay the whole patching process here.
 # Note that the fact refresh (which includes a scan) runs on system startup anyway - see os_patching puppet class
-if facts['values']['os']['family'] != 'windows'
+if os['family'] != 'windows'
   log.info 'Running os_patching fact refresh'
   _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
   err(status, 'os_patching/fact', stderr, starttime) if status != 0
 end
 
 # Reboot if the task has been told to and there is a requirement OR if reboot_override is set to true
-needs_reboot = reboot_required(facts['values']['os']['family'], facts['values']['os']['release']['major'], reboot)
+needs_reboot = reboot_required(os['family'], os['release']['major'], reboot)
 log.info "reboot_required returning #{needs_reboot}"
 if needs_reboot == true
   log.info 'Rebooting'

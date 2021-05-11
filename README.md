@@ -357,3 +357,4 @@ Fork, develop, submit a pull request
 - [Geoff Williams](https://github.com/GeoffWilliams)
 - [Jake Rogers](https://github.com/JakeTRogers)
 - [Nathan Giuliani](https://github.com/nathangiuliani)
+- [Massimiliano Adamo](https://github.com/maxadamo)
