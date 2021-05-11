@@ -10,6 +10,14 @@
 - facter -p no longer supported with Puppet 7 [\#190](https://github.com/albatrossflavour/puppet_os_patching/issues/190)
 - --nodes is deprecated [\#165](https://github.com/albatrossflavour/puppet_os_patching/issues/165)
 - fix facter no longer working on puppet 7 [\#191](https://github.com/albatrossflavour/puppet_os_patching/pull/191) ([maxadamo](https://github.com/maxadamo))
+
+## [0.14.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.14.0) (2021-05-09)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.14.0)
+
+**Implemented enhancements:**
+
+- Enable a pre-patching command to be specified [\#159](https://github.com/albatrossflavour/puppet_os_patching/issues/159)
 - \#149 allow Debian to run `apt-get autoremove` at reboot [\#151](https://github.com/albatrossflavour/puppet_os_patching/pull/151) ([albatrossflavour](https://github.com/albatrossflavour))
 - Toggle to allow warnings to block patching \#143 [\#150](https://github.com/albatrossflavour/puppet_os_patching/pull/150) ([albatrossflavour](https://github.com/albatrossflavour))
 - Updates to facter and bug fixes [\#148](https://github.com/albatrossflavour/puppet_os_patching/pull/148) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -27,6 +35,8 @@
 **Closed issues:**
 
 - "Security:" filter ineffective [\#187](https://github.com/albatrossflavour/puppet_os_patching/issues/187)
+- Fact generation misses Debian security packages [\#184](https://github.com/albatrossflavour/puppet_os_patching/issues/184)
+- Unable to fetch some archives [\#177](https://github.com/albatrossflavour/puppet_os_patching/issues/177)
 
 **Merged pull requests:**
 
