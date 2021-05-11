@@ -57,7 +57,7 @@ Run a basic patching task from the command line:
 os_patching::patch_server - Carry out OS patching on the server, optionally including a reboot and/or only applying security-related updates
 
 USAGE:
-$ puppet task run os_patching::patch_server [dpkg_params=<value>] [reboot=<value>] [security_only=<value>] [timeout=<value>] [yum_params=<value>] <[--nodes, -n <node-names>] | [--query, -q <'query'>]>
+$ puppet task run os_patching::patch_server [dpkg_params=<value>] [reboot=<value>] [security_only=<value>] [timeout=<value>] [yum_params=<value>] <[--targets, -t <target-names>] | [--query, -q <'query'>]>
 
 PARAMETERS:
 - dpkg_params : Optional[String]
@@ -357,3 +357,4 @@ Fork, develop, submit a pull request
 - [Geoff Williams](https://github.com/GeoffWilliams)
 - [Jake Rogers](https://github.com/JakeTRogers)
 - [Nathan Giuliani](https://github.com/nathangiuliani)
+- [Massimiliano Adamo](https://github.com/maxadamo)

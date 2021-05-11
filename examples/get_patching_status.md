@@ -4,7 +4,7 @@ You can use the puppet facts to query the patching status on your nodes.
 
 
 ```bash
-root@puppetmaster ~ # puppet-task run facter_task fact=os_patching --nodes centos.example.com --format json  | jq '.'
+root@puppetmaster ~ # puppet-task run facter_task fact=os_patching --targets centos.example.com --format json  | jq '.'
 ```
 
 The output will look like this:

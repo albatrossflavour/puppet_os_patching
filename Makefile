@@ -26,13 +26,19 @@ unit:
 	pdk bundle exec rake spec
 
 acceptance:
-	#${MAKE} test_puppet5
 	${MAKE} test_puppet6
-	#${MAKE} test_puppet7
+	${MAKE} test_puppet7
 
 test_puppet6:
 	pdk bundle exec rake 'litmus:provision_list[release_tests]'
 	pdk bundle exec rake litmus:install_agent[puppet6]
+	pdk bundle exec rake litmus:install_module
+	pdk bundle exec rake litmus:acceptance:parallel
+	pdk bundle exec rake litmus:tear_down
+
+test_puppet7:
+	pdk bundle exec rake 'litmus:provision_list[release_tests]'
+	pdk bundle exec rake litmus:install_agent[puppet7]
 	pdk bundle exec rake litmus:install_module
 	pdk bundle exec rake litmus:acceptance:parallel
 	pdk bundle exec rake litmus:tear_down

@@ -17,7 +17,17 @@ else
   echo "$$" > $LOCKFILE
 fi
 
-case $(facter osfamily) in
+if [ $(puppet --version|cut -d. -f1) -gt 6 ]; then
+  OSFAMILY=$(puppet facts show --render-as s osfamily | cut -d\" -f4)
+  VARDIR=$(puppet config print vardir)
+  OSRELEASEMAJOR=$(puppet facts show --render-as s os.release.major | cut -d\" -f4)
+else
+  OSFAMILY=$(facter osfamily)
+  VARDIR=$(facter -p puppet_vardir)
+  OSRELEASEMAJOR=$(facter os.release.major)
+fi
+
+case $OSFAMILY in
   RedHat)
     # Sometimes yum check-update will output extra info like this:
     # ---
@@ -25,10 +35,9 @@ case $(facter osfamily) in
     # Security: kernel-3.14.2-200.fc20.x86_64 is the currently running version
     # ---
     # We need to filter those out as they screw up the package listing
-    FILTER='egrep -v "^Security:"'
-    PKGS=$(yum -q check-update 2>/dev/null| $FILTER |  egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
+    PKGS=$(yum -q check-update 2>/dev/null| egrep -v "^Security:" |  egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
     PKGS=$(echo $PKGS | sed 's/Obsoleting.*//')
-    SECPKGS=$(yum -q --security check-update 2>/dev/null| $FILTER | egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
+    SECPKGS=$(yum -q --security check-update 2>/dev/null| egrep -v "^Security:" | egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
     SECPKGS=$(echo $SECPKGS | sed 's/Obsoleting.*//')
     HELDPKGS=$([ -r /etc/yum/pluginconf.d/versionlock.list ] && awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list | sed 's/-[0-9].*//')
   ;;
@@ -54,7 +63,7 @@ SECUPDATEFILE="$DATADIR/security_package_updates"
 OSHELDPKGFILE="$DATADIR/os_version_locked_packages"
 CATHELDPKGFILE="$DATADIR/catalog_version_locked_packages"
 MISMATCHHELDPKGFILE="$DATADIR/mismatched_version_locked_packages"
-CATALOG="$(facter -p puppet_vardir)/client_data/catalog/$(puppet config print certname --section agent).json"
+CATALOG="$VARDIR/client_data/catalog/$(puppet config print certname --section agent).json"
 
 if [ -f "${CATALOG}" ]
 then
@@ -102,7 +111,7 @@ done
 
 if [ -f '/usr/bin/needs-restarting' ]
 then
-  case $(facter os.release.major) in
+  case $OSRELEASEMAJOR in
     7)
       /usr/bin/needs-restarting -r 2>/dev/null 1>/dev/null
       if [ $? -gt 0 ]
@@ -134,7 +143,7 @@ else
   touch $DATADIR/reboot_required
 fi
 
-if [ $(facter osfamily) = 'Debian' ] || [ $(facter osfamily) = 'Suse' ]
+if [ $OSFAMILY = 'Debian' ] || [ $OSFAMILY = 'Suse' ]
 then
   if [ -f '/var/run/reboot-required' ]
   then

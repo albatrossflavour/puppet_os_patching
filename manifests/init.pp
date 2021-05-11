@@ -117,7 +117,7 @@
 #   {"End of year change freeze": {"start": "2018-12-15T00:00:00+10:00", "end": "2019-01-15T23:59:59+10:00"}}
 #
 # @example Run patching on the node `centos.example.com` using the smart reboot option
-#   puppet task run os_patching::patch_server --params '{"reboot": "smart"}' --nodes centos.example.com
+#   puppet task run os_patching::patch_server --params '{"reboot": "smart"}' --targets centos.example.com
 #
 # @example Remove from a managed system
 #   class { 'os_patching':
