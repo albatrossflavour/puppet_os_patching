@@ -78,6 +78,12 @@
 # @param patch_cron_min
 #   The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 #
+# @param windows_update_hour
+#   Control the hour on which windows nodes check for updates
+#
+# @param windows_check_interval_mins
+#   Control how often windows checks for updates
+#
 # @param ensure
 #   `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
 #
@@ -145,6 +151,8 @@ class os_patching (
   $patch_cron_monthday               = absent,
   $patch_cron_weekday                = absent,
   $patch_cron_min                    = fqdn_rand(59),
+  $windows_update_hour               = 1,
+  $windows_check_interval_mins       = 720,
   Enum['present', 'absent'] $ensure  = 'present',
 ) {
 
@@ -389,8 +397,8 @@ class os_patching (
         trigger   => [
           {
             schedule         => daily,
-            start_time       => "01:${patch_cron_min}",
-            minutes_interval => '720',
+            start_time       => "${windows_update_hour}:${patch_cron_min}",
+            minutes_interval => $windows_check_interval_mins,
           },
           {
             schedule => 'boot',

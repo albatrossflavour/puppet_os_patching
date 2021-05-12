@@ -113,6 +113,8 @@ The following parameters are available in the `os_patching` class:
 * [`patch_cron_monthday`](#patch_cron_monthday)
 * [`patch_cron_weekday`](#patch_cron_weekday)
 * [`patch_cron_min`](#patch_cron_min)
+* [`windows_update_hour`](#windows_update_hour)
+* [`windows_check_interval_mins`](#windows_check_interval_mins)
 * [`ensure`](#ensure)
 * [`blackout_windows`](#blackout_windows)
 
@@ -283,6 +285,22 @@ Data type: `Any`
 The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 
 Default value: `fqdn_rand(59)`
+
+##### <a name="windows_update_hour"></a>`windows_update_hour`
+
+Data type: `Any`
+
+Control the hour on which windows nodes check for updates
+
+Default value: `1`
+
+##### <a name="windows_check_interval_mins"></a>`windows_check_interval_mins`
+
+Data type: `Any`
+
+Control how often windows checks for updates
+
+Default value: `720`
 
 ##### <a name="ensure"></a>`ensure`
 
