@@ -1,6 +1,6 @@
 {
   "name": "albatrossflavour-os_patching",
-  "version": "0.13.0",
+  "version": "0.15.0",
   "author": "Tony Green",
   "summary": "Perform OS level patching through tasks and report on patch levels through facts",
   "license": "Apache-2.0",
@@ -10,11 +10,7 @@
   "dependencies": [
     {
       "name": "puppetlabs-stdlib",
-      "version_requirement": ">= 4.13.1 < 6.0.0"
-    },
-    {
-      "name": "puppetlabs-translate",
-      "version_requirement": ">= 1.0.0 < 2.0.0"
+      "version_requirement": ">= 4.13.1 < 8.0.0"
     },
     {
       "name": "puppet-cron",
@@ -34,21 +30,24 @@
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
@@ -63,14 +62,17 @@
       "operatingsystem": "Scientific",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
+        "20.04",
+        "18.04",
         "16.04",
-        "14.047"
+        "14.04"
       ]
     },
     {
@@ -96,10 +98,10 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 5.3.2 < 7.0.0"
+      "version_requirement": ">= 5.3.2 < 8.0.0"
     }
   ],
-  "pdk-version": "1.10.0",
-  "template-url": "file:///opt/puppetlabs/pdk/share/cache/pdk-templates.git#1.10.0",
-  "template-ref": "tags/1.10.0-0-gbba9ac3"
+  "pdk-version": "2.1.0",
+  "template-url": "pdk-default#2.1.0",
+  "template-ref": "tags/2.1.0-0-ga675ea5"
 }

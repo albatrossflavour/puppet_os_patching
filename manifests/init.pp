@@ -81,6 +81,12 @@
 # @param patch_cron_min
 #   The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 #
+# @param windows_update_hour
+#   Control the hour on which windows nodes check for updates
+#
+# @param windows_check_interval_mins
+#   Control how often windows checks for updates
+#
 # @param ensure
 #   `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
 #
@@ -120,7 +126,7 @@
 #   {"End of year change freeze": {"start": "2018-12-15T00:00:00+10:00", "end": "2019-01-15T23:59:59+10:00"}}
 #
 # @example Run patching on the node `centos.example.com` using the smart reboot option
-#   puppet task run os_patching::patch_server --params '{"reboot": "smart"}' --nodes centos.example.com
+#   puppet task run os_patching::patch_server --params '{"reboot": "smart"}' --targets centos.example.com
 #
 # @example Remove from a managed system
 #   class { 'os_patching':
@@ -149,6 +155,8 @@ class os_patching (
   $patch_cron_monthday               = absent,
   $patch_cron_weekday                = absent,
   $patch_cron_min                    = fqdn_rand(59),
+  $windows_update_hour               = 1,
+  $windows_check_interval_mins       = 720,
   Enum['present', 'absent'] $ensure  = 'present',
 ) {
 
@@ -159,7 +167,7 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
-      $fact_upload_cmd     = "${puppet_binary_dir}/puppet facts upload"
+      $fact_upload_cmd     = 'puppet facts upload'
       $cache_dir           = '/var/cache/os_patching'
       $fact_dir            = '/usr/local/bin'
       $fact_file           = 'os_patching_fact_generation.sh'
@@ -177,7 +185,7 @@ class os_patching (
       $fact_file           = 'os_patching_fact_generation.ps1'
       $fact_mode           = '0770'
     }
-    default: { fail translate(("Unsupported OS : ${facts['kernel']}")) }
+    default: { fail("Unsupported OS : ${facts['kernel']}") }
   }
 
   # calculate full path for fact command/script
@@ -199,7 +207,7 @@ class os_patching (
   }
 
   if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
-    fail translate(('The patch window can only contain alphanumerics, space, underscore and dash'))
+    fail('The patch window can only contain alphanumerics, space, underscore and dash')
   }
 
   file { $cache_dir:
@@ -269,16 +277,16 @@ class os_patching (
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
       if ( $key !~ /^[A-Za-z0-9_ ]+$/ ){
-        fail translate(('Blackout description can only contain alphanumerics, space and underscore'))
+        fail('Blackout description can only contain alphanumerics, space and underscore')
       }
       if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail translate(('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)'))
+        fail('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
       if ( $value['end'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail translate(('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)'))
+        fail('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
       if ( $value['start'] > $value['end'] ){
-        fail translate(('Blackout end time must after the start time'))
+        fail('Blackout end time must after the start time')
       }
     }
   }
@@ -299,7 +307,7 @@ class os_patching (
   if $fact_upload_exec and $fact_upload {
     exec { $fact_upload_exec:
       command     => $fact_upload_cmd,
-      path        => ['/usr/bin','/bin','/sbin','/usr/local/bin'],
+      path        => ['/opt/puppetlabs/bin/', '/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
       subscribe   => File[
         $fact_cmd,
@@ -379,6 +387,7 @@ class os_patching (
       if $fact_exec {
         exec { $fact_exec:
           path        => 'C:/Windows/System32/WindowsPowerShell/v1.0',
+	  timeout     => 900,
           refreshonly => true,
           command     => "powershell -executionpolicy remotesigned -file ${fact_cmd}",
         }
@@ -393,8 +402,8 @@ class os_patching (
         trigger   => [
           {
             schedule         => daily,
-            start_time       => "01:${patch_cron_min}",
-            minutes_interval => '720',
+            start_time       => "${windows_update_hour}:${patch_cron_min}",
+            minutes_interval => $windows_check_interval_mins,
           },
           {
             schedule => 'boot',
@@ -403,6 +412,6 @@ class os_patching (
         require   => File[$fact_cmd],
       }
     }
-    default: { fail translate(('Unsupported OS'))}
+    default: { fail('Unsupported OS')}
   }
 }
