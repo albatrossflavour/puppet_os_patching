@@ -1,6 +1,9 @@
 # @summary This manifest sets up a script and cron job to populate
 #   the `os_patching` fact.
 #
+# @param puppet_binary_dir [String]
+#   Location of the Puppet binaries
+#
 # @param patch_data_owner [String]
 #   User name for the owner of the patch data
 #
@@ -130,6 +133,7 @@
 #     ensure => absent,
 #   }
 class os_patching (
+  String $puppet_binary_dir,
   String $patch_data_owner            = 'root',
   String $patch_data_group            = 'root',
   String $patch_cron_user             = $patch_data_owner,
@@ -175,7 +179,7 @@ class os_patching (
       }
     }
     'windows': {
-      $fact_upload_cmd     = '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload'
+      $fact_upload_cmd     = "\"${puppet_binary_dir}/puppet.bat\" facts upload"
       $cache_dir           = 'C:/ProgramData/os_patching'
       $fact_dir            = $cache_dir
       $fact_file           = 'os_patching_fact_generation.ps1'

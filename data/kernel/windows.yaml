@@ -1,0 +1,2 @@
+---
+os_patching::puppet_binary_dir: 'C:/Program Files/Puppet Labs/Puppet/bin'
