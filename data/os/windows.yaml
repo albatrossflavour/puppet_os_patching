@@ -1,0 +1,4 @@
+---
+os_patching::puppet_binary_dir: 'C:/Program Files/Puppet Labs/Puppet/bin'
+os_patching::windows_update_hour: 1
+os_patching::windows_udpate_interval_mins: 720
