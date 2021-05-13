@@ -19,4 +19,4 @@ os_patching::patch_data_owner: 'root'
 os_patching::windows_udpate_interval_mins: 720
 os_patching::windows_update_hour: 1
 os_patching::yum_plugin_security: 'installed'
-os_patching::yum_utils: false
+os_patching::yum_utils: 'installed'
