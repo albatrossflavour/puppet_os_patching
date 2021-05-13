@@ -1,10 +1,2 @@
 ---
-os_patching::puppet_binary_dir: '/opt/puppetlabs/bin'
-os_patching::patch_data_owner: 'root'
-os_patching::patch_data_group: 'root'
-os_patching::patch_cron_user: 'root'
 os_patching::apt_autoremove: false
-os_patching::patch_cron_hour: absent
-os_patching::patch_cron_month: absent
-os_patching::patch_cron_monthday: absent
-os_patching::patch_cron_weekday: absent
