@@ -172,7 +172,6 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
-      #    $fact_upload_cmd     = 'puppet facts upload'
       File {
         owner => $patch_data_owner,
         group => $patch_data_group,
@@ -180,10 +179,10 @@ class os_patching (
       }
     }
     'windows': {
-      $fact_upload_cmd     = "\"${puppet_binary_dir}/puppet.bat\" facts upload"
-      $cache_dir           = 'C:/ProgramData/os_patching'
-      $fact_dir            = $cache_dir
-      $fact_file           = 'os_patching_fact_generation.ps1'
+      #$fact_upload_cmd     = "\"${puppet_binary_dir}/puppet.bat\" facts upload"
+      #$cache_dir           = 'C:/ProgramData/os_patching'
+      #$fact_dir            = $cache_dir
+      #$fact_file           = 'os_patching_fact_generation.ps1'
     }
     default: { fail("Unsupported OS : ${facts['kernel']}") }
   }
