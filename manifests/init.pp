@@ -159,6 +159,10 @@ class os_patching (
   Optional[Stdlib::Absolutepath] $pre_patching_command,
   Optional[Hash] $blackout_windows,
   Stdlib::Filemode $fact_mode,
+  Stdlib::Absolutepath $cache_dir,
+  Stdlib::Absolutepath $fact_dir,
+  String $fact_file,
+  String $fact_upload_cmd,
 ) {
 
   $fact_exec = $ensure ? {
@@ -169,9 +173,6 @@ class os_patching (
   case $::kernel {
     'Linux': {
       #    $fact_upload_cmd     = 'puppet facts upload'
-      #$cache_dir           = '/var/cache/os_patching'
-      #$fact_dir            = '/usr/local/bin'
-      #$fact_file           = 'os_patching_fact_generation.sh'
       File {
         owner => $patch_data_owner,
         group => $patch_data_group,
