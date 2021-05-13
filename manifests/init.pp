@@ -158,6 +158,7 @@ class os_patching (
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
   Optional[Stdlib::Absolutepath] $pre_patching_command,
   Optional[Hash] $blackout_windows,
+  Stdlib::Filemode $fact_mode,
 ) {
 
   $fact_exec = $ensure ? {
@@ -167,11 +168,10 @@ class os_patching (
 
   case $::kernel {
     'Linux': {
-      $fact_upload_cmd     = 'puppet facts upload'
-      $cache_dir           = '/var/cache/os_patching'
-      $fact_dir            = '/usr/local/bin'
-      $fact_file           = 'os_patching_fact_generation.sh'
-      $fact_mode           = '0700'
+      #    $fact_upload_cmd     = 'puppet facts upload'
+      #$cache_dir           = '/var/cache/os_patching'
+      #$fact_dir            = '/usr/local/bin'
+      #$fact_file           = 'os_patching_fact_generation.sh'
       File {
         owner => $patch_data_owner,
         group => $patch_data_group,
@@ -183,7 +183,6 @@ class os_patching (
       $cache_dir           = 'C:/ProgramData/os_patching'
       $fact_dir            = $cache_dir
       $fact_file           = 'os_patching_fact_generation.ps1'
-      $fact_mode           = '0770'
     }
     default: { fail("Unsupported OS : ${facts['kernel']}") }
   }
