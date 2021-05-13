@@ -154,7 +154,7 @@ class os_patching (
   $patch_cron_month,
   $patch_cron_monthday,
   $patch_cron_weekday,
-  $patch_cron_min,
+  $patch_cron_min = fqdn_rand(59),
   $windows_update_hour,
   $windows_check_interval_mins,
   Enum['present', 'absent'] $ensure,

@@ -17,7 +17,6 @@ os_patching::patch_cron_hour: absent
 os_patching::patch_cron_month: absent
 os_patching::patch_cron_monthday: absent
 os_patching::patch_cron_weekday: absent
-os_patching::patch_cron_min: fqdn_rand(59)
 os_patching::apt_autoremove: false
 os_patching::windows_update_hour: 1
 os_patching::windows_udpate_interval_mins: 720
