@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.configure do |c|
+  #c.hiera_config = 'spec/fixtures/hiera.yaml'
   c.mock_with :rspec
 end
 
@@ -37,6 +38,7 @@ default_facts.each do |fact, value|
 end
 
 RSpec.configure do |c|
+  c.hiera_config = File.expand_path(File.join(__FILE__, '../fixtures/hiera.yaml'))
   c.default_facts = default_facts
   c.before :each do
     # set to strictest setting for testing

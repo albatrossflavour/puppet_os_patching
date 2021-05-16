@@ -13,7 +13,7 @@ describe 'os_patching' do
         context 'default installation path for Puppet' do
           it {
             is_expected.to contain_exec('os_patching::exec::fact_upload').with(
-              'command' => '/opt/puppetlabs/bin/puppet facts upload',
+              'command' => "#{puppet_binary_dir}/puppet facts upload",
             )
           }
         end
@@ -23,7 +23,7 @@ describe 'os_patching' do
 
           it {
             is_expected.to contain_exec('os_patching::exec::fact_upload').with(
-              'command' => '/usr/local/bin/puppet facts upload',
+              'command' => "#{puppet_binary_dir}/puppet facts upload",
             )
           }
         end
@@ -34,7 +34,7 @@ describe 'os_patching' do
         context 'default installation path for Puppet' do
           it {
             is_expected.to contain_exec('os_patching::exec::fact_upload').with(
-              'command' => '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload',
+              'command' => 'C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat facts upload',
             )
           }
         end
@@ -44,7 +44,7 @@ describe 'os_patching' do
 
           it {
             is_expected.to contain_exec('os_patching::exec::fact_upload').with(
-              'command' => '"D:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload',
+              'command' => 'D:/Program Files/Puppet Labs/Puppet/bin/puppet.bat facts upload',
             )
           }
         end
@@ -184,9 +184,9 @@ describe 'os_patching' do
 
       it { is_expected.to contain_file(cache_dir + '/reboot_override').with_content(/^default$/)}
 
-      it { is_expected.to contain_file(fact_cmd).with({
-        'ensure' => 'file',
-      })}
+      #it { is_expected.to contain_file(fact_cmd).with({
+      #  'ensure' => 'file',
+      #})}
 
       case os_facts[:kernel]
       when 'Linux'

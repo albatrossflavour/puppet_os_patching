@@ -133,17 +133,23 @@
 #     ensure => absent,
 #   }
 class os_patching (
+  Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
+  Optional[Stdlib::Absolutepath] $pre_patching_command,
+  Optional[String] $patch_window = undef,
+  Optional[Hash] $blackout_windows = undef,
   String $puppet_binary_dir,
   String $patch_data_owner,
   String $patch_data_group,
   String $patch_cron_user,
-  String $patch_window,
   Boolean $manage_yum_utils,
   Boolean $manage_delta_rpm,
   Boolean $manage_yum_plugin_security,
   Boolean $fact_upload,
   Boolean $block_patching_on_warnings,
   Boolean $apt_autoremove,
+  Integer[0,23] $windows_update_hour,
+  Integer $windows_check_interval_mins,
+  Stdlib::Filemode $fact_mode,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security,
@@ -153,17 +159,13 @@ class os_patching (
   Variant[Enum['absent'], Integer[1,31]] $patch_cron_monthday,
   Variant[Enum['absent'], Integer[0,7]] $patch_cron_weekday,
   Integer[0,59] $patch_cron_min = fqdn_rand(59),
-  Integer[0,23] $windows_update_hour,
-  Integer $windows_check_interval_mins,
-  Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
-  Optional[Stdlib::Absolutepath] $pre_patching_command,
-  Optional[Hash] $blackout_windows,
-  Stdlib::Filemode $fact_mode,
-  Stdlib::Absolutepath $cache_dir,
-  Stdlib::Absolutepath $fact_dir,
-  String $fact_file,
-  String $fact_upload_cmd,
 ) {
+
+  # None tunable
+  $cache_dir = lookup('os_patching::cache_dir',Stdlib::Absolutepath,first,undef)
+  $fact_dir = lookup('os_patching::cache_dir',Stdlib::Absolutepath,first,undef)
+  $fact_file = lookup('os_patching::fact_file',String,first,undef)
+  $fact_upload_cmd = lookup('os_patching::fact_upload_cmd',String,first,undef)
 
   $fact_exec = $ensure ? {
     'present' => 'os_patching::exec::fact',
@@ -179,10 +181,6 @@ class os_patching (
       }
     }
     'windows': {
-      #$fact_upload_cmd     = "\"${puppet_binary_dir}/puppet.bat\" facts upload"
-      #$cache_dir           = 'C:/ProgramData/os_patching'
-      #$fact_dir            = $cache_dir
-      #$fact_file           = 'os_patching_fact_generation.ps1'
     }
     default: { fail("Unsupported OS : ${facts['kernel']}") }
   }
@@ -305,7 +303,7 @@ class os_patching (
 
   if $fact_upload_exec and $fact_upload {
     exec { $fact_upload_exec:
-      command     => $fact_upload_cmd,
+      command     => "${puppet_binary_dir}/${fact_upload_cmd}",
       path        => ['/opt/puppetlabs/bin/', '/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
       subscribe   => File[
