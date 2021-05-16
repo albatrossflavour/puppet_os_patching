@@ -167,8 +167,6 @@ class os_patching (
   $fact_file = lookup('os_patching::fact_file',String,first,undef)
   $fact_upload_cmd = lookup('os_patching::fact_upload_cmd',String,first,undef)
 
-  fail("Cachedir = ${cache_dir}")
-
   $fact_exec = $ensure ? {
     'present' => 'os_patching::exec::fact',
     default   => undef,
@@ -382,6 +380,8 @@ class os_patching (
       }
     }
     'windows': {
+
+      fail("fact_cmd = ${fact_cmd}")
 
       if $fact_exec {
         exec { $fact_exec:
