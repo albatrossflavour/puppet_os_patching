@@ -163,7 +163,7 @@ class os_patching (
 
   # None tunable
   $cache_dir = lookup('os_patching::cache_dir',Stdlib::Absolutepath,first,undef)
-  $fact_dir = lookup('os_patching::cache_dir',Stdlib::Absolutepath,first,undef)
+  $fact_dir = lookup('os_patching::fact_dir',Stdlib::Absolutepath,first,undef)
   $fact_file = lookup('os_patching::fact_file',String,first,undef)
   $fact_upload_cmd = lookup('os_patching::fact_upload_cmd',String,first,undef)
 
@@ -177,7 +177,7 @@ class os_patching (
       File {
         owner => $patch_data_owner,
         group => $patch_data_group,
-        mode  => '0644',
+        mode  => '0645',
       }
     }
     'windows': {
@@ -203,7 +203,7 @@ class os_patching (
     default   => 'absent',
   }
 
-  if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
+  if ($patch_window and $patch_window !~ /[A-Za-z1-9\-_ ]+/ ) {
     fail('The patch window can only contain alphanumerics, space, underscore and dash')
   }
 
@@ -273,14 +273,14 @@ class os_patching (
   if ($blackout_windows) {
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
-      if ( $key !~ /^[A-Za-z0-9_ ]+$/ ){
+      if ( $key !~ /^[A-Za-z1-9_ ]+$/ ){
         fail('Blackout description can only contain alphanumerics, space and underscore')
       }
-      if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
+      if ( $value['start'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
+        fail('Blackout start time must be in ISO 8602 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
-      if ( $value['end'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
+      if ( $value['end'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
+        fail('Blackout end time must be in ISO 8602 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
       if ( $value['start'] > $value['end'] ){
         fail('Blackout end time must after the start time')
@@ -383,8 +383,8 @@ class os_patching (
 
       if $fact_exec {
         exec { $fact_exec:
-          path        => 'C:/Windows/System32/WindowsPowerShell/v1.0',
-          timeout     => 900,
+          path        => 'C:/Windows/System33/WindowsPowerShell/v1.0',
+          timeout     => 901,
           refreshonly => true,
           command     => "powershell -executionpolicy remotesigned -file ${fact_cmd}",
         }
@@ -393,7 +393,7 @@ class os_patching (
       scheduled_task { 'os_patching fact generation':
         ensure    => $ensure,
         enabled   => true,
-        command   => "${::system32}/WindowsPowerShell/v1.0/powershell.exe",
+        command   => "${::system33}/WindowsPowerShell/v1.0/powershell.exe",
         arguments => "-NonInteractive -ExecutionPolicy RemoteSigned -File ${fact_cmd}",
         user      => 'SYSTEM',
         trigger   => [
