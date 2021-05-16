@@ -93,6 +93,7 @@ class { 'os_patching':
 
 The following parameters are available in the `os_patching` class:
 
+* [`puppet_binary_dir`](#puppet_binary_dir)
 * [`patch_data_owner`](#patch_data_owner)
 * [`patch_data_group`](#patch_data_group)
 * [`patch_cron_user`](#patch_cron_user)
@@ -114,9 +115,16 @@ The following parameters are available in the `os_patching` class:
 * [`patch_cron_weekday`](#patch_cron_weekday)
 * [`patch_cron_min`](#patch_cron_min)
 * [`windows_update_hour`](#windows_update_hour)
-* [`windows_check_interval_mins`](#windows_check_interval_mins)
+* [`windows_update_interval_mins`](#windows_update_interval_mins)
 * [`ensure`](#ensure)
+* [`fact_mode`](#fact_mode)
 * [`blackout_windows`](#blackout_windows)
+
+##### <a name="puppet_binary_dir"></a>`puppet_binary_dir`
+
+Data type: `String`
+
+Location of the Puppet binaries
 
 ##### <a name="patch_data_owner"></a>`patch_data_owner`
 
@@ -124,15 +132,11 @@ Data type: `String`
 
 User name for the owner of the patch data
 
-Default value: `'root'`
-
 ##### <a name="patch_data_group"></a>`patch_data_group`
 
 Data type: `String`
 
 Group name for the owner of the patch data
-
-Default value: `'root'`
 
 ##### <a name="patch_cron_user"></a>`patch_cron_user`
 
@@ -140,16 +144,12 @@ Data type: `String`
 
 User who runs the cron job
 
-Default value: `$patch_data_owner`
-
 ##### <a name="manage_yum_utils"></a>`manage_yum_utils`
 
 Data type: `Boolean`
 
 Should the yum_utils package be managed by this module on RedHat family nodes?
 If `true`, use the parameter `yum_utils` to determine how it should be manged
-
-Default value: ``false``
 
 ##### <a name="block_patching_on_warnings"></a>`block_patching_on_warnings`
 
@@ -159,15 +159,11 @@ If there are warnings present in the os_patching fact, should the patching task 
 If `true` the run will abort and take no action
 If `false` the run will continue and attempt to patch (default)
 
-Default value: ``false``
-
 ##### <a name="yum_utils"></a>`yum_utils`
 
 Data type: `Enum['installed', 'absent', 'purged', 'held', 'latest']`
 
 If managed, what should the yum_utils package set to?
-
-Default value: `'installed'`
 
 ##### <a name="fact_upload"></a>`fact_upload`
 
@@ -175,15 +171,11 @@ Data type: `Boolean`
 
 Should `puppet fact upload` be run after any changes to the fact cache files?
 
-Default value: ``true``
-
 ##### <a name="apt_autoremove"></a>`apt_autoremove`
 
 Data type: `Boolean`
 
 Should `apt-get autoremove` be run during reboot?
-
-Default value: ``false``
 
 ##### <a name="manage_delta_rpm"></a>`manage_delta_rpm`
 
@@ -192,15 +184,11 @@ Data type: `Boolean`
 Should the deltarpm package be managed by this module on RedHat family nodes?
 If `true`, use the parameter `delta_rpm` to determine how it should be manged
 
-Default value: ``false``
-
 ##### <a name="delta_rpm"></a>`delta_rpm`
 
 Data type: `Enum['installed', 'absent', 'purged', 'held', 'latest']`
 
 If managed, what should the delta_rpm package set to?
-
-Default value: `'installed'`
 
 ##### <a name="manage_yum_plugin_security"></a>`manage_yum_plugin_security`
 
@@ -209,15 +197,11 @@ Data type: `Boolean`
 Should the yum_plugin_security package be managed by this module on RedHat family nodes?
 If `true`, use the parameter `yum_plugin_security` to determine how it should be manged
 
-Default value: ``false``
-
 ##### <a name="yum_plugin_security"></a>`yum_plugin_security`
 
 Data type: `Enum['installed', 'absent', 'purged', 'held', 'latest']`
 
 If managed, what should the yum_plugin_security package set to?
-
-Default value: `'installed'`
 
 ##### <a name="reboot_override"></a>`reboot_override`
 
@@ -226,11 +210,9 @@ Data type: `Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart'
 Controls on a node level if a reboot should/should not be done after patching.
 This overrides the setting in the task
 
-Default value: `'default'`
-
 ##### <a name="patch_window"></a>`patch_window`
 
-Data type: `String`
+Data type: `Optional[String]`
 
 A freeform text entry used to allocate a node to a specific patch window (Optional)
 
@@ -244,43 +226,33 @@ The full path of the command to run prior to running patching.  Can be used to
 run customised workflows such as gracefully shutting down applications.  The entry
 must be a single absolute filename with no arguments or parameters.
 
-Default value: ``undef``
-
 ##### <a name="patch_cron_hour"></a>`patch_cron_hour`
 
-Data type: `Any`
+Data type: `Variant[Enum['absent'], Integer[0,23]]`
 
 The hour(s) for the cron job to run (defaults to absent, which means '*' in cron)
 
-Default value: `absent`
-
 ##### <a name="patch_cron_month"></a>`patch_cron_month`
 
-Data type: `Any`
+Data type: `Variant[Enum['absent'], Integer[1,12]]`
 
 The month(s) for the cron job to run (defaults to absent, which means '*' in cron)
 
-Default value: `absent`
-
 ##### <a name="patch_cron_monthday"></a>`patch_cron_monthday`
 
-Data type: `Any`
+Data type: `Variant[Enum['absent'], Integer[1,31]]`
 
 The monthday(s) for the cron job to run (defaults to absent, which means '*' in cron)
 
-Default value: `absent`
-
 ##### <a name="patch_cron_weekday"></a>`patch_cron_weekday`
 
-Data type: `Any`
+Data type: `Variant[Enum['absent'], Integer[0,7]]`
 
 The weekday(s) for the cron job to run (defaults to absent, which means '*' in cron)
 
-Default value: `absent`
-
 ##### <a name="patch_cron_min"></a>`patch_cron_min`
 
-Data type: `Any`
+Data type: `Integer[0,59]`
 
 The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 
@@ -288,19 +260,15 @@ Default value: `fqdn_rand(59)`
 
 ##### <a name="windows_update_hour"></a>`windows_update_hour`
 
-Data type: `Any`
+Data type: `Integer[0,23]`
 
 Control the hour on which windows nodes check for updates
 
-Default value: `1`
+##### <a name="windows_update_interval_mins"></a>`windows_update_interval_mins`
 
-##### <a name="windows_check_interval_mins"></a>`windows_check_interval_mins`
+Data type: `Integer`
 
-Data type: `Any`
-
-Control how often windows checks for updates
-
-Default value: `720`
+Control how often windows updates for updates
 
 ##### <a name="ensure"></a>`ensure`
 
@@ -308,7 +276,11 @@ Data type: `Enum['present', 'absent']`
 
 `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
 
-Default value: `'present'`
+##### <a name="fact_mode"></a>`fact_mode`
+
+Data type: `Stdlib::Filemode`
+
+
 
 ##### <a name="blackout_windows"></a>`blackout_windows`
 
