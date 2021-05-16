@@ -84,8 +84,8 @@
 # @param windows_update_hour
 #   Control the hour on which windows nodes check for updates
 #
-# @param windows_check_interval_mins
-#   Control how often windows checks for updates
+# @param windows_update_interval_mins
+#   Control how often windows updates for updates
 #
 # @param ensure
 #   `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
@@ -133,8 +133,6 @@
 #     ensure => absent,
 #   }
 class os_patching (
-  Optional[String] $patch_window = undef,
-  Optional[Hash] $blackout_windows = undef,
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
   Optional[Stdlib::Absolutepath] $pre_patching_command,
   String $puppet_binary_dir,
@@ -148,7 +146,7 @@ class os_patching (
   Boolean $block_patching_on_warnings,
   Boolean $apt_autoremove,
   Integer[0,23] $windows_update_hour,
-  Integer $windows_check_interval_mins,
+  Integer $windows_update_interval_mins,
   Stdlib::Filemode $fact_mode,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils,
   Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm,
@@ -159,6 +157,8 @@ class os_patching (
   Variant[Enum['absent'], Integer[1,31]] $patch_cron_monthday,
   Variant[Enum['absent'], Integer[0,7]] $patch_cron_weekday,
   Integer[0,59] $patch_cron_min = fqdn_rand(59),
+  Optional[String] $patch_window = undef,
+  Optional[Hash] $blackout_windows = undef,
 ) {
 
   # None tunable
@@ -400,7 +400,7 @@ class os_patching (
           {
             schedule         => daily,
             start_time       => "${windows_update_hour}:${patch_cron_min}",
-            minutes_interval => $windows_check_interval_mins,
+            minutes_interval => $windows_update_interval_mins,
           },
           {
             schedule => 'boot',
