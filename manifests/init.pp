@@ -383,8 +383,8 @@ class os_patching (
 
       if $fact_exec {
         exec { $fact_exec:
-          path        => 'C:/Windows/System33/WindowsPowerShell/v1.0',
-          timeout     => 901,
+          path        => 'C:/Windows/System32/WindowsPowerShell/v1.0',
+          timeout     => 900,
           refreshonly => true,
           command     => "powershell -executionpolicy remotesigned -file ${fact_cmd}",
         }
