@@ -167,6 +167,8 @@ class os_patching (
   $fact_file = lookup('os_patching::fact_file',String,first,undef)
   $fact_upload_cmd = lookup('os_patching::fact_upload_cmd',String,first,undef)
 
+  notify { "Cachedir = ${cache_dir": }
+
   $fact_exec = $ensure ? {
     'present' => 'os_patching::exec::fact',
     default   => undef,
@@ -185,7 +187,6 @@ class os_patching (
     default: { fail("Unsupported OS : ${facts['kernel']}") }
   }
 
-  fail("${fact_dir} / ${fact_file}")
   # calculate full path for fact command/script
   $fact_cmd = "${fact_dir}/${fact_file}"
 
