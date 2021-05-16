@@ -203,7 +203,7 @@ class os_patching (
     default   => 'absent',
   }
 
-  if ($patch_window and $patch_window !~ /[A-Za-z1-9\-_ ]+/ ) {
+  if ($patch_window and $patch_window !~ /[A-Za-z0-9\-_ ]+/ ) {
     fail('The patch window can only contain alphanumerics, space, underscore and dash')
   }
 
@@ -273,14 +273,14 @@ class os_patching (
   if ($blackout_windows) {
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
-      if ( $key !~ /^[A-Za-z1-9_ ]+$/ ){
+      if ( $key !~ /^[A-Za-z0-9_ ]+$/ ){
         fail('Blackout description can only contain alphanumerics, space and underscore')
       }
       if ( $value['start'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail('Blackout start time must be in ISO 8602 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
+        fail('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
       if ( $value['end'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
-        fail('Blackout end time must be in ISO 8602 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
+        fail('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
       if ( $value['start'] > $value['end'] ){
         fail('Blackout end time must after the start time')
