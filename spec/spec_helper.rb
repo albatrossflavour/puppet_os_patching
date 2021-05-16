@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.configure do |c|
-  #c.hiera_config = 'spec/fixtures/hiera.yaml'
   c.mock_with :rspec
 end
 

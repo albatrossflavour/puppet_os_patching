@@ -133,10 +133,10 @@
 #     ensure => absent,
 #   }
 class os_patching (
-  Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
-  Optional[Stdlib::Absolutepath] $pre_patching_command,
   Optional[String] $patch_window = undef,
   Optional[Hash] $blackout_windows = undef,
+  Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
+  Optional[Stdlib::Absolutepath] $pre_patching_command,
   String $puppet_binary_dir,
   String $patch_data_owner,
   String $patch_data_group,

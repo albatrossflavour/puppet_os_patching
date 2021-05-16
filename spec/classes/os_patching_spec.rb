@@ -13,7 +13,7 @@ describe 'os_patching' do
         context 'default installation path for Puppet' do
           it {
             is_expected.to contain_exec('os_patching::exec::fact_upload').with(
-              'command' => "/opt/puppetlabs/bin/puppet facts upload",
+              'command' => '/opt/puppetlabs/bin/puppet facts upload',
             )
           }
         end
@@ -23,7 +23,7 @@ describe 'os_patching' do
 
           it {
             is_expected.to contain_exec('os_patching::exec::fact_upload').with(
-              'command' => "/usr/local/bin/puppet facts upload",
+              'command' => '/usr/local/bin/puppet facts upload',
             )
           }
         end
