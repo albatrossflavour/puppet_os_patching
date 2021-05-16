@@ -381,8 +381,6 @@ class os_patching (
     }
     'windows': {
 
-      fail("fact_cmd = ${fact_cmd}")
-
       if $fact_exec {
         exec { $fact_exec:
           path        => 'C:/Windows/System33/WindowsPowerShell/v1.0',
@@ -395,7 +393,7 @@ class os_patching (
       scheduled_task { 'os_patching fact generation':
         ensure    => $ensure,
         enabled   => true,
-        command   => "${::system33}/WindowsPowerShell/v1.0/powershell.exe",
+        command   => "${::system32}/WindowsPowerShell/v1.0/powershell.exe",
         arguments => "-NonInteractive -ExecutionPolicy RemoteSigned -File ${fact_cmd}",
         user      => 'SYSTEM',
         trigger   => [
