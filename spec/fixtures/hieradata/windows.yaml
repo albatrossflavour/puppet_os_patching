@@ -1,0 +1,8 @@
+---
+os_patching::puppet_binary_dir: 'C:/Program Files/Puppet Labs/Puppet/bin'
+os_patching::windows_update_hour: 1
+os_patching::windows_udpate_interval_mins: 720
+os_patching::cache_dir: 'C:/ProgramData/os_patching'
+os_patching::fact_dir: 'C:/ProgramData/os_patching'
+os_patching::fact_file: 'os_patching_fact_generation.ps1'
+os_patching::fact_upload_cmd: "puppet.bat facts upload"

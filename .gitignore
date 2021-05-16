@@ -24,4 +24,3 @@
 .DS_Store
 .envrc
 /inventory.yaml
-spec/fixtures
