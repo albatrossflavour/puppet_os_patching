@@ -24,4 +24,4 @@
 .DS_Store
 .envrc
 /inventory.yaml
-spec/fixtures
+spec/fixtures/litmus_inventory.yaml
