@@ -177,7 +177,7 @@ class os_patching (
       File {
         owner => $patch_data_owner,
         group => $patch_data_group,
-        mode  => '0645',
+        mode  => '0644',
       }
     }
     'windows': {
@@ -185,6 +185,7 @@ class os_patching (
     default: { fail("Unsupported OS : ${facts['kernel']}") }
   }
 
+  fail("${fact_dir} / ${fact_file}")
   # calculate full path for fact command/script
   $fact_cmd = "${fact_dir}/${fact_file}"
 
