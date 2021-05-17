@@ -69,7 +69,11 @@ describe 'os_patching' do
           it { is_expected.to contain_package('yum-plugin-security') }
         end
         context 'with package management default' do
-          it { is_expected.not_to contain_package('deltarpm') }
+          if os_facts[:os]['release']['major'] == '8'
+            it { is_expected.not_to contain_package('drpm') }
+          else
+            it { is_expected.not_to contain_package('deltarpm') }
+          end
           it { is_expected.not_to contain_package('yum-utils') }
           it { is_expected.not_to contain_package('yum-plugin-security') }
         end
