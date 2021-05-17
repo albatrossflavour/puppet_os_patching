@@ -851,7 +851,7 @@ try {
     }
 
     # clean log files
-    Invoke-CleanLogFile -LogFileFilter "os_patching*.log"
+    Invoke-CleanLogFile -LogFileFilter "os_patching-*.log"
 }
 finally {
     # this code is always executed, even when an exception is trapped during main script execution
