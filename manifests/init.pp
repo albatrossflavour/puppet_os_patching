@@ -326,7 +326,7 @@ class os_patching (
       }
 
       if ( $facts['os']['family'] == 'RedHat' and $manage_delta_rpm) {
-        if ( $facts['os']['release']['major'] < 8 or $facts['os']['name'] == 'Fedora') {
+        if ( Integer($facts['os']['release']['major']) < 8 or $facts['os']['name'] == 'Fedora') {
           package { 'deltarpm':
             ensure => $delta_rpm,
           }
