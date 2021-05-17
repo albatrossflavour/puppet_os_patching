@@ -319,19 +319,26 @@ class os_patching (
   case $::kernel {
     'Linux': {
 
-      if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
+      if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
         package { 'yum-utils':
           ensure => $yum_utils,
         }
       }
 
-      if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
-        package { 'deltarpm':
-          ensure => $delta_rpm,
+      if ( $facts['os']['family'] == 'RedHat' and $manage_delta_rpm) {
+        if ( Integer($facts['os']['release']['major']) < 8 or $facts['os']['name'] == 'Fedora') {
+          package { 'deltarpm':
+            ensure => $delta_rpm,
+          }
+        }
+        else {
+          package { 'drpm':
+            ensure => $delta_rpm,
+          }
         }
       }
 
-      if ( $::osfamily == 'RedHat' and $manage_yum_plugin_security) {
+      if ( $facts['os']['family'] == 'RedHat' and $manage_yum_plugin_security) {
         package { 'yum-plugin-security':
           ensure => $yum_plugin_security,
         }
