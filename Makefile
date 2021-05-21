@@ -8,6 +8,10 @@ test:
 	${MAKE} acceptance
 	${MAKE} documentation
 
+release:
+	${MAKE} test
+	${MAKE} release_updates
+
 setup:
 	pdk bundle install
 
@@ -48,3 +52,9 @@ teardown:
 
 documentation:
 	pdk bundle exec puppet strings generate --format=markdown
+
+release_updates:
+	pdk bundle exec rake module:bump:minor
+	pdk bundle exec rake changelog
+	pdk bundle exec rake module:tag
+	pdk bundle exec rake build
