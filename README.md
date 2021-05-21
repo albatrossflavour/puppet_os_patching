@@ -1,10 +1,12 @@
 # os_patching
 
-This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently, patching works on Linux (Redhat, Suse and Debian derivatives) and Windows (Server 2008 through to 2019 have been tested).
+This module contains a set of tasks and custom facts to allow the automation of and reporting on operating system patching. Currently, patching works on Linux (Redhat, Suse and Debian derivatives) and Windows (Server 2008 through to 2019 have been tested).  FreeBSD support is a work in progress and is currently reporting only.
 
 Under the hood, it uses the OS level tools or APIs to carry out the actual patching.  That does mean that you need to be sure that your nodes can search for their updates using the native tool - e.g. You still need to manage the configuration of YUM, APT, Zypper or Windows Update.
 
-Note - Windows systems require at least PowerShell version 3.0. If you are intending to update an unpatched Windows system before Server 2012, you will need to update PowerShell first.
+**Note** - Windows systems require at least PowerShell version 3.0. If you are intending to update an unpatched Windows system before Server 2012, you will need to update PowerShell first.
+
+**Note** - FreeBSD support is currently limited to reporting patch state only. Actual patching will be enabled in a future release.
 
 [The wiki](https://github.com/albatrossflavour/puppet_os_patching/wiki/Background) contains some useful background information on the module and how it works.
 
@@ -289,7 +291,7 @@ The script used to scan for updates and generate the fact data is stored in the 
 
 The os_patching directory contains the various control files needed for this module and its tasks to work correctly.  The locations are as follows:
 
-* Linux - `/var/cache/os_patching`
+* Linux/FreeBSD - `/var/cache/os_patching`
 * Windows - `c:\ProgramData\os_patching`
 
 The following files are stored in this directory:
