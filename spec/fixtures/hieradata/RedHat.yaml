@@ -1,0 +1,7 @@
+---
+os_patching::manage_yum_utils: false
+os_patching::manage_delta_rpm: false
+os_patching::manage_yum_plugin_security: false
+os_patching::yum_utils: 'installed'
+os_patching::delta_rpm: 'installed'
+os_patching::yum_plugin_security: 'installed'

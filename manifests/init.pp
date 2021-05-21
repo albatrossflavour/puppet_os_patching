@@ -1,8 +1,8 @@
 # @summary This manifest sets up a script and cron job to populate
 #   the `os_patching` fact.
 #
-# @param puppet_binary_dir [String]
-#   Location of the Puppet binaries
+# @param puppet_binary [String]
+#   Location of the Puppet binary
 #
 # @param patch_data_owner [String]
 #   User name for the owner of the patch data
@@ -135,7 +135,7 @@
 class os_patching (
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
   Optional[Stdlib::Absolutepath] $pre_patching_command,
-  String $puppet_binary_dir,
+  Stdlib::Absolutepath $puppet_binary,
   String $patch_data_owner,
   String $patch_data_group,
   String $patch_cron_user,
@@ -165,7 +165,6 @@ class os_patching (
   $cache_dir = lookup('os_patching::cache_dir',Stdlib::Absolutepath,first,undef)
   $fact_dir = lookup('os_patching::fact_dir',Stdlib::Absolutepath,first,undef)
   $fact_file = lookup('os_patching::fact_file',String,first,undef)
-  $fact_upload_cmd = lookup('os_patching::fact_upload_cmd',String,first,undef)
 
   $fact_exec = $ensure ? {
     'present' => 'os_patching::exec::fact',
@@ -303,7 +302,7 @@ class os_patching (
 
   if $fact_upload_exec and $fact_upload {
     exec { $fact_upload_exec:
-      command     => "${puppet_binary_dir}/${fact_upload_cmd}",
+      command     => "'${puppet_binary}' facts upload",
       path        => ['/opt/puppetlabs/bin/', '/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
       subscribe   => File[

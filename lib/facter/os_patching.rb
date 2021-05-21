@@ -21,8 +21,6 @@ else
       os_patching_dir = '/var/cache/os_patching'
     when 'windows'
       os_patching_dir = 'C:\ProgramData\os_patching'
-    else
-      raise 'Usupported OS'
     end
 
     chunk(:updates) do
