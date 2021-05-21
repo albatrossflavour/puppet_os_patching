@@ -47,7 +47,7 @@ PuppetLint.configuration.send('disable_relative')
 if Bundler.rubygems.find_name('github_changelog_generator').any?
   GitHubChangelogGenerator::RakeTask.new :changelog do |config|
     raise "Set CHANGELOG_GITHUB_TOKEN environment variable eg 'export CHANGELOG_GITHUB_TOKEN=valid_token_here'" if Rake.application.top_level_tasks.include? "changelog" and ENV['CHANGELOG_GITHUB_TOKEN'].nil?
-    config.user = "#{changelog_user}"
+    config.user = "albatrossflavour"
     config.project = "#{changelog_project}"
     config.future_release = "#{changelog_future_release}"
     config.exclude_labels = ['maintenance']

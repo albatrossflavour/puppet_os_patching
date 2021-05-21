@@ -9,16 +9,17 @@ if Facter.value(:facterversion).split('.')[0].to_i < 2
   end
 else
   Facter.add('os_patching', :type => :aggregate) do
-    confine { Facter.value(:kernel) == 'windows' || Facter.value(:kernel) == 'Linux' }
+    confine { ['FreeBSD', 'Linux', 'windows'].include?(Facter.value(:kernel)) }
     require 'time'
     now = Time.now.iso8601
     warnings = {}
     blocked = false
     blocked_reasons = []
 
-    if Facter.value(:kernel) == 'Linux'
+    case Facter.value(:kernel)
+    when 'FreeBSD', 'Linux'
       os_patching_dir = '/var/cache/os_patching'
-    elsif Facter.value(:kernel) == 'windows'
+    when 'windows'
       os_patching_dir = 'C:\ProgramData\os_patching'
     end
 

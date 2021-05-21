@@ -6,12 +6,48 @@ describe 'os_patching' do
       let(:facts) { os_facts }
 
       case os_facts[:kernel]
-      when 'Linux'
+      when 'Linux', 'FreeBSD'
         let(:cache_dir) { '/var/cache/os_patching' }
         let(:fact_cmd) { '/usr/local/bin/os_patching_fact_generation.sh' }
+
+        context 'default installation path for Puppet' do
+          it {
+            is_expected.to contain_exec('os_patching::exec::fact_upload').with(
+              'command' => '\'/usr/local/bin/puppet\' facts upload',
+            )
+          }
+        end
+
+        context 'alternate installation path for Puppet' do
+          let(:params) { {'puppet_binary' => '/opt/local/bin/puppet' } }
+
+          it {
+            is_expected.to contain_exec('os_patching::exec::fact_upload').with(
+              'command' => '\'/opt/local/bin/puppet\' facts upload',
+            )
+          }
+        end
       when 'windows'
         let(:cache_dir) { 'C:/ProgramData/os_patching' }
         let(:fact_cmd) { 'C:/ProgramData/os_patching/os_patching_fact_generation.ps1' }
+
+        context 'default installation path for Puppet' do
+          it {
+            is_expected.to contain_exec('os_patching::exec::fact_upload').with(
+              'command' => '\'C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat\' facts upload',
+            )
+          }
+        end
+
+        context 'alternate installation path for Puppet' do
+          let(:params) { {'puppet_binary' => 'D:/Program Files/Puppet Labs/Puppet/bin/puppet.bat' } }
+
+          it {
+            is_expected.to contain_exec('os_patching::exec::fact_upload').with(
+              'command' => '\'D:/Program Files/Puppet Labs/Puppet/bin/puppet.bat\' facts upload',
+            )
+          }
+        end
       end
 
       case os_facts[:osfamily]
@@ -24,12 +60,20 @@ describe 'os_patching' do
               'manage_yum_plugin_security' => true,
             }
           }
-          it { is_expected.to contain_package('deltarpm') }
+          if os_facts[:os]['release']['major'] == '8'
+            it { is_expected.to contain_package('drpm') }
+          else
+            it { is_expected.to contain_package('deltarpm') }
+          end
           it { is_expected.to contain_package('yum-utils') }
           it { is_expected.to contain_package('yum-plugin-security') }
         end
         context 'with package management default' do
-          it { is_expected.not_to contain_package('deltarpm') }
+          if os_facts[:os]['release']['major'] == '8'
+            it { is_expected.not_to contain_package('drpm') }
+          else
+            it { is_expected.not_to contain_package('deltarpm') }
+          end
           it { is_expected.not_to contain_package('yum-utils') }
           it { is_expected.not_to contain_package('yum-plugin-security') }
         end

@@ -1,0 +1,3 @@
+---
+os_patching::patch_data_group: 'wheel'
+os_patching::puppet_binary: '/usr/local/bin/puppet'

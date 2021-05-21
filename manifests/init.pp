@@ -1,6 +1,9 @@
 # @summary This manifest sets up a script and cron job to populate
 #   the `os_patching` fact.
 #
+# @param puppet_binary [String]
+#   Location of the Puppet binary
+#
 # @param patch_data_owner [String]
 #   User name for the owner of the patch data
 #
@@ -78,6 +81,12 @@
 # @param patch_cron_min
 #   The min(s) for the cron job to run (defaults to a random number between 0 and 59)
 #
+# @param windows_update_hour
+#   Control the hour on which windows nodes check for updates
+#
+# @param windows_update_interval_mins
+#   Control how often windows updates for updates
+#
 # @param ensure
 #   `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
 #
@@ -124,29 +133,38 @@
 #     ensure => absent,
 #   }
 class os_patching (
-  String $patch_data_owner            = 'root',
-  String $patch_data_group            = 'root',
-  String $patch_cron_user             = $patch_data_owner,
-  Boolean $manage_yum_utils           = false,
-  Boolean $manage_delta_rpm           = false,
-  Boolean $manage_yum_plugin_security = false,
-  Boolean $fact_upload                = true,
-  Boolean $block_patching_on_warnings = false,
-  Boolean $apt_autoremove             = false,
-  Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils = 'installed',
-  Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm = 'installed',
-  Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security = 'installed',
-  Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override = 'default',
-  Optional[Stdlib::Absolutepath] $pre_patching_command = undef,
-  Optional[Hash] $blackout_windows   = undef,
-  $patch_window                      = undef,
-  $patch_cron_hour                   = absent,
-  $patch_cron_month                  = absent,
-  $patch_cron_monthday               = absent,
-  $patch_cron_weekday                = absent,
-  $patch_cron_min                    = fqdn_rand(59),
-  Enum['present', 'absent'] $ensure  = 'present',
+  Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
+  Optional[Stdlib::Absolutepath] $pre_patching_command,
+  Stdlib::Absolutepath $puppet_binary,
+  String $patch_data_owner,
+  String $patch_data_group,
+  String $patch_cron_user,
+  Boolean $manage_yum_utils,
+  Boolean $manage_delta_rpm,
+  Boolean $manage_yum_plugin_security,
+  Boolean $fact_upload,
+  Boolean $block_patching_on_warnings,
+  Boolean $apt_autoremove,
+  Integer[0,23] $windows_update_hour,
+  Integer $windows_update_interval_mins,
+  Stdlib::Filemode $fact_mode,
+  Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_utils,
+  Enum['installed', 'absent', 'purged', 'held', 'latest'] $delta_rpm,
+  Enum['installed', 'absent', 'purged', 'held', 'latest'] $yum_plugin_security,
+  Enum['present', 'absent'] $ensure,
+  Variant[Enum['absent'], Integer[0,23]] $patch_cron_hour,
+  Variant[Enum['absent'], Integer[1,12]] $patch_cron_month,
+  Variant[Enum['absent'], Integer[1,31]] $patch_cron_monthday,
+  Variant[Enum['absent'], Integer[0,7]] $patch_cron_weekday,
+  Integer[0,59] $patch_cron_min = fqdn_rand(59),
+  Optional[String] $patch_window = undef,
+  Optional[Hash] $blackout_windows = undef,
 ) {
+
+  # None tunable
+  $cache_dir = lookup('os_patching::cache_dir',Stdlib::Absolutepath,first,undef)
+  $fact_dir = lookup('os_patching::fact_dir',Stdlib::Absolutepath,first,undef)
+  $fact_file = lookup('os_patching::fact_file',String,first,undef)
 
   $fact_exec = $ensure ? {
     'present' => 'os_patching::exec::fact',
@@ -154,12 +172,7 @@ class os_patching (
   }
 
   case $::kernel {
-    'Linux': {
-      $fact_upload_cmd     = 'puppet facts upload'
-      $cache_dir           = '/var/cache/os_patching'
-      $fact_dir            = '/usr/local/bin'
-      $fact_file           = 'os_patching_fact_generation.sh'
-      $fact_mode           = '0700'
+    'FreeBSD', 'Linux': {
       File {
         owner => $patch_data_owner,
         group => $patch_data_group,
@@ -167,11 +180,6 @@ class os_patching (
       }
     }
     'windows': {
-      $fact_upload_cmd     = '"C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat" facts upload'
-      $cache_dir           = 'C:/ProgramData/os_patching'
-      $fact_dir            = $cache_dir
-      $fact_file           = 'os_patching_fact_generation.ps1'
-      $fact_mode           = '0770'
     }
     default: { fail("Unsupported OS : ${facts['kernel']}") }
   }
@@ -267,10 +275,10 @@ class os_patching (
       if ( $key !~ /^[A-Za-z0-9_ ]+$/ ){
         fail('Blackout description can only contain alphanumerics, space and underscore')
       }
-      if ( $value['start'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
+      if ( $value['start'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
         fail('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
-      if ( $value['end'] !~ /^\d{,4}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
+      if ( $value['end'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
         fail('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
       if ( $value['start'] > $value['end'] ){
@@ -294,7 +302,7 @@ class os_patching (
 
   if $fact_upload_exec and $fact_upload {
     exec { $fact_upload_exec:
-      command     => $fact_upload_cmd,
+      command     => "'${puppet_binary}' facts upload",
       path        => ['/opt/puppetlabs/bin/', '/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
       subscribe   => File[
@@ -308,21 +316,28 @@ class os_patching (
   }
 
   case $::kernel {
-    'Linux': {
+    'FreeBSD', 'Linux': {
 
-      if ( $::osfamily == 'RedHat' and $manage_yum_utils) {
+      if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
         package { 'yum-utils':
           ensure => $yum_utils,
         }
       }
 
-      if ( $::osfamily == 'RedHat' and $manage_delta_rpm) {
-        package { 'deltarpm':
-          ensure => $delta_rpm,
+      if ( $facts['os']['family'] == 'RedHat' and $manage_delta_rpm) {
+        if ( Integer($facts['os']['release']['major']) < 8 or $facts['os']['name'] == 'Fedora') {
+          package { 'deltarpm':
+            ensure => $delta_rpm,
+          }
+        }
+        else {
+          package { 'drpm':
+            ensure => $delta_rpm,
+          }
         }
       }
 
-      if ( $::osfamily == 'RedHat' and $manage_yum_plugin_security) {
+      if ( $facts['os']['family'] == 'RedHat' and $manage_yum_plugin_security) {
         package { 'yum-plugin-security':
           ensure => $yum_plugin_security,
         }
@@ -375,6 +390,7 @@ class os_patching (
       if $fact_exec {
         exec { $fact_exec:
           path        => 'C:/Windows/System32/WindowsPowerShell/v1.0',
+          timeout     => 900,
           refreshonly => true,
           command     => "powershell -executionpolicy remotesigned -file ${fact_cmd}",
         }
@@ -389,8 +405,8 @@ class os_patching (
         trigger   => [
           {
             schedule         => daily,
-            start_time       => "01:${patch_cron_min}",
-            minutes_interval => '720',
+            start_time       => "${windows_update_hour}:${patch_cron_min}",
+            minutes_interval => $windows_update_interval_mins,
           },
           {
             schedule => 'boot',

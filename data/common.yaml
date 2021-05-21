@@ -1,0 +1,26 @@
+---
+os_patching::fact_upload: true
+os_patching::pre_patching_command: NULL
+os_patching::block_patching_on_warnings: false
+os_patching::reboot_override: 'default'
+os_patching::ensure: 'present'
+os_patching::apt_autoremove: false
+os_patching::delta_rpm: 'installed'
+os_patching::manage_delta_rpm: false
+os_patching::manage_yum_plugin_security: false
+os_patching::manage_yum_utils: false
+os_patching::patch_cron_hour: 'absent'
+os_patching::patch_cron_month: 'absent'
+os_patching::patch_cron_monthday: 'absent'
+os_patching::patch_cron_weekday: 'absent'
+os_patching::patch_cron_user: 'root'
+os_patching::patch_data_group: 'root'
+os_patching::patch_data_owner: 'root'
+os_patching::windows_update_interval_mins: 720
+os_patching::windows_update_hour: 1
+os_patching::yum_plugin_security: 'installed'
+os_patching::yum_utils: 'installed'
+os_patching::cache_dir: '/var/cache/os_patching'
+os_patching::fact_dir: '/usr/local/bin'
+os_patching::fact_file: 'os_patching_fact_generation.sh'
+os_patching::fact_mode: '0700'
