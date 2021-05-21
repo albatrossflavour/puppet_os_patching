@@ -6,7 +6,7 @@ describe 'os_patching' do
       let(:facts) { os_facts }
 
       case os_facts[:kernel]
-      when 'Linux'
+      when 'Linux', 'FreeBSD'
         let(:cache_dir) { '/var/cache/os_patching' }
         let(:fact_cmd) { '/usr/local/bin/os_patching_fact_generation.sh' }
 

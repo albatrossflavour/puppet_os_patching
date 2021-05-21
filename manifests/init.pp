@@ -173,7 +173,7 @@ class os_patching (
   }
 
   case $::kernel {
-    'Linux': {
+    'FreeBSD', 'Linux': {
       File {
         owner => $patch_data_owner,
         group => $patch_data_group,
@@ -317,7 +317,7 @@ class os_patching (
   }
 
   case $::kernel {
-    'Linux': {
+    'FreeBSD', 'Linux': {
 
       if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
         package { 'yum-utils':
