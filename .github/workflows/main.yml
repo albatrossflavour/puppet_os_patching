@@ -24,103 +24,16 @@ jobs:
       uses: actions/checkout@v2
       if: ${{ github.repository_owner == 'albatrossflavour' }}
 
-    - name: Activate Ruby 2.7
-      uses: ruby/setup-ruby@v1
-      if: ${{ github.repository_owner == 'albatrossflavour' }}
-      with:
-        ruby-version: "2.7"
-        bundler-cache: true
-
-    - name: Print bundle environment
+    - name: Install PDK
       if: ${{ github.repository_owner == 'albatrossflavour' }}
       run: |
-        echo ::group::bundler environment
-        buildevents cmd $TRACE_ID $STEP_ID 'bundle env' -- bundle env
-        echo ::endgroup::
+        wget https://apt.puppet.com/puppet-tools-release-focal.deb
+        sudo dpkg -i puppet-tools-release-focal.deb
+        sudo apt-get update
+        sudo apt-get install pdk
 
-    - name: Setup Acceptance Test Matrix
-      id: get-matrix
+    - name: Run tests
       if: ${{ github.repository_owner == 'albatrossflavour' }}
       run: |
-        if [ '${{ github.repository_owner }}' == 'albatrossflavour' ]; then
-          buildevents cmd $TRACE_ID $STEP_ID matrix_from_metadata -- bundle exec matrix_from_metadata_v2
-        else
-          echo  "::set-output name=matrix::{}"
-        fi
-
-  Acceptance:
-    name: "${{matrix.platforms.label}}, ${{matrix.collection}}"
-    needs:
-      - setup_matrix
-
-    runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-      matrix: ${{fromJson(needs.setup_matrix.outputs.matrix)}}
-
-    env:
-      BUILDEVENT_FILE: '../buildevents.txt'
-
-    steps:
-    - run: |
-        echo 'platform=${{ matrix.platforms.image }}' >> $BUILDEVENT_FILE
-        echo 'collection=${{ matrix.collection }}' >> $BUILDEVENT_FILE
-        echo 'label=${{ matrix.platforms.label }}' >> $BUILDEVENT_FILE
-
-
-    - name: Checkout Source
-      uses: actions/checkout@v2
-
-    - name: Activate Ruby 2.7
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: "2.7"
-        bundler-cache: true
-
-    - name: Print bundle environment
-      run: |
-        echo ::group::bundler environment
-        buildevents cmd $TRACE_ID $STEP_ID 'bundle env' -- bundle env
-        echo ::endgroup::
-
-    - name: Provision test environment
-      run: |
-        buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:provision ${{ matrix.platforms.image }}' -- bundle exec rake 'litmus:provision[${{matrix.platforms.provider}},${{ matrix.platforms.image }}]'
-        echo ::group::=== REQUEST ===
-        cat request.json || true
-        echo
-        echo ::endgroup::
-        echo ::group::=== INVENTORY ===
-        if [ -f 'spec/fixtures/litmus_inventory.yaml' ];
-        then
-          FILE='spec/fixtures/litmus_inventory.yaml'
-        elif [ -f 'inventory.yaml' ];
-        then
-          FILE='inventory.yaml'
-        fi
-        sed -e 's/password: .*/password: "[redacted]"/' < $FILE || true
-        echo ::endgroup::
-
-    - name: Install agent
-      run: |
-        buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:install_agent ${{ matrix.collection }}' -- bundle exec rake 'litmus:install_agent[${{ matrix.collection }}]'
-
-    - name: Install module
-      run: |
-        buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:install_module' -- bundle exec rake 'litmus:install_module'
-
-    - name: Run acceptance tests
-      run: |
-        buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:acceptance:parallel' -- bundle exec rake 'litmus:acceptance:parallel'
-
-    - name: Remove test environment
-      if: ${{ always() }}
-      continue-on-error: true
-      run: |
-        if [[ -f inventory.yaml || -f spec/fixtures/litmus_inventory.yaml ]]; then
-          buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:tear_down' -- bundle exec rake 'litmus:tear_down'
-          echo ::group::=== REQUEST ===
-          cat request.json || true
-          echo
-          echo ::endgroup::
-        fi
+        export PATH=/opt/puppetlabs/pdk/bin:$PATH
+        make
