@@ -36,5 +36,5 @@ jobs:
     - name: Run tests
       if: ${{ github.repository_owner == 'albatrossflavour' }}
       run: |
-        export PATH=/opt/puppetlabs/pdk/bin:$PATH
+        #export PATH=/opt/puppetlabs/pdk/bin:$PATH
         make
