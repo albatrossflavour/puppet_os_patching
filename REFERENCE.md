@@ -93,7 +93,7 @@ class { 'os_patching':
 
 The following parameters are available in the `os_patching` class:
 
-* [`puppet_binary_dir`](#puppet_binary_dir)
+* [`puppet_binary`](#puppet_binary)
 * [`patch_data_owner`](#patch_data_owner)
 * [`patch_data_group`](#patch_data_group)
 * [`patch_cron_user`](#patch_cron_user)
@@ -120,11 +120,11 @@ The following parameters are available in the `os_patching` class:
 * [`fact_mode`](#fact_mode)
 * [`blackout_windows`](#blackout_windows)
 
-##### <a name="puppet_binary_dir"></a>`puppet_binary_dir`
+##### <a name="puppet_binary"></a>`puppet_binary`
 
-Data type: `String`
+Data type: `Stdlib::Absolutepath`
 
-Location of the Puppet binaries
+Location of the Puppet binary
 
 ##### <a name="patch_data_owner"></a>`patch_data_owner`
 
@@ -398,4 +398,3 @@ Data type: `Optional[Integer]`
 
 
 Default value: `1800`
-

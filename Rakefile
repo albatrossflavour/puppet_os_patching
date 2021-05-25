@@ -42,6 +42,12 @@ def changelog_future_release
   returnVal
 end
 
+PuppetLint::RakeTask.new :lint do |config|
+  # Should the task fail if there were any warnings, defaults to false
+  config.fail_on_warnings = true
+end
+
+
 PuppetLint.configuration.send('disable_relative')
 
 if Bundler.rubygems.find_name('github_changelog_generator').any?
@@ -86,4 +92,3 @@ Gemfile:
 EOM
   end
 end
-

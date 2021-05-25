@@ -1,3 +1,6 @@
+.PHONY: clean
+.DEFAULT: validate
+
 all:
 	${MAKE} test
 
@@ -54,7 +57,11 @@ documentation:
 	pdk bundle exec puppet strings generate --format=markdown
 
 release_updates:
+	${MAKE} documentation
 	pdk bundle exec rake module:bump:minor
 	pdk bundle exec rake changelog
 	pdk bundle exec rake module:tag
 	pdk bundle exec rake build
+
+clean:
+	@pdk bundle exec rake module:clean
