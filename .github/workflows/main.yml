@@ -1,30 +1,119 @@
-# This is a basic workflow to help you get started with Actions
+name: "nightly"
 
-name: CI
-
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the development branch
-  push:
-    branches: [ development ]
-  pull_request:
-    branches: [ development ]
+  schedule:
+    - cron: '0 0 * * *'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: litmusimage/ubuntu:20.04
+  setup_matrix:
+    name: "Setup Test Matrix"
+    runs-on: ubuntu-20.04
+    outputs:
+      matrix: ${{ steps.get-matrix.outputs.matrix }}
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Makefile
-        run: make
+    - name: Checkout Source
+      uses: actions/checkout@v2
+      if: ${{ github.repository_owner == 'albatrossflavour' }}
+
+    - name: Activate Ruby 2.7
+      uses: ruby/setup-ruby@v1
+      if: ${{ github.repository_owner == 'albatrossflavour' }}
+      with:
+        ruby-version: "2.7"
+        bundler-cache: true
+
+    - name: Print bundle environment
+      if: ${{ github.repository_owner == 'albatrossflavour' }}
+      run: |
+        echo ::group::bundler environment
+        buildevents cmd $TRACE_ID $STEP_ID 'bundle env' -- bundle env
+        echo ::endgroup::
+
+    - name: Setup Acceptance Test Matrix
+      id: get-matrix
+      if: ${{ github.repository_owner == 'albatrossflavour' }}
+      run: |
+        if [ '${{ github.repository_owner }}' == 'albatrossflavour' ]; then
+          buildevents cmd $TRACE_ID $STEP_ID matrix_from_metadata -- bundle exec matrix_from_metadata_v2
+        else
+          echo  "::set-output name=matrix::{}"
+        fi
+
+  Acceptance:
+    name: "${{matrix.platforms.label}}, ${{matrix.collection}}"
+    needs:
+      - setup_matrix
+
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.setup_matrix.outputs.matrix)}}
+
+    env:
+      BUILDEVENT_FILE: '../buildevents.txt'
+
+    steps:
+    - run: |
+        echo 'platform=${{ matrix.platforms.image }}' >> $BUILDEVENT_FILE
+        echo 'collection=${{ matrix.collection }}' >> $BUILDEVENT_FILE
+        echo 'label=${{ matrix.platforms.label }}' >> $BUILDEVENT_FILE
+
+
+    - name: Checkout Source
+      uses: actions/checkout@v2
+
+    - name: Activate Ruby 2.7
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "2.7"
+        bundler-cache: true
+
+    - name: Print bundle environment
+      run: |
+        echo ::group::bundler environment
+        buildevents cmd $TRACE_ID $STEP_ID 'bundle env' -- bundle env
+        echo ::endgroup::
+
+    - name: Provision test environment
+      run: |
+        buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:provision ${{ matrix.platforms.image }}' -- bundle exec rake 'litmus:provision[${{matrix.platforms.provider}},${{ matrix.platforms.image }}]'
+        echo ::group::=== REQUEST ===
+        cat request.json || true
+        echo
+        echo ::endgroup::
+        echo ::group::=== INVENTORY ===
+        if [ -f 'spec/fixtures/litmus_inventory.yaml' ];
+        then
+          FILE='spec/fixtures/litmus_inventory.yaml'
+        elif [ -f 'inventory.yaml' ];
+        then
+          FILE='inventory.yaml'
+        fi
+        sed -e 's/password: .*/password: "[redacted]"/' < $FILE || true
+        echo ::endgroup::
+
+    - name: Install agent
+      run: |
+        buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:install_agent ${{ matrix.collection }}' -- bundle exec rake 'litmus:install_agent[${{ matrix.collection }}]'
+
+    - name: Install module
+      run: |
+        buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:install_module' -- bundle exec rake 'litmus:install_module'
+
+    - name: Run acceptance tests
+      run: |
+        buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:acceptance:parallel' -- bundle exec rake 'litmus:acceptance:parallel'
+
+    - name: Remove test environment
+      if: ${{ always() }}
+      continue-on-error: true
+      run: |
+        if [[ -f inventory.yaml || -f spec/fixtures/litmus_inventory.yaml ]]; then
+          buildevents cmd $TRACE_ID $STEP_ID 'rake litmus:tear_down' -- bundle exec rake 'litmus:tear_down'
+          echo ::group::=== REQUEST ===
+          cat request.json || true
+          echo
+          echo ::endgroup::
+        fi
