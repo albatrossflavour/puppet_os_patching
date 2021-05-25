@@ -31,7 +31,7 @@ jobs:
         sudo dpkg -i puppet-tools-release-focal.deb
         sudo apt-get update
         sudo apt-get install pdk
-        sudo chmod -R go-w /opt /home/linuxbrew /home/runner /usr/share/rust/.cargo/bin
+        sudo chmod -R go-w /opt /home/linuxbrew /home/runner /usr/share/rust
 
     - name: Run tests
       if: ${{ github.repository_owner == 'albatrossflavour' }}
