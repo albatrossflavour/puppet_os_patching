@@ -31,6 +31,7 @@ jobs:
         sudo dpkg -i puppet-tools-release-focal.deb
         sudo apt-get update
         sudo apt-get install pdk
+        chmod -R go-w /opt/puppetlabs
 
     - name: Run tests
       if: ${{ github.repository_owner == 'albatrossflavour' }}
