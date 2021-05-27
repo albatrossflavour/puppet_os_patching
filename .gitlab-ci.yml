@@ -16,6 +16,6 @@ before_script:
 
 pdk and litmus:
   stage: testing
-  image: litmusimage/centos:7
+  image: puppet/puppet-dev-tools
   script:
     - make
