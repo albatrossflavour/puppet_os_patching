@@ -5,4 +5,4 @@ os_patching::windows_update_interval_mins: 720
 os_patching::cache_dir: 'C:/ProgramData/os_patching'
 os_patching::fact_dir: 'C:/ProgramData/os_patching'
 os_patching::fact_file: 'os_patching_fact_generation.ps1'
-os_patching::fact_mode: '0000'
+os_patching::fact_mode: '0770'
