@@ -1,67 +1,63 @@
 .PHONY: clean
 .DEFAULT: validate
 
-all:
-	${MAKE} test
+# Use PDK if it's installed, otherwise just use native bundler
+ifeq ($(wildcard /opt/puppetlabs/pdk/bin/pdk),)
+PDK =
+else
+PDK = /opt/puppetlabs/pdk/bin/pdk
+endif
 
-test:
-	${MAKE} setup
-	${MAKE} validate
-	${MAKE} unit
-	${MAKE} acceptance
-	${MAKE} documentation
+all: test
 
-release:
-	${MAKE} test
-	${MAKE} release_updates
+test: validate unit acceptance documentation
+
+release: test release_updates
+
+acceptance: test_puppet6 test_puppet7
 
 setup:
-	/opt/puppetlabs/pdk/bin/pdk bundle install
+	${PDK} bundle install
 
-validate:
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake metadata_lint
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake syntax
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake validate
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake rubocop
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake lint
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake check:git_ignore
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake check:dot_underscore
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake check:symlinks
-	/opt/puppetlabs/pdk/bin/pdk bundle exec puppet-lint manifests
+validate: setup
+	${PDK} bundle exec rake metadata_lint
+	${PDK} bundle exec rake syntax
+	${PDK} bundle exec rake validate
+	${PDK} bundle exec rake rubocop
+	${PDK} bundle exec rake lint
+	${PDK} bundle exec rake check:git_ignore
+	${PDK} bundle exec rake check:dot_underscore
+	${PDK} bundle exec rake check:symlinks
+	${PDK} bundle exec puppet-lint manifests
 
-unit:
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake spec
+unit: setup
+	${PDK} bundle exec rake spec
 
-acceptance:
-	${MAKE} test_puppet6
-	${MAKE} test_puppet7
+test_puppet6: setup
+	${PDK} bundle exec rake 'litmus:provision_list[release_tests]'
+	${PDK} bundle exec rake litmus:install_agent[puppet6]
+	${PDK} bundle exec rake litmus:install_module
+	${PDK} bundle exec rake litmus:acceptance:parallel
+	${PDK} bundle exec rake litmus:tear_down
 
-test_puppet6:
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake 'litmus:provision_list[release_tests]'
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:install_agent[puppet6]
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:install_module
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:acceptance:parallel
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:tear_down
+test_puppet7: setup
+	${PDK} bundle exec rake 'litmus:provision_list[release_tests]'
+	${PDK} bundle exec rake litmus:install_agent[puppet7]
+	${PDK} bundle exec rake litmus:install_module
+	${PDK} bundle exec rake litmus:acceptance:parallel
+	${PDK} bundle exec rake litmus:tear_down
 
-test_puppet7:
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake 'litmus:provision_list[release_tests]'
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:install_agent[puppet7]
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:install_module
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:acceptance:parallel
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:tear_down
+teardown: setup
+	${PDK} bundle exec rake litmus:tear_down
 
-teardown:
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake litmus:tear_down
+documentation: setup
+	${PDK} bundle exec puppet strings generate --format=markdown
 
-documentation:
-	/opt/puppetlabs/pdk/bin/pdk bundle exec puppet strings generate --format=markdown
+release_updates: setup documentation
+	${PDK} bundle exec rake module:bump:minor
+	${PDK} bundle exec rake changelog
+	${PDK} bundle exec rake module:tag
+	${PDK} bundle exec rake build
 
-release_updates:
-	${MAKE} documentation
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake module:bump:minor
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake changelog
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake module:tag
-	/opt/puppetlabs/pdk/bin/pdk bundle exec rake build
-
-clean:
-	@/opt/puppetlabs/pdk/bin/pdk bundle exec rake module:clean
+clean: setup
+	${PDK} bundle exec rake module:clean
