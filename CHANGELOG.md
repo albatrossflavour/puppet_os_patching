@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v0.17.0](https://github.com/albatrossflavour/puppet_os_patching/tree/v0.17.0) (2021-07-12)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/v0.16.0...v0.17.0)
+
+### Fixed
+
+- s/udpate/update [\#208](https://github.com/albatrossflavour/puppet_os_patching/pull/208) ([noahbliss](https://github.com/noahbliss))
+- ensure that key exists while parsing json [\#203](https://github.com/albatrossflavour/puppet_os_patching/pull/203) ([maxadamo](https://github.com/maxadamo))
+
 ## [v0.16.0](https://github.com/albatrossflavour/puppet_os_patching/tree/v0.16.0) (2021-05-21)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.15.0...v0.16.0)
@@ -33,7 +42,7 @@ All notable changes to this project will be documented in this file. The format 
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.14.0...0.15.0)
 
-### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+### Added
 
 - v0.15.0 release [\#196](https://github.com/albatrossflavour/puppet_os_patching/pull/196) ([albatrossflavour](https://github.com/albatrossflavour))
 
@@ -166,7 +175,6 @@ All notable changes to this project will be documented in this file. The format 
 ### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - V0.6.3 release [\#85](https://github.com/albatrossflavour/puppet_os_patching/pull/85) ([albatrossflavour](https://github.com/albatrossflavour))
-- Debian fact improvements [\#84](https://github.com/albatrossflavour/puppet_os_patching/pull/84) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge pull request \#82 from albatrossflavour/development [\#83](https://github.com/albatrossflavour/puppet_os_patching/pull/83) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.6.2](https://github.com/albatrossflavour/puppet_os_patching/tree/0.6.2) (2018-10-03)
@@ -175,6 +183,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
+- Debian fact improvements [\#84](https://github.com/albatrossflavour/puppet_os_patching/pull/84) ([albatrossflavour](https://github.com/albatrossflavour))
 - V0.6.2 release [\#82](https://github.com/albatrossflavour/puppet_os_patching/pull/82) ([albatrossflavour](https://github.com/albatrossflavour))
 - Enable security patching in debian again [\#81](https://github.com/albatrossflavour/puppet_os_patching/pull/81) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge pull request \#79 from albatrossflavour/development [\#80](https://github.com/albatrossflavour/puppet_os_patching/pull/80) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -186,7 +195,6 @@ All notable changes to this project will be documented in this file. The format 
 ### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Fix a couple of strings issues [\#79](https://github.com/albatrossflavour/puppet_os_patching/pull/79) ([albatrossflavour](https://github.com/albatrossflavour))
-- Merge pull request \#77 from albatrossflavour/development [\#78](https://github.com/albatrossflavour/puppet_os_patching/pull/78) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.6.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.6.0) (2018-10-02)
 
@@ -194,6 +202,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
+- Merge pull request \#77 from albatrossflavour/development [\#78](https://github.com/albatrossflavour/puppet_os_patching/pull/78) ([albatrossflavour](https://github.com/albatrossflavour))
 - Pull to master [\#77](https://github.com/albatrossflavour/puppet_os_patching/pull/77) ([albatrossflavour](https://github.com/albatrossflavour))
 - Feature/data parser [\#76](https://github.com/albatrossflavour/puppet_os_patching/pull/76) ([albatrossflavour](https://github.com/albatrossflavour))
 - Feature/clean cache [\#75](https://github.com/albatrossflavour/puppet_os_patching/pull/75) ([albatrossflavour](https://github.com/albatrossflavour))
