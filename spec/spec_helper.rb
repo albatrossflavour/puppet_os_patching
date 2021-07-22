@@ -37,7 +37,6 @@ default_facts.each do |fact, value|
 end
 
 RSpec.configure do |c|
-  c.hiera_config = File.expand_path(File.join(__FILE__, '../fixtures/hiera.yaml'))
   c.default_facts = default_facts
   c.before :each do
     # set to strictest setting for testing
@@ -48,6 +47,18 @@ RSpec.configure do |c|
   c.filter_run_excluding(bolt: true) unless ENV['GEM_BOLT']
   c.after(:suite) do
     RSpec::Puppet::Coverage.report!(0)
+  end
+
+  # Filter backtrace noise
+  backtrace_exclusion_patterns = [
+    %r{spec_helper},
+    %r{gems},
+  ]
+
+  if c.respond_to?(:backtrace_exclusion_patterns)
+    c.backtrace_exclusion_patterns = backtrace_exclusion_patterns
+  elsif c.respond_to?(:backtrace_clean_patterns)
+    c.backtrace_clean_patterns = backtrace_exclusion_patterns
   end
 end
 
