@@ -42,18 +42,12 @@ def changelog_future_release
   returnVal
 end
 
-PuppetLint::RakeTask.new :lint do |config|
-  # Should the task fail if there were any warnings, defaults to false
-  config.fail_on_warnings = true
-end
-
-
 PuppetLint.configuration.send('disable_relative')
 
 if Bundler.rubygems.find_name('github_changelog_generator').any?
   GitHubChangelogGenerator::RakeTask.new :changelog do |config|
     raise "Set CHANGELOG_GITHUB_TOKEN environment variable eg 'export CHANGELOG_GITHUB_TOKEN=valid_token_here'" if Rake.application.top_level_tasks.include? "changelog" and ENV['CHANGELOG_GITHUB_TOKEN'].nil?
-    config.user = "albatrossflavour"
+    config.user = "#{changelog_user}"
     config.project = "#{changelog_project}"
     config.future_release = "#{changelog_future_release}"
     config.exclude_labels = ['maintenance']
@@ -92,3 +86,4 @@ Gemfile:
 EOM
   end
 end
+
