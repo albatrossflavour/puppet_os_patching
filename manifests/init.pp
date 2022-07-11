@@ -61,6 +61,9 @@
 # @param patch_window [String]
 #   A freeform text entry used to allocate a node to a specific patch window (Optional)
 #
+# @param blackout_windows [Hash]
+#   Hash of start/end blackout dates+times (Optional)
+#
 # @param pre_patching_command [Stdlib::AbsolutePath]
 #   The full path of the command to run prior to running patching.  Can be used to
 #   run customised workflows such as gracefully shutting down applications.  The entry
@@ -86,6 +89,9 @@
 #
 # @param windows_update_interval_mins
 #   Control how often windows updates for updates
+#
+# @param fact_mode
+#   Mode to set on fact command file
 #
 # @param ensure
 #   `present` to install scripts, cronjobs, files, etc, `absent` to cleanup a system that previously hosted us
@@ -160,7 +166,6 @@ class os_patching (
   Optional[String] $patch_window = undef,
   Optional[Hash] $blackout_windows = undef,
 ) {
-
   # None tunable
   $cache_dir = lookup('os_patching::cache_dir',Stdlib::Absolutepath,first,undef)
   $fact_dir = lookup('os_patching::fact_dir',Stdlib::Absolutepath,first,undef)
@@ -171,7 +176,7 @@ class os_patching (
     default   => undef,
   }
 
-  case $::kernel {
+  case $facts['kernel'] {
     'FreeBSD', 'Linux': {
       File {
         owner => $patch_data_owner,
@@ -272,16 +277,16 @@ class os_patching (
   if ($blackout_windows) {
     # Validate the information in the blackout_windows hash
     $blackout_windows.each | String $key, Hash $value | {
-      if ( $key !~ /^[A-Za-z0-9_ ]+$/ ){
+      if ( $key !~ /^[A-Za-z0-9_ ]+$/ ) {
         fail('Blackout description can only contain alphanumerics, space and underscore')
       }
-      if ( $value['start'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
+      if ( $value['start'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ) {
         fail('Blackout start time must be in ISO 8601 format (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
-      if ( $value['end'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ){
+      if ( $value['end'] !~ /^\d{,5}-\d{1,2}-\d{1,2}T\d{,2}:\d{,2}:\d{,2}[-\+]\d{,2}:\d{,2}$/ ) {
         fail('Blackout end time must be in ISO 8601 format  (YYYY-MM-DDTmm:hh:ss[-+]hh:mm)')
       }
-      if ( $value['start'] > $value['end'] ){
+      if ( $value['start'] > $value['end'] ) {
         fail('Blackout end time must after the start time')
       }
     }
@@ -295,7 +300,7 @@ class os_patching (
   file { "${cache_dir}/blackout_windows":
     ensure  => $blackout_windows_ensure,
     content => epp("${module_name}/blackout_windows.epp", {
-      'blackout_windows' => pick($blackout_windows, {}),
+        'blackout_windows' => pick($blackout_windows, {}),
     }),
     require => File[$cache_dir],
   }
@@ -315,9 +320,8 @@ class os_patching (
     }
   }
 
-  case $::kernel {
+  case $facts['kernel'] {
     'FreeBSD', 'Linux': {
-
       if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
         package { 'yum-utils':
           ensure => $yum_utils,
@@ -386,7 +390,6 @@ class os_patching (
       }
     }
     'windows': {
-
       if $fact_exec {
         exec { $fact_exec:
           path        => 'C:/Windows/System32/WindowsPowerShell/v1.0',
@@ -399,7 +402,7 @@ class os_patching (
       scheduled_task { 'os_patching fact generation':
         ensure    => $ensure,
         enabled   => true,
-        command   => "${::system32}/WindowsPowerShell/v1.0/powershell.exe",
+        command   => "${facts['os']['windows']['system32']}/WindowsPowerShell/v1.0/powershell.exe",
         arguments => "-NonInteractive -ExecutionPolicy RemoteSigned -File ${fact_cmd}",
         user      => 'SYSTEM',
         trigger   => [
@@ -410,11 +413,11 @@ class os_patching (
           },
           {
             schedule => 'boot',
-          }
+          },
         ],
         require   => File[$fact_cmd],
       }
     }
-    default: { fail('Unsupported OS')}
+    default: { fail('Unsupported OS') }
   }
 }
