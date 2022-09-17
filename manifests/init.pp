@@ -307,7 +307,7 @@ class os_patching (
 
   if $fact_upload_exec and $fact_upload {
     exec { $fact_upload_exec:
-      command     => "'${puppet_binary}' facts upload",
+      command     => "\"${puppet_binary}\" facts upload",
       path        => ['/opt/puppetlabs/bin/', '/usr/bin','/bin','/sbin','/usr/local/bin'],
       refreshonly => true,
       subscribe   => File[
