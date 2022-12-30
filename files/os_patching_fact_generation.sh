@@ -35,9 +35,9 @@ case $OSFAMILY in
     # Security: kernel-3.14.2-200.fc20.x86_64 is the currently running version
     # ---
     # We need to filter those out as they screw up the package listing
-    PKGS=$(yum -q check-update 2>/dev/null| egrep -v "^[Ss]ecurity:" |  egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_:.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
+    PKGS=$(yum -q check-update 2>/dev/null| egrep -v "^[Ss]ecurity:" | grep -oP '^.*?(?= )')
     PKGS=$(echo $PKGS | sed 's/Obsoleting.*//')
-    SECPKGS=$(yum -q --security check-update 2>/dev/null| egrep -v "^Security:" | egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_:.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
+    SECPKGS=$(yum -q --security check-update 2>/dev/null| egrep -v "^Security:" | grep -oP '^.*?(?= )')
     SECPKGS=$(echo $SECPKGS | sed 's/Obsoleting.*//')
     HELDPKGS=$([ -r /etc/yum/pluginconf.d/versionlock.list ] && awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list | sed 's/-[0-9].*//')
   ;;
