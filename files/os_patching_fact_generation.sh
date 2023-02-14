@@ -124,33 +124,31 @@ done
 
 if [ -f '/usr/bin/needs-restarting' ]
 then
-  case $OSRELEASEMAJOR in
-    7)
-      /usr/bin/needs-restarting -r 2>/dev/null 1>/dev/null
-      if [ $? -gt 0 ]
+  if [ $OSRELEASEMAJOR -gt 6 ]
+  then
+    /usr/bin/needs-restarting -r 2>/dev/null 1>/dev/null
+    if [ $? -gt 0 ]
+    then
+      echo "true" > $DATADIR/reboot_required
+    else
+      echo "false" > $DATADIR/reboot_required
+    fi
+    /usr/bin/needs-restarting 2>/dev/null | sed 's/[[:space:]]*$//' >$DATADIR/apps_to_restart
+  else
+    /usr/bin/needs-restarting 2>/dev/null 1>$DATADIR/apps_to_restart
+    if [ $? -gt 0 ]
+    then
+      echo "true" > $DATADIR/reboot_required
+    else
+      APPS_TO_RESTART=$(wc -l $DATADIR/apps_to_restart | awk '{print $1}')
+      if [ $APPS_TO_RESTART -gt 0 ]
       then
         echo "true" > $DATADIR/reboot_required
       else
         echo "false" > $DATADIR/reboot_required
       fi
-      /usr/bin/needs-restarting 2>/dev/null | sed 's/[[:space:]]*$//' >$DATADIR/apps_to_restart
-    ;;
-    6)
-      /usr/bin/needs-restarting 2>/dev/null 1>$DATADIR/apps_to_restart
-      if [ $? -gt 0 ]
-      then
-        echo "true" > $DATADIR/reboot_required
-      else
-        APPS_TO_RESTART=$(wc -l $DATADIR/apps_to_restart | awk '{print $1}')
-        if [ $APPS_TO_RESTART -gt 0 ]
-        then
-          echo "true" > $DATADIR/reboot_required
-        else
-          echo "false" > $DATADIR/reboot_required
-        fi
-      fi
-    ;;
-  esac
+    fi
+  fi
 else
   touch $DATADIR/apps_to_restart
   touch $DATADIR/reboot_required
