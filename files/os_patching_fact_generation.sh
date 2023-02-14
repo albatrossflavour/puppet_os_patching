@@ -35,9 +35,9 @@ case $OSFAMILY in
     # Security: kernel-3.14.2-200.fc20.x86_64 is the currently running version
     # ---
     # We need to filter those out as they screw up the package listing
-    PKGS=$(yum -q check-update 2>/dev/null| egrep -v "^[Ss]ecurity:" |  egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_:.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
+    PKGS=$(yum -q check-update 2>/dev/null| egrep -v "^[Ss]ecurity:" | grep -oP '^.*?(?= )')
     PKGS=$(echo $PKGS | sed 's/Obsoleting.*//')
-    SECPKGS=$(yum -q --security check-update 2>/dev/null| egrep -v "^Security:" | egrep -i '^[[:alnum:]_-]+\.[[:alnum:]_-]+[[:space:]]+[[:alnum:]_:.-]+[[:space:]]+[A-Za-z0-9_.-]+[[:space:]]*$' | awk '/^[[:alnum:]]/ {print $1}')
+    SECPKGS=$(yum -q --security check-update 2>/dev/null| egrep -v "^Security:" | grep -oP '^.*?(?= )')
     SECPKGS=$(echo $SECPKGS | sed 's/Obsoleting.*//')
     HELDPKGS=$([ -r /etc/yum/pluginconf.d/versionlock.list ] && awk -F':' '/:/ {print $2}' /etc/yum/pluginconf.d/versionlock.list | sed 's/-[0-9].*//')
   ;;
@@ -47,7 +47,7 @@ case $OSFAMILY in
     HELDPKGS=$(zypper --non-interactive --no-abbrev --quiet ll | grep '|' | grep -v '^Repository' | awk -F'|' '/^[[:alnum:]]/ {print $2}' | sed 's/^\s*\|\s*$//')
   ;;
   Debian)
-    apt update >/dev/null 2>&1
+    apt update 2>/dev/null 1>/dev/null
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
     SECPKGS=$(apt upgrade -s 2>/dev/null | awk 'BEGIN {IGNORECASE = 1}; $1 == "Inst" && /Security/ {print $2}')
     HELDPKGS=$(dpkg --get-selections | awk '$2 == "hold" {print $1}')
@@ -125,33 +125,31 @@ done
 
 if [ -f '/usr/bin/needs-restarting' ]
 then
-  case $OSRELEASEMAJOR in
-    7)
-      /usr/bin/needs-restarting -r 2>/dev/null 1>/dev/null
-      if [ $? -gt 0 ]
+  if [ $OSRELEASEMAJOR -gt 6 ]
+  then
+    /usr/bin/needs-restarting -r 2>/dev/null 1>/dev/null
+    if [ $? -gt 0 ]
+    then
+      echo "true" > $DATADIR/reboot_required
+    else
+      echo "false" > $DATADIR/reboot_required
+    fi
+    /usr/bin/needs-restarting 2>/dev/null | grep -v 'Updating Subscription Management repositories' | sed 's/[[:space:]]*$//' >$DATADIR/apps_to_restart
+  else
+    /usr/bin/needs-restarting 2>/dev/null | grep -v 'Updating Subscription Management repositories' > $DATADIR/apps_to_restart
+    if [ $? -gt 0 ]
+    then
+      echo "true" > $DATADIR/reboot_required
+    else
+      APPS_TO_RESTART=$(wc -l $DATADIR/apps_to_restart | awk '{print $1}')
+      if [ $APPS_TO_RESTART -gt 0 ]
       then
         echo "true" > $DATADIR/reboot_required
       else
         echo "false" > $DATADIR/reboot_required
       fi
-      /usr/bin/needs-restarting 2>/dev/null | sed 's/[[:space:]]*$//' >$DATADIR/apps_to_restart
-    ;;
-    6)
-      /usr/bin/needs-restarting 2>/dev/null 1>$DATADIR/apps_to_restart
-      if [ $? -gt 0 ]
-      then
-        echo "true" > $DATADIR/reboot_required
-      else
-        APPS_TO_RESTART=$(wc -l $DATADIR/apps_to_restart | awk '{print $1}')
-        if [ $APPS_TO_RESTART -gt 0 ]
-        then
-          echo "true" > $DATADIR/reboot_required
-        else
-          echo "false" > $DATADIR/reboot_required
-        fi
-      fi
-    ;;
-  esac
+    fi
+  fi
 else
   touch $DATADIR/apps_to_restart
   touch $DATADIR/reboot_required
