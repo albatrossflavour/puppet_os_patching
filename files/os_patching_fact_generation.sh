@@ -49,7 +49,7 @@ case $OSFAMILY in
   Debian)
     apt update 2>/dev/null 1>/dev/null
     PKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" {print $2}')
-    SECPKGS=$(apt upgrade -s 2>/dev/null | awk '$1 == "Inst" && /Security/ {print $2}')
+    SECPKGS=$(apt upgrade -s 2>/dev/null | awk 'BEGIN {IGNORECASE = 1}; $1 == "Inst" && /Security/ {print $2}')
     HELDPKGS=$(dpkg --get-selections | awk '$2 == "hold" {print $1}')
   ;;
   FreeBSD)
