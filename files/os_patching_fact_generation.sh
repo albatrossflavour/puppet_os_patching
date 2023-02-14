@@ -134,9 +134,9 @@ then
     else
       echo "false" > $DATADIR/reboot_required
     fi
-    /usr/bin/needs-restarting 2>/dev/null | sed 's/[[:space:]]*$//' >$DATADIR/apps_to_restart
+    /usr/bin/needs-restarting 2>/dev/null | grep -v 'Updating Subscription Management repositories' | sed 's/[[:space:]]*$//' >$DATADIR/apps_to_restart
   else
-    /usr/bin/needs-restarting 2>/dev/null 1>$DATADIR/apps_to_restart
+    /usr/bin/needs-restarting 2>/dev/null | grep -v 'Updating Subscription Management repositories' > $DATADIR/apps_to_restart
     if [ $? -gt 0 ]
     then
       echo "true" > $DATADIR/reboot_required
