@@ -6,6 +6,9 @@ defaults:
   data_hash: 'yaml_data'
 
 hierarchy:
+  - name: 'Agent Type'
+    path: 'agent/%{facts.os_patching.agent_version}.yaml'
+
   - name: 'Kernel'
     path: 'kernel/%{facts.kernel}.yaml'
 

@@ -1,0 +1,2 @@
+---
+os_patching::puppet_binary: '/opt/puppetlabs/bin/puppet'
