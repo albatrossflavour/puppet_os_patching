@@ -25,11 +25,10 @@ else
 
     chunk(:agent_type) do
       data = {}
-      case Facter.value(:aio_agent_version)
-      when /^[0-9]/
-        data['agent_type'] = 'PE'
-      else
+      if Facter.value(:aio_agent_version)
         data['agent_type'] = 'POS'
+      else
+        data['agent_type'] = 'PE'
       end
       data
     end
