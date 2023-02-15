@@ -7,7 +7,7 @@ defaults:
 
 hierarchy:
   - name: 'Agent Type'
-    path: 'agent/%{facts.os_patching.agent_version}.yaml'
+    path: 'agent/%{facts.os_patching.agent_type}.yaml'
 
   - name: 'Kernel'
     path: 'kernel/%{facts.kernel}.yaml'
