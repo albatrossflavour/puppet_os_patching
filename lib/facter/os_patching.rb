@@ -25,10 +25,10 @@ else
 
     chunk(:agent_type) do
       data = {}
-      if Facter.value(:aio_agent_build).empty?
-        data['agent_type'] = 'POS'
-      else
+      if Facter.value(:aio_agent_build) =~ /[0-9]/
         data['agent_type'] = 'PE'
+      else
+        data['agent_type'] = 'POS'
       end
       data
     end
