@@ -25,7 +25,7 @@ else
 
     chunk(:agent_type) do
       data = {}
-      if Facter.value(:aio_agent_version).empty?
+      if Facter.value(:aio_agent_build).empty?
         data['agent_type'] = 'POS'
       else
         data['agent_type'] = 'PE'
