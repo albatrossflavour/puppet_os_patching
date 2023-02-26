@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.19.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.19.0) (2023-02-26)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.18.0...0.19.0)
+
+**Implemented enhancements:**
+
+- The os\_patching\_fact\_generation.sh does not run apt update [\#217](https://github.com/albatrossflavour/puppet_os_patching/issues/217)
+- \#217 add an apt update as part of the fact generation [\#224](https://github.com/albatrossflavour/puppet_os_patching/pull/224) ([albatrossflavour](https://github.com/albatrossflavour))
+- Don't record note from subscription-manager if enabled [\#221](https://github.com/albatrossflavour/puppet_os_patching/pull/221) ([jcpunk](https://github.com/jcpunk))
+
+**Closed issues:**
+
+- Regular expression does not capture all packages [\#222](https://github.com/albatrossflavour/puppet_os_patching/issues/222)
+
+**Merged pull requests:**
+
+- \#222 Update os\_patching\_fact\_generation.sh [\#223](https://github.com/albatrossflavour/puppet_os_patching/pull/223) ([dpavlotzky](https://github.com/dpavlotzky))
+- Add correct reboot detection for RHEL 8 and 9 [\#220](https://github.com/albatrossflavour/puppet_os_patching/pull/220) ([jcpunk](https://github.com/jcpunk))
+- fix issue \#211 [\#219](https://github.com/albatrossflavour/puppet_os_patching/pull/219) ([brajjan](https://github.com/brajjan))
+- Update Apt Support - Fixes \#217 [\#218](https://github.com/albatrossflavour/puppet_os_patching/pull/218) ([AMDHome](https://github.com/AMDHome))
+
 ## [0.18.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.18.0) (2022-08-08)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/v0.17.0...0.18.0)
