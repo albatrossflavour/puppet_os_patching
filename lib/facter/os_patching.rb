@@ -28,7 +28,7 @@ else
       if Facter.value(:aio_agent_build) =~ /[0-9]/
         data['agent_type'] = 'PE'
       else
-        data['agent_type'] = 'POS'
+        data['agent_type'] = 'OSP'
       end
       data
     end
