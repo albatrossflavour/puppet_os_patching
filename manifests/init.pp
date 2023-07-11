@@ -14,7 +14,7 @@
 #   User who runs the cron job
 #
 # @param manage_yum_utils [Boolean]
-#   Should the yum_utils package be managed by this module on RedHat family nodes?
+#   Should the yum_utils/dnf_utils package be managed by this module on RedHat family nodes?
 #   If `true`, use the parameter `yum_utils` to determine how it should be manged
 #
 # @param block_patching_on_warnings [Boolean]
@@ -323,9 +323,14 @@ class os_patching (
   case $facts['kernel'] {
     'FreeBSD', 'Linux': {
       if ( $facts['os']['family'] == 'RedHat' and $manage_yum_utils) {
-        package { 'yum-utils':
-          ensure => $yum_utils,
-        }
+        if ( Integer($facts['os']['release']['major']) < 8) {
+          package { 'yum-utils':
+            ensure => $yum_utils,
+          }
+        } else {
+          package { 'dnf-utils':
+            ensure => $yum_utils,
+          }
       }
 
       if ( $facts['os']['family'] == 'RedHat' and $manage_delta_rpm) {
@@ -341,7 +346,7 @@ class os_patching (
         }
       }
 
-      if ( $facts['os']['family'] == 'RedHat' and $manage_yum_plugin_security) {
+      if ( $facts['os']['family'] == 'RedHat' and $manage_yum_plugin_security and Integer($facts['os']['release']['major']) < 8 ) {
         package { 'yum-plugin-security':
           ensure => $yum_plugin_security,
         }
