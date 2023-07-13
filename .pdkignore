@@ -1,4 +1,5 @@
 .git/
+/.vendor/
 .*.sw[op]
 .metadata
 .yardoc
