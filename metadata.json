@@ -1,6 +1,6 @@
 {
   "name": "albatrossflavour-os_patching",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "author": "Tony Green",
   "summary": "Perform OS level patching through tasks and report on patch levels through facts",
   "license": "Apache-2.0",
@@ -10,7 +10,7 @@
   "dependencies": [
     {
       "name": "puppetlabs-stdlib",
-      "version_requirement": ">= 4.13.1 < 9.0.0"
+      "version_requirement": ">= 4.13.1 < 10.0.0"
     },
     {
       "name": "puppet-cron",
