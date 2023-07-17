@@ -331,6 +331,7 @@ class os_patching (
           package { 'dnf-utils':
             ensure => $yum_utils,
           }
+        }
       }
 
       if ( $facts['os']['family'] == 'RedHat' and $manage_delta_rpm) {
