@@ -1,4 +1,29 @@
-# Changelog
+# Change log
+
+All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
+
+## [v0.20.0](https://github.com/albatrossflavour/puppet_os_patching/tree/v0.20.0) (2023-07-13)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.19.0...v0.20.0)
+
+### Added
+
+- \#227 Support for stdlib 9.x [\#228](https://github.com/albatrossflavour/puppet_os_patching/pull/228) ([albatrossflavour](https://github.com/albatrossflavour))
+- Add RHEL9 to supported OS [\#225](https://github.com/albatrossflavour/puppet_os_patching/pull/225) ([tuxmea](https://github.com/tuxmea))
+- \#217 add an apt update as part of the fact generation [\#224](https://github.com/albatrossflavour/puppet_os_patching/pull/224) ([albatrossflavour](https://github.com/albatrossflavour))
+- \#222 Update os\_patching\_fact\_generation.sh [\#223](https://github.com/albatrossflavour/puppet_os_patching/pull/223) ([dpavlotzky](https://github.com/dpavlotzky))
+- Don't record note from subscription-manager if enabled [\#221](https://github.com/albatrossflavour/puppet_os_patching/pull/221) ([jcpunk](https://github.com/jcpunk))
+- Fix up the GitHub workflows [\#209](https://github.com/albatrossflavour/puppet_os_patching/pull/209) ([albatrossflavour](https://github.com/albatrossflavour))
+
+### Fixed
+
+- Add correct reboot detection for RHEL 8 and 9 [\#220](https://github.com/albatrossflavour/puppet_os_patching/pull/220) ([jcpunk](https://github.com/jcpunk))
+- fix issue \#211 [\#219](https://github.com/albatrossflavour/puppet_os_patching/pull/219) ([brajjan](https://github.com/brajjan))
+- Update Apt Support - Fixes \#217 [\#218](https://github.com/albatrossflavour/puppet_os_patching/pull/218) ([AMDHome](https://github.com/AMDHome))
+
+## [0.19.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.19.0) (2023-02-26)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.18.0...0.19.0)
 
 ## [0.19.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.19.0) (2023-02-26)
 
@@ -25,15 +50,11 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/v0.17.0...0.18.0)
 
-**Implemented enhancements:**
+### Added
 
 - updated RHEL regex to accommodate colon [\#216](https://github.com/albatrossflavour/puppet_os_patching/pull/216) ([prolixalias](https://github.com/prolixalias))
 
-**Fixed bugs:**
-
-- Fact generation on RHEL incorrectly indicating no PKGS for update [\#212](https://github.com/albatrossflavour/puppet_os_patching/issues/212)
-
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - adjust upper limit [\#214](https://github.com/albatrossflavour/puppet_os_patching/pull/214) ([prolixalias](https://github.com/prolixalias))
 
@@ -41,10 +62,8 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/v0.16.0...v0.17.0)
 
-**Fixed bugs:**
+### Fixed
 
-- create version 0.17 [\#207](https://github.com/albatrossflavour/puppet_os_patching/issues/207)
-- os\_patching\_fact\_generation.ps1 created without required permissions [\#206](https://github.com/albatrossflavour/puppet_os_patching/issues/206)
 - s/udpate/update [\#208](https://github.com/albatrossflavour/puppet_os_patching/pull/208) ([noahbliss](https://github.com/noahbliss))
 - ensure that key exists while parsing json [\#203](https://github.com/albatrossflavour/puppet_os_patching/pull/203) ([maxadamo](https://github.com/maxadamo))
 
@@ -52,12 +71,8 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.15.0...v0.16.0)
 
-**Implemented enhancements:**
+### Added
 
-- Hiera support [\#204](https://github.com/albatrossflavour/puppet_os_patching/issues/204)
-- Delta RPM doesn't exist on RHEL8, need to move to `drpm` [\#200](https://github.com/albatrossflavour/puppet_os_patching/issues/200)
-- scheduled task to run os\_patching\_fact\_generation.ps1 is hardcoded to every 12 hours [\#174](https://github.com/albatrossflavour/puppet_os_patching/issues/174)
-- Adding os\_patching class result in failed runs on all Windows nodes on first run [\#172](https://github.com/albatrossflavour/puppet_os_patching/issues/172)
 - Feature/204 hiera support [\#205](https://github.com/albatrossflavour/puppet_os_patching/pull/205) ([albatrossflavour](https://github.com/albatrossflavour))
 - Feature/200 deltarpm [\#201](https://github.com/albatrossflavour/puppet_os_patching/pull/201) ([albatrossflavour](https://github.com/albatrossflavour))
 - Feature/module hiera [\#199](https://github.com/albatrossflavour/puppet_os_patching/pull/199) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -68,13 +83,13 @@
 - Do not hardcode the path of AIO commands [\#168](https://github.com/albatrossflavour/puppet_os_patching/pull/168) ([smortex](https://github.com/smortex))
 - Improve os\_patching::patch\_after\_healthcheck plan [\#167](https://github.com/albatrossflavour/puppet_os_patching/pull/167) ([kreeuwijk](https://github.com/kreeuwijk))
 - Update README.md [\#162](https://github.com/albatrossflavour/puppet_os_patching/pull/162) ([LDaneliukas](https://github.com/LDaneliukas))
+- Add FreeBSD support [\#156](https://github.com/albatrossflavour/puppet_os_patching/pull/156) ([smortex](https://github.com/smortex))
 
-**Fixed bugs:**
+### Fixed
 
-- undefined method `match' for nil:NilClass \(NoMethodError\) [\#202](https://github.com/albatrossflavour/puppet_os_patching/issues/202)
-- Locked Log file on Windows [\#186](https://github.com/albatrossflavour/puppet_os_patching/issues/186)
 - puppetlabs-translate deprecated [\#189](https://github.com/albatrossflavour/puppet_os_patching/pull/189) ([binford2k](https://github.com/binford2k))
 - expand filter inline and remove $FILTER variables [\#188](https://github.com/albatrossflavour/puppet_os_patching/pull/188) ([michael-letsengage](https://github.com/michael-letsengage))
+- match Debian-Security [\#185](https://github.com/albatrossflavour/puppet_os_patching/pull/185) ([dgrote](https://github.com/dgrote))
 - Fixing failing development tests [\#179](https://github.com/albatrossflavour/puppet_os_patching/pull/179) ([Tamerz](https://github.com/Tamerz))
 - fix\(patch\_server\) change regex after yum history [\#171](https://github.com/albatrossflavour/puppet_os_patching/pull/171) ([bmx0r](https://github.com/bmx0r))
 - Inconsistence between facter and manifest [\#164](https://github.com/albatrossflavour/puppet_os_patching/pull/164) ([elfranne](https://github.com/elfranne))
@@ -83,46 +98,29 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.14.0...0.15.0)
 
-**Implemented enhancements:**
+### Added
 
-- long usernames in `yum history` cause 'yum did not appear to run' [\#192](https://github.com/albatrossflavour/puppet_os_patching/issues/192)
-- facter -p no longer supported with Puppet 7 [\#190](https://github.com/albatrossflavour/puppet_os_patching/issues/190)
-- --nodes is deprecated [\#165](https://github.com/albatrossflavour/puppet_os_patching/issues/165)
 - v0.15.0 release [\#196](https://github.com/albatrossflavour/puppet_os_patching/pull/196) ([albatrossflavour](https://github.com/albatrossflavour))
-
-**Fixed bugs:**
-
-- NoMethodError in os\_patching\_fact\_generation.sh [\#180](https://github.com/albatrossflavour/puppet_os_patching/issues/180)
-
-**Closed issues:**
-
-- "Security:" filter ineffective [\#187](https://github.com/albatrossflavour/puppet_os_patching/issues/187)
 
 ## [0.14.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.14.0) (2021-05-09)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.12.0...0.14.0)
 
-**Implemented enhancements:**
+### Added
 
-- Enable a pre-patching command to be specified [\#159](https://github.com/albatrossflavour/puppet_os_patching/issues/159)
 - \#149 allow Debian to run `apt-get autoremove` at reboot [\#151](https://github.com/albatrossflavour/puppet_os_patching/pull/151) ([albatrossflavour](https://github.com/albatrossflavour))
 - Toggle to allow warnings to block patching \#143 [\#150](https://github.com/albatrossflavour/puppet_os_patching/pull/150) ([albatrossflavour](https://github.com/albatrossflavour))
 - Updates to facter and bug fixes [\#148](https://github.com/albatrossflavour/puppet_os_patching/pull/148) ([albatrossflavour](https://github.com/albatrossflavour))
 - Force usage of the 'C' locale [\#142](https://github.com/albatrossflavour/puppet_os_patching/pull/142) ([smortex](https://github.com/smortex))
 
-**Fixed bugs:**
+### Fixed
 
 - \#148 ensure versionlock file is there before we read it [\#154](https://github.com/albatrossflavour/puppet_os_patching/pull/154) ([albatrossflavour](https://github.com/albatrossflavour))
 - Prevent error message to stderr on RedHat [\#153](https://github.com/albatrossflavour/puppet_os_patching/pull/153) ([smortex](https://github.com/smortex))
 - Bugfix: Add missing dependency [\#144](https://github.com/albatrossflavour/puppet_os_patching/pull/144) ([theosotr](https://github.com/theosotr))
 - The declared ISO format does not exist, had one extra `dd` [\#141](https://github.com/albatrossflavour/puppet_os_patching/pull/141) ([rnelson0](https://github.com/rnelson0))
 
-**Closed issues:**
-
-- Fact generation misses Debian security packages [\#184](https://github.com/albatrossflavour/puppet_os_patching/issues/184)
-- Unable to fetch some archives [\#177](https://github.com/albatrossflavour/puppet_os_patching/issues/177)
-
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Litmus updates and pre-v0.14.0 work [\#195](https://github.com/albatrossflavour/puppet_os_patching/pull/195) ([albatrossflavour](https://github.com/albatrossflavour))
 - Master release - bug fixes and travis  [\#183](https://github.com/albatrossflavour/puppet_os_patching/pull/183) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -134,42 +132,24 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.1...0.12.0)
 
-**Implemented enhancements:**
+### Fixed
 
-- add flag to run "apt-get autoremove" after patching on ubuntu servers [\#149](https://github.com/albatrossflavour/puppet_os_patching/issues/149)
-- Add a list of required KBs to the os\_patching fact on windows [\#145](https://github.com/albatrossflavour/puppet_os_patching/issues/145)
-- Create the wiki and populate some how to guides [\#128](https://github.com/albatrossflavour/puppet_os_patching/issues/128)
-- Timeouts on os\_patching\_fact\_generation.sh? [\#94](https://github.com/albatrossflavour/puppet_os_patching/issues/94)
-
-**Fixed bugs:**
-
-- Travis tests taking too long [\#138](https://github.com/albatrossflavour/puppet_os_patching/issues/138)
-- Version 0.11.1 of module cannot be installed on Windows \(via Agent\) [\#136](https://github.com/albatrossflavour/puppet_os_patching/issues/136)
-- Unable to run task os\_patching::patch\_server Windows 2012r2 with puppet enterprise agent 6.4.2 [\#133](https://github.com/albatrossflavour/puppet_os_patching/issues/133)
 - \#138 - fix travis issues [\#139](https://github.com/albatrossflavour/puppet_os_patching/pull/139) ([albatrossflavour](https://github.com/albatrossflavour))
+- \#129 restrictions on stdlib are too tight [\#130](https://github.com/albatrossflavour/puppet_os_patching/pull/130) ([albatrossflavour](https://github.com/albatrossflavour))
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - V0.12.0 release [\#152](https://github.com/albatrossflavour/puppet_os_patching/pull/152) ([albatrossflavour](https://github.com/albatrossflavour))
 - V0.11.2 release [\#140](https://github.com/albatrossflavour/puppet_os_patching/pull/140) ([albatrossflavour](https://github.com/albatrossflavour))
 - \#136 add html to the pdkignore [\#137](https://github.com/albatrossflavour/puppet_os_patching/pull/137) ([albatrossflavour](https://github.com/albatrossflavour))
 - Issue/133 eventlog puppet agent 6.4.2 [\#134](https://github.com/albatrossflavour/puppet_os_patching/pull/134) ([nathangiuliani](https://github.com/nathangiuliani))
 - Updated ReadMe [\#131](https://github.com/albatrossflavour/puppet_os_patching/pull/131) ([nathangiuliani](https://github.com/nathangiuliani))
-- \#129 restrictions on stdlib are too tight [\#130](https://github.com/albatrossflavour/puppet_os_patching/pull/130) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.11.1](https://github.com/albatrossflavour/puppet_os_patching/tree/0.11.1) (2019-05-07)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.11.0...0.11.1)
 
-**Implemented enhancements:**
-
-- Update the README to show the windows paths too [\#127](https://github.com/albatrossflavour/puppet_os_patching/issues/127)
-
-**Fixed bugs:**
-
-- puppetlabs/stdlib version 5.2.0 [\#129](https://github.com/albatrossflavour/puppet_os_patching/issues/129)
-
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - V0.11.1 release to master [\#132](https://github.com/albatrossflavour/puppet_os_patching/pull/132) ([albatrossflavour](https://github.com/albatrossflavour))
 
@@ -177,28 +157,22 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.10.0...0.11.0)
 
-**Implemented enhancements:**
+### Added
 
-- Add litmus tests to run the tasks and validate the results [\#124](https://github.com/albatrossflavour/puppet_os_patching/issues/124)
-- Enable windows support for the manifests and facter [\#120](https://github.com/albatrossflavour/puppet_os_patching/issues/120)
+- Enable windows support [\#121](https://github.com/albatrossflavour/puppet_os_patching/pull/121) ([albatrossflavour](https://github.com/albatrossflavour))
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - v0.11.0 release [\#126](https://github.com/albatrossflavour/puppet_os_patching/pull/126) ([albatrossflavour](https://github.com/albatrossflavour))
 - \#124 promote new tests to development [\#125](https://github.com/albatrossflavour/puppet_os_patching/pull/125) ([albatrossflavour](https://github.com/albatrossflavour))
 - Release to production in preparation for V0.11.0 release [\#123](https://github.com/albatrossflavour/puppet_os_patching/pull/123) ([albatrossflavour](https://github.com/albatrossflavour))
 - Community information added [\#122](https://github.com/albatrossflavour/puppet_os_patching/pull/122) ([albatrossflavour](https://github.com/albatrossflavour))
-- Enable windows support [\#121](https://github.com/albatrossflavour/puppet_os_patching/pull/121) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.10.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.10.0) (2019-04-26)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.9.0...0.10.0)
 
-**Implemented enhancements:**
-
-- Create example bolt plan for patching [\#117](https://github.com/albatrossflavour/puppet_os_patching/issues/117)
-
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Release to production [\#119](https://github.com/albatrossflavour/puppet_os_patching/pull/119) ([albatrossflavour](https://github.com/albatrossflavour))
 - Add example plan [\#118](https://github.com/albatrossflavour/puppet_os_patching/pull/118) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -210,7 +184,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.8.0...0.9.0)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Merge Litmus and Suse to production [\#115](https://github.com/albatrossflavour/puppet_os_patching/pull/115) ([albatrossflavour](https://github.com/albatrossflavour))
 
@@ -218,12 +192,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.7.0...0.8.0)
 
-**Closed issues:**
-
-- Why stdlib 5.0.0? [\#107](https://github.com/albatrossflavour/puppet_os_patching/issues/107)
-- Don't try to upload facts on puppet apply \(no agent\) [\#106](https://github.com/albatrossflavour/puppet_os_patching/issues/106)
-
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Changelog update [\#111](https://github.com/albatrossflavour/puppet_os_patching/pull/111) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge to master [\#110](https://github.com/albatrossflavour/puppet_os_patching/pull/110) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -237,13 +206,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.4...0.7.0)
 
-**Fixed bugs:**
-
-- 3777 updates!? \(update check should only count stdout\) [\#99](https://github.com/albatrossflavour/puppet_os_patching/issues/99)
-- AIX - Error resolving os\_patching \(restrict away from AIX?\) [\#93](https://github.com/albatrossflavour/puppet_os_patching/issues/93)
-- json encoding issue [\#92](https://github.com/albatrossflavour/puppet_os_patching/issues/92)
-
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - V0.7.0 release [\#102](https://github.com/albatrossflavour/puppet_os_patching/pull/102) ([albatrossflavour](https://github.com/albatrossflavour))
 - metadata updates prior to 0.7.0 release [\#101](https://github.com/albatrossflavour/puppet_os_patching/pull/101) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -256,7 +219,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.3...0.6.4)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Push to master \(0.6.4\) [\#87](https://github.com/albatrossflavour/puppet_os_patching/pull/87) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge pull request \#85 from albatrossflavour/development [\#86](https://github.com/albatrossflavour/puppet_os_patching/pull/86) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -265,7 +228,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.2...0.6.3)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - V0.6.3 release [\#85](https://github.com/albatrossflavour/puppet_os_patching/pull/85) ([albatrossflavour](https://github.com/albatrossflavour))
 - Debian fact improvements [\#84](https://github.com/albatrossflavour/puppet_os_patching/pull/84) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -275,7 +238,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.1...0.6.2)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - V0.6.2 release [\#82](https://github.com/albatrossflavour/puppet_os_patching/pull/82) ([albatrossflavour](https://github.com/albatrossflavour))
 - Enable security patching in debian again [\#81](https://github.com/albatrossflavour/puppet_os_patching/pull/81) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -285,7 +248,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.6.0...0.6.1)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Fix a couple of strings issues [\#79](https://github.com/albatrossflavour/puppet_os_patching/pull/79) ([albatrossflavour](https://github.com/albatrossflavour))
 - Merge pull request \#77 from albatrossflavour/development [\#78](https://github.com/albatrossflavour/puppet_os_patching/pull/78) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -294,30 +257,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.5.0...0.6.0)
 
-**Implemented enhancements:**
-
-- \[enhancement\] consider validating incoming ISO-8601 timestamps for validity [\#69](https://github.com/albatrossflavour/puppet_os_patching/issues/69)
-- \[bug\] invalid times parsed from blackouts file silently ignored [\#67](https://github.com/albatrossflavour/puppet_os_patching/issues/67)
-- \[task\] move data to /var/cache [\#60](https://github.com/albatrossflavour/puppet_os_patching/issues/60)
-- \[enhancement\]\[sponsored\] fixup puppetstrings output and include REFERENCE.md [\#59](https://github.com/albatrossflavour/puppet_os_patching/issues/59)
-- \[testing\]\[sponsored\] need mock version of `puppet fact upload` [\#58](https://github.com/albatrossflavour/puppet_os_patching/issues/58)
-- \[testing\]\[sponsored\] acceptance tests [\#57](https://github.com/albatrossflavour/puppet_os_patching/issues/57)
-- \[feature\]\[sponsored\] package cleanup before   [\#55](https://github.com/albatrossflavour/puppet_os_patching/issues/55)
-- \[feature\]\[sponsored\] uninstall support [\#54](https://github.com/albatrossflavour/puppet_os_patching/issues/54)
-- stack trace when task run before setup complete [\#52](https://github.com/albatrossflavour/puppet_os_patching/issues/52)
-
-**Fixed bugs:**
-
-- \[bug\] task fails to run on debian \[assign geoff\] [\#70](https://github.com/albatrossflavour/puppet_os_patching/issues/70)
-- \[bug\] script relies on /usr/local/bin/facter but it does not always exist [\#56](https://github.com/albatrossflavour/puppet_os_patching/issues/56)
-- Value type appears to be incorrect [\#48](https://github.com/albatrossflavour/puppet_os_patching/issues/48)
-
-**Closed issues:**
-
-- manage yum-utils? [\#74](https://github.com/albatrossflavour/puppet_os_patching/issues/74)
-- \[bug\] blackout timezone example is wrong \[assigned geoff\] [\#66](https://github.com/albatrossflavour/puppet_os_patching/issues/66)
-
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Pull to master [\#77](https://github.com/albatrossflavour/puppet_os_patching/pull/77) ([albatrossflavour](https://github.com/albatrossflavour))
 - Feature/data parser [\#76](https://github.com/albatrossflavour/puppet_os_patching/pull/76) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -336,7 +276,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.4.1...0.5.0)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Merge to master [\#50](https://github.com/albatrossflavour/puppet_os_patching/pull/50) ([albatrossflavour](https://github.com/albatrossflavour))
 - Change the way we handle reboot logic [\#49](https://github.com/albatrossflavour/puppet_os_patching/pull/49) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -346,7 +286,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.4.0...0.4.1)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - V0.4.1 [\#46](https://github.com/albatrossflavour/puppet_os_patching/pull/46) ([albatrossflavour](https://github.com/albatrossflavour))
 
@@ -354,18 +294,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.5...0.4.0)
 
-**Implemented enhancements:**
-
-- `packages_updated` does not show the kernel itself [\#29](https://github.com/albatrossflavour/puppet_os_patching/issues/29)
-
-**Fixed bugs:**
-
-- Locked, Exiting - Need trap\(s\) if we have a lockfile \(/usr/local/bin/os\_patching\_fact\_generation.sh\) [\#42](https://github.com/albatrossflavour/puppet_os_patching/issues/42)
-- When os\_patching reports patches but there is not enough space to install them, it reports success [\#39](https://github.com/albatrossflavour/puppet_os_patching/issues/39)
-- When unreachable yumrepos are present, os\_patching does not restart properly [\#36](https://github.com/albatrossflavour/puppet_os_patching/issues/36)
-- When no disk space is left, os\_patching reports no patches to apply rather than an error [\#35](https://github.com/albatrossflavour/puppet_os_patching/issues/35)
-
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - V0.4.0 release [\#45](https://github.com/albatrossflavour/puppet_os_patching/pull/45) ([albatrossflavour](https://github.com/albatrossflavour))
 - Add extra error checking for the patch execution [\#44](https://github.com/albatrossflavour/puppet_os_patching/pull/44) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -381,7 +310,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.4...0.3.5)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Pre-release updates [\#27](https://github.com/albatrossflavour/puppet_os_patching/pull/27) ([albatrossflavour](https://github.com/albatrossflavour))
 - Release to master [\#26](https://github.com/albatrossflavour/puppet_os_patching/pull/26) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -392,7 +321,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.3.3...0.3.4)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Pre release updates [\#23](https://github.com/albatrossflavour/puppet_os_patching/pull/23) ([albatrossflavour](https://github.com/albatrossflavour))
 - Missed a new variable [\#22](https://github.com/albatrossflavour/puppet_os_patching/pull/22) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -415,7 +344,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.2.1...0.3.1)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Resync to development [\#15](https://github.com/albatrossflavour/puppet_os_patching/pull/15) ([albatrossflavour](https://github.com/albatrossflavour))
 
@@ -423,16 +352,16 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.1.19...0.2.1)
 
-**Implemented enhancements:**
+### Added
 
 - Major documentation update [\#14](https://github.com/albatrossflavour/puppet_os_patching/pull/14) ([albatrossflavour](https://github.com/albatrossflavour))
 
-**Fixed bugs:**
+### Fixed
 
 - rubocop [\#13](https://github.com/albatrossflavour/puppet_os_patching/pull/13) ([albatrossflavour](https://github.com/albatrossflavour))
 - Rubocop updates [\#12](https://github.com/albatrossflavour/puppet_os_patching/pull/12) ([albatrossflavour](https://github.com/albatrossflavour))
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Rubocop is on thin ice! [\#11](https://github.com/albatrossflavour/puppet_os_patching/pull/11) ([albatrossflavour](https://github.com/albatrossflavour))
 - rubocop updates [\#10](https://github.com/albatrossflavour/puppet_os_patching/pull/10) ([albatrossflavour](https://github.com/albatrossflavour))
@@ -444,7 +373,7 @@
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.1.17...0.1.19)
 
-**Merged pull requests:**
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
 
 - Feature/smarter tasks [\#6](https://github.com/albatrossflavour/puppet_os_patching/pull/6) ([albatrossflavour](https://github.com/albatrossflavour))
 
