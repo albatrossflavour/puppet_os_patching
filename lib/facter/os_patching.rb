@@ -23,6 +23,16 @@ else
       os_patching_dir = 'C:\ProgramData\os_patching'
     end
 
+    chunk(:agent_type) do
+      data = {}
+      if Facter.value(:aio_agent_build) =~ /[0-9]/
+        data['agent_type'] = 'PE'
+      else
+        data['agent_type'] = 'OSP'
+      end
+      data
+    end
+
     chunk(:updates) do
       data = {}
       updatelist = []
