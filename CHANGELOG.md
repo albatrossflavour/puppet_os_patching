@@ -2,13 +2,21 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v0.21.0](https://github.com/albatrossflavour/puppet_os_patching/tree/v0.21.0) (2023-07-18)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/v0.20.1...v0.21.0)
+
+### Added
+
+- 215 fact upload cannot find puppet executable during first run [\#231](https://github.com/albatrossflavour/puppet_os_patching/pull/231) ([albatrossflavour](https://github.com/albatrossflavour))
+
+### Fixed
+
+- \#229 fix syntax error [\#230](https://github.com/albatrossflavour/puppet_os_patching/pull/230) ([albatrossflavour](https://github.com/albatrossflavour))
+
 ## [v0.20.1](https://github.com/albatrossflavour/puppet_os_patching/tree/v0.20.1) (2023-07-18)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/v0.20.0...v0.20.1)
-
-### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
-
-- \#229 fix syntax error [\#230](https://github.com/albatrossflavour/puppet_os_patching/pull/230) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [v0.20.0](https://github.com/albatrossflavour/puppet_os_patching/tree/v0.20.0) (2023-07-13)
 
@@ -21,7 +29,6 @@ All notable changes to this project will be documented in this file. The format 
 - \#217 add an apt update as part of the fact generation [\#224](https://github.com/albatrossflavour/puppet_os_patching/pull/224) ([albatrossflavour](https://github.com/albatrossflavour))
 - \#222 Update os\_patching\_fact\_generation.sh [\#223](https://github.com/albatrossflavour/puppet_os_patching/pull/223) ([dpavlotzky](https://github.com/dpavlotzky))
 - Don't record note from subscription-manager if enabled [\#221](https://github.com/albatrossflavour/puppet_os_patching/pull/221) ([jcpunk](https://github.com/jcpunk))
-- Fix up the GitHub workflows [\#209](https://github.com/albatrossflavour/puppet_os_patching/pull/209) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ### Fixed
 
@@ -32,6 +39,10 @@ All notable changes to this project will be documented in this file. The format 
 ## [0.19.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.19.0) (2023-02-26)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.18.0...0.19.0)
+
+### Added
+
+- Fix up the GitHub workflows [\#209](https://github.com/albatrossflavour/puppet_os_patching/pull/209) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ## [0.18.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.18.0) (2022-08-08)
 
