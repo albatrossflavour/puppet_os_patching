@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Added
 
-- 215 fact upload cannot find puppet executable during first run [\#231](https://github.com/albatrossflavour/puppet_os_patching/pull/231) ([albatrossflavour](https://github.com/albatrossflavour))
+- 215 allow puppet open source to work with os\_patching [\#231](https://github.com/albatrossflavour/puppet_os_patching/pull/231) ([albatrossflavour](https://github.com/albatrossflavour))
 
 ### Fixed
 
