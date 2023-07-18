@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v0.20.1](https://github.com/albatrossflavour/puppet_os_patching/tree/v0.20.1) (2023-07-18)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/v0.20.0...v0.20.1)
+
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+
+- \#229 fix syntax error [\#230](https://github.com/albatrossflavour/puppet_os_patching/pull/230) ([albatrossflavour](https://github.com/albatrossflavour))
+
 ## [v0.20.0](https://github.com/albatrossflavour/puppet_os_patching/tree/v0.20.0) (2023-07-13)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.19.0...v0.20.0)
