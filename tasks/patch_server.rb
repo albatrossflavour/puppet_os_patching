@@ -486,7 +486,7 @@ if os['family'] == 'RedHat'
       # ID     | Login user               | Date and time    | 8< SNIP >8
       # ------------------------------------------------------ 8< SNIP >8
       #     69 | System <unset>           | 2018-09-17 17:18 | 8< SNIP >8
-      matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\-<> ]*\|\s*([\d:\- ]*)/)
+      matchdata = line.to_s.match(/^\s+(\d+)\s*\|\s*[\w\-<>,= ]*\|\s*([\d:\- ]*)/)
       next unless matchdata
       job = matchdata[1]
       yum_end = matchdata[2]
