@@ -81,9 +81,9 @@ fi
 
 if [ -f "${CATALOG}" ]
 then
-  VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | $RUBY -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r['parameters']['ensure'] and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] end")
+  VERSION_LOCK_FROM_CATALOG=$(cat $CATALOG | $RUBY -e "require 'json'; json_hash = JSON.parse(ARGF.read); json_hash['resources'].select { |r| r['type'] == 'Package' and r.key?('parameters') and r['parameters']['ensure'] and r['parameters']['ensure'].match /\d.+/ }.each do | m | puts m['title'] end")
 else
-	VERSION_LOCK_FROM_CATALOG=''
+  VERSION_LOCK_FROM_CATALOG=''
 fi
 
 
