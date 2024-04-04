@@ -247,13 +247,13 @@ end
 
 log.info 'os_patching run started'
 
-# ensure node has been tagged with os_patching class by checking for fact generation script
+# ensure node has been tagged with os_patching class by checking for fact cache directory
 log.debug 'Running os_patching fact refresh'
-unless File.exist? fact_generation_script
+unless Dir.exist? '/var/cache/os_patching'
   err(
     255,
-    "os_patching/#{fact_generation_script}",
-    "#{fact_generation_script} does not exist, declare os_patching and run Puppet first",
+    "/var/cache/os_patching",
+    "/var/cache/os_patching does not exist, declare os_patching and run Puppet first",
     starttime,
   )
 end
@@ -299,7 +299,7 @@ end
 # Refresh the patching fact cache on non-windows systems
 # Windows scans can take a long time, and we do one at the start of the os_patching_windows script anyway.
 # No need to do yet another scan prior to this, it just wastes valuable time.
-if os['family'] != 'windows'
+if os['family'] != 'windows' and File.exist? fact_generation_script
   _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
   err(status, 'os_patching/fact_refresh', stderr, starttime) if status != 0
 end
@@ -648,7 +648,7 @@ end
 # Windows scans can take an eternity after a patch run prior to being reboot (30+ minutes in a lab on 2008 versions..)
 # Best not to delay the whole patching process here.
 # Note that the fact refresh (which includes a scan) runs on system startup anyway - see os_patching puppet class
-if os['family'] != 'windows'
+if os['family'] != 'windows' and File.exist? fact_generation_script
   log.info 'Running os_patching fact refresh'
   _fact_out, stderr, status = Open3.capture3(fact_generation_cmd)
   err(status, 'os_patching/fact', stderr, starttime) if status != 0

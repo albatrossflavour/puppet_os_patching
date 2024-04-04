@@ -28,6 +28,15 @@
 # @param fact_upload [Boolean]
 #   Should `puppet fact upload` be run after any changes to the fact cache files?
 #
+# @param fact_cron [Boolean]
+#   Feature flag to toggle cron jobs to refresh facts
+#
+# @param enable_facts_script [Boolean]
+#   Determines whether a shell script will be used to generate facts for Facter to read from
+#   This primarily affects facts generated with package management tools
+#   If `true` a shell script will be used to generate facts
+#   If `false` facts will be generated on the fly within Facter
+#
 # @param apt_autoremove [Boolean]
 #   Should `apt-get autoremove` be run during reboot?
 #
@@ -149,6 +158,8 @@ class os_patching (
   Boolean $manage_delta_rpm,
   Boolean $manage_yum_plugin_security,
   Boolean $fact_upload,
+  Boolean $fact_cron,
+  Boolean $enable_facts_script,
   Boolean $block_patching_on_warnings,
   Boolean $apt_autoremove,
   Integer[0,23] $windows_update_hour,
@@ -197,8 +208,8 @@ class os_patching (
     default   => undef
   }
 
-  $ensure_file = $ensure ? {
-    'present' => 'file',
+  $ensure_file = ($ensure == 'present' and $enable_facts_script ) ? {
+    true      => 'file',
     default   => 'absent',
   }
 
@@ -220,7 +231,10 @@ class os_patching (
     ensure => $ensure_file,
     mode   => $fact_mode,
     source => "puppet:///modules/${module_name}/${fact_file}",
-    notify => Exec[$fact_exec],
+  }
+
+  if $enable_facts_script {
+    File[$fact_cmd]->Exec[$fact_exec]
   }
 
   $autoremove_ensure = $apt_autoremove ? {
@@ -255,7 +269,10 @@ class os_patching (
 
   file { "${cache_dir}/block_patching_on_warnings":
     ensure => $block_patching_ensure,
-    notify => Exec[$fact_exec],
+  }
+
+  if $enable_facts_script {
+    File["${cache_dir}/block_patching_on_warnings"]->Exec[$fact_exec]
   }
 
   $reboot_override_ensure = ($ensure == 'present' and $reboot_override) ? {
@@ -353,7 +370,7 @@ class os_patching (
         }
       }
 
-      if $fact_exec {
+      if $fact_exec and $enable_facts_script {
         exec { $fact_exec:
           command     => $fact_cmd,
           user        => $patch_data_owner,
@@ -366,24 +383,26 @@ class os_patching (
         }
       }
 
-      cron { 'Cache patching data':
-        ensure   => $ensure,
-        command  => $fact_cmd,
-        user     => $patch_cron_user,
-        hour     => $patch_cron_hour,
-        minute   => $patch_cron_min,
-        month    => $patch_cron_month,
-        monthday => $patch_cron_monthday,
-        weekday  => $patch_cron_weekday,
-        require  => File[$fact_cmd],
-      }
+      if $fact_cron {
+        cron { 'Cache patching data':
+          ensure   => $ensure,
+          command  => $fact_cmd,
+          user     => $patch_cron_user,
+          hour     => $patch_cron_hour,
+          minute   => $patch_cron_min,
+          month    => $patch_cron_month,
+          monthday => $patch_cron_monthday,
+          weekday  => $patch_cron_weekday,
+          require  => File[$fact_cmd],
+        }
 
-      cron { 'Cache patching data at reboot':
-        ensure  => $ensure,
-        command => $fact_cmd,
-        user    => $patch_cron_user,
-        special => 'reboot',
-        require => File[$fact_cmd],
+        cron { 'Cache patching data at reboot':
+          ensure  => $ensure,
+          command => $fact_cmd,
+          user    => $patch_cron_user,
+          special => 'reboot',
+          require => File[$fact_cmd],
+        }
       }
 
       if $facts['os']['family'] == 'Debian' {

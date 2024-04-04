@@ -1,5 +1,7 @@
 ---
+os_patching::fact_cron: true
 os_patching::fact_upload: true
+os_patching::use_shell_script: true
 os_patching::pre_patching_command: NULL
 os_patching::block_patching_on_warnings: false
 os_patching::reboot_override: 'default'
