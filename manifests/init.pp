@@ -308,7 +308,7 @@ class os_patching (
   if $fact_upload_exec and $fact_upload {
     $puppet_binary_path = $facts['os']['family'] ? {
       'windows' => 'C:/Program Files/Puppet Labs/Puppet/bin/puppet.bat',
-      default   => '/opt/puppet/bin/puppet',
+      default   => '/opt/puppetlabs/bin/puppet',
     }
 
     exec { $fact_upload_exec:
