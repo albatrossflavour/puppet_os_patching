@@ -11,8 +11,15 @@ trap "{ rm -f $LOCKFILE ; exit 255; }" 2 3 15
 
 if [ -f "$LOCKFILE" ]
 then
-  echo "Locked, exiting" >&2
-  exit 0
+  ps -fp $(cat "$LOCKFILE") >/dev/null
+  if [ $? -eq 0 ]
+  then
+    PID=$(cat "$LOCKFILE")
+    echo "Locked, by pid ${PID} exiting" >&2
+    exit 0
+  else
+    echo "$$" > $LOCKFILE
+  fi
 else
   echo "$$" > $LOCKFILE
 fi
