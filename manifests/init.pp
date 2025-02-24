@@ -368,7 +368,7 @@ class os_patching (
 
       cron { 'Cache patching data':
         ensure   => $ensure,
-        command  => $fact_cmd,
+        command  => "${fact_cmd} >/dev/null 2>/dev/null",
         user     => $patch_cron_user,
         hour     => $patch_cron_hour,
         minute   => $patch_cron_min,
@@ -380,7 +380,7 @@ class os_patching (
 
       cron { 'Cache patching data at reboot':
         ensure  => $ensure,
-        command => $fact_cmd,
+        command => "${fact_cmd} >/dev/null 2>/dev/null",
         user    => $patch_cron_user,
         special => 'reboot',
         require => File[$fact_cmd],
