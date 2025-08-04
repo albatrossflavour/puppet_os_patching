@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.23.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.23.0) (2025-08-04)
+
+[Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/0.22.0...0.23.0)
+
 ## [0.22.0](https://github.com/albatrossflavour/puppet_os_patching/tree/0.22.0) (2025-02-26)
 
 [Full Changelog](https://github.com/albatrossflavour/puppet_os_patching/compare/v0.21.0...0.22.0)
