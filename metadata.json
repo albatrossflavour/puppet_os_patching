@@ -1,6 +1,6 @@
 {
   "name": "albatrossflavour-os_patching",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "author": "albatrossflavour",
   "summary": "Perform OS level patching through tasks and report on patch levels through facts",
   "license": "Apache-2.0",
@@ -115,7 +115,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 5.3.2 < 8.0.0"
+      "version_requirement": ">= 5.3.2 < 9.0.0"
     }
   ],
   "pdk-version": "2.1.1",
